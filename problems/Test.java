@@ -1,0 +1,13 @@
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD})
+public @interface Test {
+    String displayName();
+    boolean hidden() default false;
+
+    String expected() default "";
+}
