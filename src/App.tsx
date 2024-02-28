@@ -83,7 +83,7 @@ function App() {
   return (
     <div className="App">
       <Header />
-      <Problem id="problems/test.js" />
+      <Problem id={window.location.href + ".js"} />
     </div>
   );
 }
