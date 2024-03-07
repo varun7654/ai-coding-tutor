@@ -13,7 +13,6 @@ const marked = new Marked(
         async: false,
         langPrefix: 'hljs language-',
         highlight: (code, lang, callback) => {
-            console.log("highlighting", code, lang);
             let highlighted = hljs.highlight(code, {language: lang});
             return highlighted.value;
         }
@@ -44,6 +43,23 @@ function Problem({id}: { id: string }) {
         codeLang: 'javascript'
     });
 
+    function extractTestCases(tokens: Token[], tests: string[], testExpectedResults: string[]) {
+        // Tests are formatted as a list of functions in a code block with the expected result below it
+        while (tokens.length > 0) {
+            absorbWhitespace(tokens);
+            if (tokens.length === 0 || tokens[0].type !== "code") break;
+            let test = tokens.shift() as Tokens.Code;
+
+            absorbWhitespace(tokens);
+            // @ts-ignore - ts seems to not believe that type could be paragraph
+            if (tokens.length === 0 || tokens[0].type !== "paragraph") break;
+            let expectedResult = tokens.shift() as Tokens.Paragraph;
+
+            tests.push(test.text);
+            testExpectedResults.push(expectedResult.text);
+        }
+    }
+
     if (problemData.title === 'Loading...' && id) {
         fetch(id)
             .then(async r => {
@@ -56,8 +72,6 @@ function Problem({id}: { id: string }) {
             })
             .then(async text => {
                 let tokens = marked.lexer(text);
-                console.log(tokens);
-
                 let title = (tokens.shift() as Tokens.Heading).text;
 
                 // Collect everything under the description heading
@@ -71,15 +85,14 @@ function Problem({id}: { id: string }) {
                 removeNextHeading(tokens); // Remove the problem heading
                 let problem = tokens.shift() as Tokens.Code;
                 let splitProblem = problem.text.split("// Your code here");
-                console.log(splitProblem);
                 let codeLang = problem.lang ? problem.lang : "javascript";
 
                 let displayAbove = splitProblem[0].trim();
                 let displayBelow = splitProblem[1].trim();
 
                 removeNextHeading(tokens); // Remove the solution heading
+                absorbWhitespace(tokens);
                 let solutionMd = tokens.shift() as Tokens.Code;
-                console.log(solutionMd);
                 if (solutionMd.lang !== codeLang) {
                     throw new Error("Solution language does not match problem language " + solutionMd.lang + " " + codeLang);
                 }
@@ -93,28 +106,14 @@ function Problem({id}: { id: string }) {
 
 
                 removeNextHeading(tokens); // Remove the tests heading
-                // Tests are formatted as a list of functions in a code block with the expected result below it
                 let tests: string[] = [];
                 let testExpectedResults: string[] = [];
-
-                while (tokens.length > 1 && tokens[0].type === "code" && tokens[1].type === "paragraph") {
-                    let test = tokens.shift() as Tokens.Code;
-                    let expectedResult = tokens.shift() as Tokens.Paragraph;
-                    tests.push(test.text);
-                    testExpectedResults.push(expectedResult.text);
-                }
+                extractTestCases(tokens, tests, testExpectedResults);
 
                 removeNextHeading(tokens); // Remove the hidden tests heading
-                // Hidden tests are formatted the same as normal tests
                 let hiddenTests: string[] = [];
                 let hiddenTestExpectedResults: string[] = [];
-
-                while (tokens.length > 1 && tokens[0].type === "code" && tokens[1].type === "paragraph") {
-                    let test = tokens.shift() as Tokens.Code;
-                    let expectedResult = tokens.shift() as Tokens.Paragraph;
-                    hiddenTests.push(test.text);
-                    hiddenTestExpectedResults.push(expectedResult.text);
-                }
+                extractTestCases(tokens, hiddenTests, hiddenTestExpectedResults);
 
                 setProblemData({
                     title,
@@ -190,7 +189,12 @@ function removeNextType(tokens: Token[], type: string) {
         tokens.shift();
     }
     tokens.shift();
+}
 
+function absorbWhitespace(tokens: Token[]) {
+    while (tokens.length > 0 && tokens[0].type === "space") {
+        tokens.shift();
+    }
 }
 
 function App() {
