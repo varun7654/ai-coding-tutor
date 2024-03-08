@@ -14,6 +14,7 @@ export function getEditor(lang: string, onChange: (value: string) => void) {
       placeholder={""}
       mode={lang}
       theme="github"
+      onLoad={() => onChange("")}
       onChange={onChange}
       width={"75%"}
       name="editor"

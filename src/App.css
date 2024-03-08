@@ -46,4 +46,15 @@
   width: 40%;
 }
 
+.Test-passed {
+  background: #00FF00;
+  color: #000;
+
+}
+
+.Test-failed {
+  background: #FF0000;
+  color: #000;
+}
+
 

@@ -19,10 +19,13 @@ const marked = new Marked(
 
 let userCode = "";
 
-let history: string[] = [];
-
 export function Problem({id}: { id: string }) {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
+    const [userData, setUserData] = useState(new UserData());
+    
+    function onCodeSubmit() {
+        onSubmission(problemData, userData, setUserData);
+    }
 
     function extractTestCases(tokens: Token[], tests: string[], testExpectedResults: string[]) {
         // Tests are formatted as a list of functions in a code block with the expected result below it
@@ -130,16 +133,21 @@ export function Problem({id}: { id: string }) {
 
     let testsDisplay = [];
     for (let i = 0; i < problemData.tests.length; i++) {
-        testsDisplay.push(
-            "Test " + (i + 1) + ": "+ problemData.tests[i] + " -> " + problemData.testExpectedResults[i]
-        );
+        testsDisplay.push(getTestElement(problemData.tests[i], problemData.testExpectedResults[i], userData.testResults[i]));
     }
 
-    let hiddenTestsDisplay = [];
-    for (let i = 0; i < problemData.hiddenTests.length; i++) {
-        hiddenTestsDisplay.push(
-            "Hidden Test " + (i + 1) + ": "+ problemData.hiddenTests[i] + " -> " + problemData.hiddenTestExpectedResults[i]
-        );
+    let hiddenTestText: string;
+    if (userData.testResults.length === 0) {
+        hiddenTestText = "Hidden tests will be run when you submit your code";
+    } else {
+        let totalHiddenTests = problemData.hiddenTests.length;
+        let hiddenTestsPassed = 0;
+        for (let i = 0; i < problemData.hiddenTests.length; i++) {
+            if (userData.testResults[i + problemData.tests.length]) {
+                hiddenTestsPassed++;
+            }
+        }
+        hiddenTestText = hiddenTestsPassed + " / " + totalHiddenTests + " hidden tests passed";
     }
 
     return (
@@ -150,7 +158,7 @@ export function Problem({id}: { id: string }) {
                 <pre className="Problem-template-code" dangerouslySetInnerHTML={{__html: displayAboveParsed}}/>
                 {getEditor(problemData.codeLang, (value) => {userCode = value;})}
                 <pre className="Problem-template-code" dangerouslySetInnerHTML={{__html: displayBelowParsed}}/>
-                <SubmitButton problemData={problemData} />
+                <SubmitButton onClick={onCodeSubmit} />
             </div>
             <h3>Solution</h3>
             <pre className="Problem-solution" dangerouslySetInnerHTML={{__html: solutionParsed}} />
@@ -159,16 +167,24 @@ export function Problem({id}: { id: string }) {
             <ul>
                 {testsDisplay.map((test, i) => <li key={i}>{test}</li>)}
             </ul>
-            <h3>Hidden Tests</h3>
-            <ul>
-                {hiddenTestsDisplay.map((test, i) => <li key={i}>{test}</li>)}
-            </ul>
+            <p className="Problem-hidden-tests">
+                {hiddenTestText}
+            </p>
+
         </div>
     );
 }
 
-class ProblemData
-{
+function getTestElement(test: string, expectedResult: string, result: boolean | undefined) {
+    let resultText = result === undefined  ? "Not run" : (result ? "Passed" : "Failed");
+    return (
+        <p className={"Test-" + resultText.toLowerCase()}>
+            {test} {"->"} {expectedResult} : {resultText}
+        </p>
+    );
+}
+
+class ProblemData {
     title: string = 'Loading...';
     description: string = "";
     tests: string[] = [];
@@ -182,35 +198,45 @@ class ProblemData
     codeLang: string = "";
 }
 
-function SubmitButton({problemData} : {problemData: ProblemData}) {
+class UserData {
+    history: string[] = [];
+    testResults: boolean[] = [];
+
+    constructor(history: string[] = [], testResults: boolean[] = []) {
+        this.history = history;
+        this.testResults = testResults;
+    }
+}
+
+function SubmitButton({onClick} : {onClick: () => void}){
     return (
         <button onClick={() => {
-            onSubmission({problemData});
+            onClick();
         }}>Test Code</button>
     );
 }
 
-function onSubmission(problemData: {problemData: ProblemData}) {
-    if (history.length === 0) {
+function onSubmission(problemData: ProblemData, userData: UserData, setUserData: (data: UserData) => void) {
+    if (userData.history.length === 0) {
         // First submission
-        history.push(userCode);
+        userData.history.push(userCode);
     } else {
-        let lastSubmission = history[history.length - 1];
+        let lastSubmission = userData.history[userData.history.length - 1];
         if (lastSubmission !== userCode) {
-            history.push(userCode);
+            userData.history.push(userCode);
         }
     }
 
     const sandbox = new Sandbox();
 
-    const scope: {results: string[]} = {results: []};
+    const scope: {results: any[]} = {results: []};
 
-    let userRunnableCode = problemData.problemData.displayAbove + "\n"
+    let userRunnableCode = problemData.displayAbove + "\n"
         + userCode + "\n"
-        + problemData.problemData.displayBelow
+        + problemData.displayBelow
     + "\n";
 
-    let combinedTests = problemData.problemData.tests.concat(problemData.problemData.hiddenTests);
+    let combinedTests = problemData.tests.concat(problemData.hiddenTests);
 
     for (let i = 0; i < combinedTests.length; i++) {
         let testSplitIntoLines = combinedTests[i].split("\n");
@@ -221,14 +247,35 @@ function onSubmission(problemData: {problemData: ProblemData}) {
         userRunnableCode += "\n{\n" + testCode + "\n}\n"; // Wrap the test in a block to avoid variable name conflicts
     }
 
-    console.log(userRunnableCode);
-
     const exec = sandbox.compile(userRunnableCode);
     exec(scope).run();
 
-    console.log(scope.results);
+    let testResults: boolean[] = [];
 
-    console.log(scope);
+    for (let i = 0; i < combinedTests.length; i++) {
+        let result = scope.results[i];
+        if (result === undefined) {
+            result = "undefined";
+        } else if (result === null) {
+            result = "null";
+        }
+
+
+        let expectedResult : string;
+        if (i < problemData.tests.length) {
+            expectedResult = problemData.testExpectedResults[i];
+        } else {
+            expectedResult = problemData.hiddenTestExpectedResults[i - problemData.tests.length];
+        }
+        let testPassed = result.toString() === expectedResult;
+        // console.log(result.toString(), "===", expectedResult, testPassed);
+        testResults.push(testPassed);
+    }
+
+    setUserData(new UserData(
+        userData.history,
+        testResults
+    ));
 }
 
 function removeNextHeading(tokens: Token[]) {
