@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import 'highlight.js/styles/atom-one-light.min.css';
-import {Problem} from "./Problem";
+import {Problem} from "./problem/Problem";
 
 function Header() {
     return (

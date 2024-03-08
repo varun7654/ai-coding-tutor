@@ -3,6 +3,8 @@ import {markedHighlight} from "marked-highlight";
 import hljs from "highlight.js/lib/common";
 import React, {useState} from "react";
 import DOMPurify from "dompurify";
+import {Editor} from "ace-builds";
+import {getEditor} from "./Editor";
 
 const marked = new Marked(
     markedHighlight({
@@ -14,6 +16,10 @@ const marked = new Marked(
         }
     })
 );
+
+let userCode = "";
+
+let history: string[] = [];
 
 export function Problem({id}: { id: string }) {
     const [problemData, setProblemData] = useState({
@@ -149,8 +155,9 @@ export function Problem({id}: { id: string }) {
             <div className="Problem-desc" dangerouslySetInnerHTML={{__html: descParsed}}/>
             <div className="Problem-Code">
                 <pre className="Problem-template-code" dangerouslySetInnerHTML={{__html: displayAboveParsed}}/>
-                <input className="Problem-user-code"/>
+                {getEditor(problemData.codeLang, (value) => {userCode = value;})}
                 <pre className="Problem-template-code" dangerouslySetInnerHTML={{__html: displayBelowParsed}}/>
+                <SubmitButton />
             </div>
             <h3>Solution</h3>
             <pre className="Problem-solution" dangerouslySetInnerHTML={{__html: solutionParsed}} />
@@ -164,6 +171,14 @@ export function Problem({id}: { id: string }) {
                 {hiddenTestsDisplay.map((test, i) => <li key={i}>{test}</li>)}
             </ul>
         </div>
+    );
+}
+
+function SubmitButton() {
+    return (
+        <button onClick={() => {
+            console.log(userCode);
+        }}>Test Code</button>
     );
 }
 
