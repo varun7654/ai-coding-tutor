@@ -1,5 +1,4 @@
 import React from "react";
-import { render } from "react-dom";
 import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/mode-java";
@@ -16,6 +15,8 @@ export function getEditor(lang: string, onChange: (value: string) => void) {
       mode={lang}
       theme="github"
       onChange={onChange}
+      width={"75%"}
+      name="editor"
       setOptions={{
         useWorker: false,
         enableBasicAutocompletion: true,

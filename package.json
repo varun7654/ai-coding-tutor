@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.0",
+    "@nyariv/sandboxjs": "^0.8.23",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -17,7 +18,7 @@
     "highlight.js": "^11.9.0",
     "marked": "^12.0.1",
     "marked-highlight": "^2.1.1",
-    "pygmentize-bundled": "^2.3.0",
+    "pygmentize-bundled": "^1.2.0",
     "react": "^18.2.0",
     "react-ace": "^10.1.0",
     "react-dom": "^18.2.0",

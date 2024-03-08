@@ -3,8 +3,8 @@ import {markedHighlight} from "marked-highlight";
 import hljs from "highlight.js/lib/common";
 import React, {useState} from "react";
 import DOMPurify from "dompurify";
-import {Editor} from "ace-builds";
 import {getEditor} from "./Editor";
+import Sandbox from "@nyariv/sandboxjs";
 
 const marked = new Marked(
     markedHighlight({
@@ -22,19 +22,7 @@ let userCode = "";
 let history: string[] = [];
 
 export function Problem({id}: { id: string }) {
-    const [problemData, setProblemData] = useState({
-        title: 'Loading...',
-        description: 'test description',
-        tests: ["test1", "test2", "test3"],
-        testExpectedResults: ["1, 2, 3"],
-        hiddenTests: ["hidden test1", "hidden test2", "hidden test3:"],
-        hiddenTestExpectedResults: ["1, 2, 3"],
-        displayAbove: 'testing display above',
-        displayBelow: 'testing display below',
-        solution: 'solution goes here',
-        solutionExplanation: 'solution explination goes here',
-        codeLang: 'javascript'
-    });
+    const [problemData, setProblemData] = useState(null as unknown as ProblemData);
 
     function extractTestCases(tokens: Token[], tests: string[], testExpectedResults: string[]) {
         // Tests are formatted as a list of functions in a code block with the expected result below it
@@ -53,7 +41,7 @@ export function Problem({id}: { id: string }) {
         }
     }
 
-    if (problemData.title === 'Loading...' && id) {
+    if (problemData === null) {
         fetch(id)
             .then(async r => {
                 let text = await r.text()
@@ -124,9 +112,14 @@ export function Problem({id}: { id: string }) {
             })
             .catch(e => {
                 console.error(e);
-                problemData.title = 'Failed to load problem data'
+                let problemData = new ProblemData();
+                problemData.title = "Failed to load problem";
                 setProblemData(problemData);
             })
+    }
+
+    if (problemData === null) {
+        return <div>Loading...</div>;
     }
 
     let descParsed = DOMPurify.sanitize(marked.parse(problemData.description) as string);
@@ -151,13 +144,13 @@ export function Problem({id}: { id: string }) {
 
     return (
         <div className="Problem">
-            <h2 className="Problem-title">{problemData.title}</h2>
+            <h1 className="Problem-title">{problemData.title}</h1>
             <div className="Problem-desc" dangerouslySetInnerHTML={{__html: descParsed}}/>
             <div className="Problem-Code">
                 <pre className="Problem-template-code" dangerouslySetInnerHTML={{__html: displayAboveParsed}}/>
                 {getEditor(problemData.codeLang, (value) => {userCode = value;})}
                 <pre className="Problem-template-code" dangerouslySetInnerHTML={{__html: displayBelowParsed}}/>
-                <SubmitButton />
+                <SubmitButton problemData={problemData} />
             </div>
             <h3>Solution</h3>
             <pre className="Problem-solution" dangerouslySetInnerHTML={{__html: solutionParsed}} />
@@ -174,12 +167,68 @@ export function Problem({id}: { id: string }) {
     );
 }
 
-function SubmitButton() {
+class ProblemData
+{
+    title: string = 'Loading...';
+    description: string = "";
+    tests: string[] = [];
+    testExpectedResults: string[] = []
+    hiddenTests: string[] = []
+    hiddenTestExpectedResults: string[] = [];
+    displayAbove: string = "";
+    displayBelow: string = "";
+    solution: string = "";
+    solutionExplanation: string = "";
+    codeLang: string = "";
+}
+
+function SubmitButton({problemData} : {problemData: ProblemData}) {
     return (
         <button onClick={() => {
-            console.log(userCode);
+            onSubmission({problemData});
         }}>Test Code</button>
     );
+}
+
+function onSubmission(problemData: {problemData: ProblemData}) {
+    if (history.length === 0) {
+        // First submission
+        history.push(userCode);
+    } else {
+        let lastSubmission = history[history.length - 1];
+        if (lastSubmission !== userCode) {
+            history.push(userCode);
+        }
+    }
+
+    const sandbox = new Sandbox();
+
+    const scope: {results: string[]} = {results: []};
+
+    let userRunnableCode = problemData.problemData.displayAbove + "\n"
+        + userCode + "\n"
+        + problemData.problemData.displayBelow
+    + "\n";
+
+    let combinedTests = problemData.problemData.tests.concat(problemData.problemData.hiddenTests);
+
+    for (let i = 0; i < combinedTests.length; i++) {
+        let testSplitIntoLines = combinedTests[i].split("\n");
+
+        let testCode = testSplitIntoLines.slice(0, -1).join("\n"); // run all but the last line
+        testCode += "let result" + i + " = " + testSplitIntoLines[testSplitIntoLines.length - 1]; // Run the test and store the result
+        testCode += "\nresults.push(result" + i + ");"; // Push the result to the result array
+        userRunnableCode += "\n{\n" + testCode + "\n}\n"; // Wrap the test in a block to avoid variable name conflicts
+    }
+
+    console.log(userRunnableCode);
+
+    const exec = sandbox.compile(userRunnableCode);
+    exec(scope).run();
+
+    console.log(scope.results);
+
+    console.log(scope);
 }
 
 function removeNextHeading(tokens: Token[]) {
