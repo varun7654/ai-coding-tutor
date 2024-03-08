@@ -16,8 +16,9 @@ export function getEditor(lang: string, onChange: (value: string) => void) {
       theme="github"
       onLoad={() => onChange("")}
       onChange={onChange}
-      width={"75%"}
+      width={"90%"}
       name="editor"
+      fontSize="1.1em"
       setOptions={{
         useWorker: false,
         enableBasicAutocompletion: true,
@@ -25,6 +26,12 @@ export function getEditor(lang: string, onChange: (value: string) => void) {
         enableSnippets: true,
         showLineNumbers: true,
         tabSize: 2
+      }}
+      style={{
+          border: "1px solid #d3d3d3",
+          borderRadius: "5px",
+          width: "95%",
+          maxWidth: "50em"
       }}
   />
 }

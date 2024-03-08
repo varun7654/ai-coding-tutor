@@ -5,8 +5,9 @@ import React, {useState} from "react";
 import DOMPurify from "dompurify";
 import {getEditor} from "./Editor";
 import Sandbox from "@nyariv/sandboxjs";
+import {HelpBox} from "./Help";
 
-const marked = new Marked(
+export const marked = new Marked(
     markedHighlight({
         async: false,
         langPrefix: 'hljs language-',
@@ -22,7 +23,7 @@ let userCode = "";
 export function Problem({id}: { id: string }) {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
     const [userData, setUserData] = useState(new UserData());
-    
+
     function onCodeSubmit() {
         onSubmission(problemData, userData, setUserData);
     }
@@ -76,16 +77,9 @@ export function Problem({id}: { id: string }) {
 
                 removeNextHeading(tokens); // Remove the solution heading
                 absorbWhitespace(tokens);
-                let solutionMd = tokens.shift() as Tokens.Code;
-                if (solutionMd.lang !== codeLang) {
-                    throw new Error("Solution language does not match problem language " + solutionMd.lang + " " + codeLang);
-                }
-                let solution = solutionMd.text;
-
-                // The remaining parts under the solution heading is the explination
-                let solutionExplanation = "";
-                while (tokens.length > 0 && tokens[0].type !== "heading") {
-                    solutionExplanation += ((tokens.shift() as Token).raw);
+                let solution = "";
+                while (tokens.length > 0 && !(tokens[0].type === "heading" && (tokens[0] as Tokens.Heading).depth <= 1)) {
+                    solution += ((tokens.shift() as Token).raw);
                 }
 
 
@@ -109,7 +103,6 @@ export function Problem({id}: { id: string }) {
                     displayAbove,
                     displayBelow,
                     solution,
-                    solutionExplanation,
                     codeLang
                 });
             })
@@ -128,8 +121,7 @@ export function Problem({id}: { id: string }) {
     let descParsed = DOMPurify.sanitize(marked.parse(problemData.description) as string);
     let displayAboveParsed = DOMPurify.sanitize(hljs.highlight(problemData.codeLang, problemData.displayAbove).value);
     let displayBelowParsed = DOMPurify.sanitize(hljs.highlight(problemData.codeLang, problemData.displayBelow).value);
-    let solutionParsed = DOMPurify.sanitize(hljs.highlight(problemData.codeLang, problemData.solution).value);
-    let solutionExplanationParsed = DOMPurify.sanitize(marked.parse(problemData.solutionExplanation) as string);
+    let solutionParsed = DOMPurify.sanitize(marked.parse(problemData.solution) as string);
 
     let testsDisplay = [];
     for (let i = 0; i < problemData.tests.length; i++) {
@@ -160,17 +152,18 @@ export function Problem({id}: { id: string }) {
                 <pre className="Problem-template-code" dangerouslySetInnerHTML={{__html: displayBelowParsed}}/>
                 <SubmitButton onClick={onCodeSubmit} />
             </div>
-            <h3>Solution</h3>
-            <pre className="Problem-solution" dangerouslySetInnerHTML={{__html: solutionParsed}} />
-            <div className="Problem-solution-explanation" dangerouslySetInnerHTML={{__html: solutionExplanationParsed}}/>
-            <h3>Tests</h3>
-            <ul>
-                {testsDisplay.map((test, i) => <li key={i}>{test}</li>)}
-            </ul>
-            <p className="Problem-hidden-tests">
-                {hiddenTestText}
-            </p>
-
+            <h1>Solution</h1>
+            <div className="Problem-solution" dangerouslySetInnerHTML={{__html: solutionParsed}} />
+            <div className="Problem-test-results">
+                <h3>Tests</h3>
+                <ul>
+                    {testsDisplay.map((test, i) => <li key={i}>{test}</li>)}
+                </ul>
+                <p className="Problem-hidden-tests">
+                    {hiddenTestText}
+                </p>
+            </div>
+            <HelpBox problemData={problemData} getUserData={() => userData} />
         </div>
     );
 }
@@ -184,7 +177,7 @@ function getTestElement(test: string, expectedResult: string, result: boolean | 
     );
 }
 
-class ProblemData {
+export class ProblemData {
     title: string = 'Loading...';
     description: string = "";
     tests: string[] = [];
@@ -194,17 +187,18 @@ class ProblemData {
     displayAbove: string = "";
     displayBelow: string = "";
     solution: string = "";
-    solutionExplanation: string = "";
     codeLang: string = "";
 }
 
-class UserData {
+export class UserData {
     history: string[] = [];
+    requestHelpHistory: string[] = [];
     testResults: boolean[] = [];
 
-    constructor(history: string[] = [], testResults: boolean[] = []) {
+    constructor(history: string[] = [], requestHelpHistory: string[] = [],  testResults: boolean[] = []) {
         this.history = history;
         this.testResults = testResults;
+        this.requestHelpHistory = requestHelpHistory;
     }
 }
 
@@ -246,9 +240,14 @@ function onSubmission(problemData: ProblemData, userData: UserData, setUserData:
         testCode += "\nresults.push(result" + i + ");"; // Push the result to the result array
         userRunnableCode += "\n{\n" + testCode + "\n}\n"; // Wrap the test in a block to avoid variable name conflicts
     }
-
-    const exec = sandbox.compile(userRunnableCode);
-    exec(scope).run();
+    try {
+        const exec = sandbox.compile(userRunnableCode);
+        exec(scope).run();
+    } catch (e) {
+        console.error(e);
+        // TODO: Handle error and display to user
+        return;
+    }
 
     let testResults: boolean[] = [];
 
@@ -274,6 +273,7 @@ function onSubmission(problemData: ProblemData, userData: UserData, setUserData:
 
     setUserData(new UserData(
         userData.history,
+        userData.requestHelpHistory,
         testResults
     ));
 }

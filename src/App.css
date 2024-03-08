@@ -18,23 +18,24 @@
 .Problem {
   margin-top: 0;
   padding-top: 0;
-  margin-bottom: 0;
+  margin-bottom: 10em;
   padding-bottom: 0;
-  justify-content: center;
+  justify-content: left;
   padding-left: 2em;
-
+  text-align: left;
 }
 
 .Problem-user-code {
   margin-top: 0;
   padding-left: 5em;
-  justify-items: center;
+  justify-items: left;
 }
 
 .Problem-template-code {
   margin-top: 0;
   margin-bottom: 0;
   padding-left: 0;
+  font-size: 1.2em;
 }
 
 .Problem-desc {
@@ -43,7 +44,18 @@
   margin-bottom: 0;
   padding-bottom: 0;
   padding-left: 0;
-  width: 40%;
+  width: 95%;
+  max-width: 50em;
+}
+
+.Problem-solution {
+    margin-top: 0;
+    padding-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    width: 95%;
+    max-width: 50em;
 }
 
 .Test-passed {

@@ -1,18 +1,13 @@
-# Fibonacci Test Problem
+# Fibonacci Problem
 
 ## Description
 
-This is the description of the problem.
-- All the markdown is supported.
-- You can use lists, images, etc.
-- You can also use code blocks:
-    ```javascript
-    function hello() {
-      console.log('Hello, World!');
-    }
-    ```
-  
-What about something that is really really long. like what if i just keep on wriring. Does it wrap properly? hmmmmmmmmmmmmmmmmmmmmm lets see!!!!! wowowoowo wOWEJhfoaijweiof 
+Write a function that takes in a number `n` and returns the `n`th number in the Fibonacci sequence.
+
+The Fibonacci sequence is a series of numbers in which each number is the sum of the two preceding ones.
+
+For reference, the 0th and 1st numbers in the Fibonacci sequence are `0` and `1`, respectively. 
+The sequence starts like this: `0, 1, 1, 2, 3, 5, 8, 13, 21, 34` and so on.
 
 # Problem
 ```javascript
@@ -22,16 +17,37 @@ function findNthFibonacci(n) {
 ```
 
 # Solution
+There are many ways to solve this problem.
+
+## Solution 1
 ```javascript
 function findNthFibonacci(n) {
   if (n <= 1) return n;
   return findNthFibonacci(n - 1) + findNthFibonacci(n - 2);
 }
 ```
-This is a simple recursive solution to find the nth Fibonacci number. 
-It has a time complexity of O(2^n) and a space complexity of O(n).
 
-It works by breaking down the problem into smaller subproblems and solving them recursively.
+This is a simple recursive solution to find the nth Fibonacci number. 
+
+It works by breaking down the problem into smaller subproblems where the nth Fibonacci number is the sum of the (n-1)th and (n-2)th Fibonacci numbers.
+
+## Solution 2
+```javascript
+function findNthFibonacci(n) {
+    if (n <= 1) return n;
+    let a = 0, b = 1, c;
+    for (let i = 2; i <= n; i++) {
+        c = a + b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+```
+
+This is an iterative solution to find the nth Fibonacci number. 
+It works by using a loop to calculate the nth Fibonacci number by adding the previous two numbers in the sequence.
+
 
 # Test Cases
 ```javascript
