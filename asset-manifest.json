@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/codetutor.dacubeking.com/static/css/main.c3e97334.css",
+    "main.js": "/codetutor.dacubeking.com/static/js/main.18b9d601.js",
+    "static/js/453.4ba5cc60.chunk.js": "/codetutor.dacubeking.com/static/js/453.4ba5cc60.chunk.js",
+    "index.html": "/codetutor.dacubeking.com/index.html",
+    "main.c3e97334.css.map": "/codetutor.dacubeking.com/static/css/main.c3e97334.css.map",
+    "main.18b9d601.js.map": "/codetutor.dacubeking.com/static/js/main.18b9d601.js.map",
+    "453.4ba5cc60.chunk.js.map": "/codetutor.dacubeking.com/static/js/453.4ba5cc60.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c3e97334.css",
+    "static/js/main.18b9d601.js"
+  ]
+}

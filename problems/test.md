@@ -1,0 +1,161 @@
+# Fibonacci Problem
+
+## Description
+
+Write a function that takes in a number `n` and returns the `n`th number in the Fibonacci sequence.
+
+The Fibonacci sequence is a series of numbers in which each number is the sum of the two preceding ones.
+
+For reference, the 0th and 1st numbers in the Fibonacci sequence are `0` and `1`, respectively. 
+The sequence starts like this: `0, 1, 1, 2, 3, 5, 8, 13, 21, 34` and so on.
+
+# Problem
+```javascript
+function findNthFibonacci(n) {
+  // Your code here
+}
+```
+
+# Solution
+There are many ways to solve this problem.
+
+## Solution 1
+```javascript
+function findNthFibonacci(n) {
+  if (n <= 1) return n;
+  return findNthFibonacci(n - 1) + findNthFibonacci(n - 2);
+}
+```
+
+This is a simple recursive solution to find the nth Fibonacci number. 
+
+It works by breaking down the problem into smaller subproblems where the nth Fibonacci number is the sum of the (n-1)th and (n-2)th Fibonacci numbers.
+
+## Solution 2
+```javascript
+function findNthFibonacci(n) {
+    if (n <= 1) return n;
+    let a = 0, b = 1, c;
+    for (let i = 2; i <= n; i++) {
+        c = a + b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+```
+
+This is an iterative solution to find the nth Fibonacci number. 
+It works by using a loop to calculate the nth Fibonacci number by adding the previous two numbers in the sequence.
+
+
+# Test Cases
+```javascript
+findNthFibonacci(0);
+```
+0
+```javascript
+findNthFibonacci(1);
+```
+1
+
+```javascript
+findNthFibonacci(2);
+```
+
+1
+```javascript
+findNthFibonacci(3);
+```
+
+2
+
+```javascript
+findNthFibonacci(4);
+```
+
+3
+
+```javascript
+findNthFibonacci(5);
+```
+5
+
+```javascript
+findNthFibonacci(6);
+```
+8
+
+```javascript
+findNthFibonacci(7);
+```
+13
+
+```javascript
+findNthFibonacci(8);
+```
+21
+
+```javascript
+findNthFibonacci(9);
+```
+34
+
+```javascript
+findNthFibonacci(10);
+```
+55
+
+```javascript
+findNthFibonacci(11);
+```
+89
+
+# Hidden Test Cases
+```javascript
+findNthFibonacci(12);
+```
+144
+
+```javascript
+findNthFibonacci(13);
+```
+233
+
+```javascript
+findNthFibonacci(14);
+```
+377
+
+```javascript
+findNthFibonacci(15);
+```
+610
+
+```javascript
+findNthFibonacci(16);
+```
+987
+
+```javascript
+findNthFibonacci(17);
+```
+1597
+
+```javascript
+findNthFibonacci(18);
+```
+2584
+
+```javascript
+findNthFibonacci(19);
+```
+4181
+
+# Tags
+- Recursion
+- Fibonacci
+- JavaScript
+
+
+
