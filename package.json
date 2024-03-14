@@ -2,7 +2,7 @@
   "name": "ai-coding-learning",
   "version": "0.1.0",
   "private": true,
-  "homepage": "codetutor.dacubeking.com",
+  "homepage": "https://codetutor.dacubeking.com",
   "dependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.0",
     "@nyariv/sandboxjs": "^0.8.23",
