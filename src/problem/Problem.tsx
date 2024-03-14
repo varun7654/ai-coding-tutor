@@ -8,6 +8,7 @@ import Sandbox from "@nyariv/sandboxjs";
 import {HelpBox} from "./Help";
 import {Language} from "highlight.js";
 import assert from "node:assert";
+import {useParams} from "react-router-dom";
 
 hljs.registerAliases([""], {languageName: "javascript"})
 export const marked = new Marked(
@@ -23,9 +24,10 @@ export const marked = new Marked(
 
 let userCode = "";
 
-export function Problem({id}: { id: string }) {
+export function Problem() {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
     const [userData, setUserData] = useState(new UserData());
+    const { id } = useParams();
 
     function onCodeSubmit() {
         onSubmission(problemData, userData, setUserData);
@@ -48,8 +50,8 @@ export function Problem({id}: { id: string }) {
         }
     }
 
-    if (problemData === null) {
-        fetch(id)
+    if (problemData === null && id !== undefined) {
+        fetch(process.env.PUBLIC_URL + "/problems/" + id + ".md")
             .then(async r => {
                 let text = await r.text()
                 if (!r.ok || !text.startsWith("#")) {
@@ -118,7 +120,11 @@ export function Problem({id}: { id: string }) {
     }
 
     if (problemData === null) {
-        return <div>Loading...</div>;
+        if (id !== undefined) {
+            return <div>Loading...</div>;
+        } else {
+            return <div>A problem wasn't specified</div>;
+        }
     }
 
     let hljsLang = problemData.codeLang;

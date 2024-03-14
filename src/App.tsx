@@ -18,7 +18,7 @@ function App() {
                 <Header />
                 <Routes>
                     <Route path="/" Component={Home} />
-                    <Route path="/problem" Component={() => <Problem id={window.location.href + ".md"} />} />
+                    <Route path="/problem/:id" Component={() => <Problem />} />
                 </Routes>
             </div>
         </Router>
