@@ -6,7 +6,10 @@ import DOMPurify from "dompurify";
 import {getEditor} from "./Editor";
 import Sandbox from "@nyariv/sandboxjs";
 import {HelpBox} from "./Help";
+import {Language} from "highlight.js";
+import assert from "node:assert";
 
+hljs.registerAliases([""], {languageName: "javascript"})
 export const marked = new Marked(
     markedHighlight({
         async: false,
@@ -109,7 +112,7 @@ export function Problem({id}: { id: string }) {
             .catch(e => {
                 console.error(e);
                 let problemData = new ProblemData();
-                problemData.title = "Failed to load problem";
+                problemData.title = "Failed to load problem " + id;
                 setProblemData(problemData);
             })
     }
@@ -118,9 +121,15 @@ export function Problem({id}: { id: string }) {
         return <div>Loading...</div>;
     }
 
+    let hljsLang = problemData.codeLang;
+
+    if (hljs.getLanguage(hljsLang) === undefined) {
+        hljsLang = "javascript";
+    }
+
     let descParsed = DOMPurify.sanitize(marked.parse(problemData.description) as string);
-    let displayAboveParsed = DOMPurify.sanitize(hljs.highlight(problemData.codeLang, problemData.displayAbove).value);
-    let displayBelowParsed = DOMPurify.sanitize(hljs.highlight(problemData.codeLang, problemData.displayBelow).value);
+    let displayAboveParsed = DOMPurify.sanitize(hljs.highlight(problemData.displayAbove, {language: hljsLang}).value);
+    let displayBelowParsed = DOMPurify.sanitize(hljs.highlight(problemData.displayBelow, {language: hljsLang}).value);
     let solutionParsed = DOMPurify.sanitize(marked.parse(problemData.solution) as string);
 
     let testsDisplay = [];
