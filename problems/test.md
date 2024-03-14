@@ -146,12 +146,6 @@ findNthFibonacci(17);
 findNthFibonacci(18);
 ```
 2584
-
-```javascript
-findNthFibonacci(19);
-```
-4181
-
 # Tags
 - Recursion
 - Fibonacci

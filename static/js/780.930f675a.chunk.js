@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkai_coding_learning=self.webpackChunkai_coding_learning||[]).push([[780],{780:(n,e,s)=>{s.r(e),s.d(e,{default:()=>l});var a=s(5117),i=s(5043),r=s(579);const c=()=>(0,r.jsx)(a.es,{children:(0,r.jsx)(a.b7,{name:"App",children:(0,r.jsx)(a.uA,{name:"Loader",children:(0,r.jsx)(a.KT,{children:(0,r.jsx)(d,{})})})})});function d(){return(0,r.jsx)(i.Fragment,{children:"Loading..."})}const l=()=>(0,r.jsx)(a.m8,{palette:(0,r.jsx)(c,{})})}}]);
+//# sourceMappingURL=780.930f675a.chunk.js.map
