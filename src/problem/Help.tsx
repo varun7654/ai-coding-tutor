@@ -27,6 +27,8 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
             hiddenTests += "- " + getTestAsString(problemData.hiddenTests[i], problemData.hiddenTestExpectedResults[i], userData.testResults[i + problemData.tests.length]);
         }
 
+        setResponse("Asking AI tutor for help...");
+
         let aiPrompt = "One of our users is stuck on this problem:\n"
             + "## " + problemData.title + "\n"
             + problemData.description + "\n\n"
@@ -37,7 +39,9 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
             + "# This is the user's code: \n"
             + "```" + problemData.codeLang + "\n"
             + problemData.displayAbove + "\n"
+            + "// Below is the first line of the user's code\n"
             + userData.history[userData.history.length - 1] + "\n"
+            + "// Above is the last line of the user's code\n"
             + problemData.displayBelow + "\n"
             + "```\n\n"
             + "# Here are the test cases we've ran: \n"
@@ -51,6 +55,8 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
         }));
 
         let token = getToken();
+
+
 
         fetch("https://codehelp.api.dacubeking.com/ai-tutor", {
             method: "POST",
@@ -101,7 +107,7 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
                 handleHelpRequest();
             }} className="Help Button">I'm Stuck
             </button>
-            <p className="Problem-template-code" dangerouslySetInnerHTML={{__html: response}}/>
+            <p className="Code-tutor-response" dangerouslySetInnerHTML={{__html: response}}/>
         </div>
     );
 }

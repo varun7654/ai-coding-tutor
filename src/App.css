@@ -83,3 +83,22 @@ code[class^="hljs-"] {
     background: #000;
 }
 
+.Code-tutor-response {
+    margin-top: 0;
+    padding-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    width: 95%;
+    max-width: 50em;
+}
+
+code {
+    background-color: #282c34;
+    color: #efe9e7;
+    padding: 0.2em 0.4em;
+    font-size: 90%;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    border-radius: 3px;
+}
+
