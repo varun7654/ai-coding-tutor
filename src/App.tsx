@@ -9,8 +9,8 @@ import LoginSuccess from "./auth/LoginSuccess";
 
 
 export const API_URL = "https://codehelp.api.dacubeking.com/";
-
 export const AUTH_API_URL = `${API_URL}auth`;
+
 
 export function Header() {
     return (
@@ -19,8 +19,6 @@ export function Header() {
 }
 
 function App() {
-    const [token, setToken] = useState(localStorage.getItem("token") || undefined as string | undefined);
-    const [userName, setUserName] = useState(undefined as string | undefined);
     return (
         <Router>
             <div className="App">
@@ -28,8 +26,8 @@ function App() {
                 <Routes>
                     <Route path="/" Component={Home} />
                     <Route path="/problem/:id" Component={() => <Problem />} />
-                    <Route path="/auth/login" Component={() => <Login token={token} />} />
-                    <Route path="/auth/login_success" Component={() => <LoginSuccess token={token} setToken={setToken} />} />
+                    <Route path="/auth/login" Component={() => <Login />} />
+                    <Route path="/auth/login_success" Component={() => <LoginSuccess/>} />
                 </Routes>
             </div>
         </Router>

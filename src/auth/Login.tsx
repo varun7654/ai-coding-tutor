@@ -1,13 +1,13 @@
 import {useState} from "react";
-import {useSearchParams} from "react-router-dom";
 import {AUTH_API_URL} from "../App";
+import {getToken, isLoggedIn} from "./AuthHelper";
 
-
-
-export default function Login({token} : {token: string | undefined}) {
+export default function Login() {
     const [userName, setUserName] = useState(undefined as string | undefined);
 
-    let loggedIn = token !== undefined;
+    let token = getToken();
+    console.log("Token: " + token);
+    let loggedIn = isLoggedIn();
 
     if (loggedIn) {
         // get user info
@@ -19,11 +19,24 @@ export default function Login({token} : {token: string | undefined}) {
         })
         .then(response => response.json())
         .then(({login}) => {
+            console.log("Username: " + login);
             setUserName(login);
+            if (localStorage.getItem("userName") !== login) {
+                localStorage.setItem("userName", login);
+            }
+
+            if (localStorage.getItem("closeWindowAfterLogin") === "true") {
+                localStorage.setItem("closeWindowAfterLogin", "false");
+                window.close();
+            }
         })
         .catch(error => {
             console.error(error);
         });
+    }
+
+    function logIn() {
+        window.location.href = AUTH_API_URL;
     }
 
     if (loggedIn) {
@@ -39,7 +52,7 @@ export default function Login({token} : {token: string | undefined}) {
             return (
                 <div>
                     <p id="signed-in">
-                        Hello there, <span id="login">...</span>.  <LogoutButton />
+                        Checking that we've signed you in properly.  <LogoutButton />
                     </p>
                 </div>
             )
@@ -48,12 +61,8 @@ export default function Login({token} : {token: string | undefined}) {
         return (
             <div>
                 <h1>
-                    Login with GitHub
-                    <small>Log in</small>
+                    You are not logged in. <button onClick={logIn}>Log in</button>
                 </h1>
-                <p id="signed-out">
-                    <a href={AUTH_API_URL}>Login with GitHub</a>
-                </p>
             </div>
         )
     }

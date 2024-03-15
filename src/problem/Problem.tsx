@@ -176,7 +176,7 @@ export function Problem() {
                     {hiddenTestText}
                 </p>
             </div>
-            <HelpBox problemData={problemData} getUserData={() => userData} />
+            <HelpBox problemData={problemData} getUserData={() => userData} runTests={onCodeSubmit}/>
         </div>
     );
 }

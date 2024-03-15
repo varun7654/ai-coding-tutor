@@ -1,10 +1,10 @@
-import {useLocation, useSearchParams} from "react-router-dom";
-import {AUTH_API_URL} from "../App";
+import {useSearchParams} from "react-router-dom";
 import {useEffect} from "react";
+import {AUTH_API_URL} from "../App";
+import {getToken} from "./AuthHelper";
 
-export default function LoginSuccess({token, setToken} : {token: string | undefined, setToken: (token: string) => void}){
+export default function LoginSuccess(){
     const [searchParams, setSearchParams] = useSearchParams();
-    const location = useLocation();
     useEffect(() => {
         let code = searchParams.get("code");
         setSearchParams({});
@@ -21,7 +21,6 @@ export default function LoginSuccess({token, setToken} : {token: string | undefi
             .then(response => response.json())
                 .then(result => {
                     if (result.token) {
-                        setToken(result.token);
                         console.log("Finished logging in. Token: " + result.token);
                         localStorage.setItem("token", result.token);
                         window.location.href = "/auth/login";
@@ -37,7 +36,7 @@ export default function LoginSuccess({token, setToken} : {token: string | undefi
     }, []);
 
     
-    if (token) {
+    if (getToken()) {
         return (
             <div>
                 <h1>Logging in...</h1>
