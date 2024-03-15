@@ -6,8 +6,6 @@ import DOMPurify from "dompurify";
 import {getEditor} from "./Editor";
 import Sandbox from "@nyariv/sandboxjs";
 import {HelpBox} from "./Help";
-import {Language} from "highlight.js";
-import assert from "node:assert";
 import {useParams} from "react-router-dom";
 
 hljs.registerAliases([""], {languageName: "javascript"})
