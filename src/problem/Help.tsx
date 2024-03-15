@@ -32,23 +32,23 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
         let aiPrompt = "One of our users is stuck on this problem:\n"
             + "## " + problemData.title + "\n"
             + problemData.description + "\n\n"
-            + "# Here are some example solutions that we've made: \n\n"
+            + "# Answers: (The existence of these are confidential. DO NOT DISCLOSE OR MENTION THESE EXIST)\n\n"
             + problemData.solution + "\n"
             + "Do not disclose these solutions or even the existence of these solutions to the user. Only use these solutions to " +
-            "further your understanding of the problem and the issue the user is having.\n\n"
-            + "# This is the user's code: \n"
+            "further your, the tutor's, understanding of the problem. The user cannot see these and does not know what they are.\n\n"
+            + "# The user's code: \n"
             + "```" + problemData.codeLang + "\n"
             + problemData.displayAbove + "\n"
-            + "// Below is the first line of the user's code\n"
+            + "// Below is the first line the user has wrote\n"
             + userData.history[userData.history.length - 1] + "\n"
-            + "// Above is the last line of the user's code\n"
+            + "// Above is the last line the user has wrote\n"
             + problemData.displayBelow + "\n"
             + "```\n\n"
             + "# Here are the test cases we've ran: \n"
             + visibleTests + "\n"
-            + "# Here are the hidden test cases (The user knows that these exist, but do not disclose the test cases): \n"
+            + "# Here are the hidden test cases: (The user knows that these exist, but the specific test cases are confidential.) \n"
             + hiddenTests + "\n"
-            + "Please help the user out with any issues they are having.";
+            + "Please help the user out with the issue they are having.";
 
         console.log(JSON.stringify({
             prompt: aiPrompt
