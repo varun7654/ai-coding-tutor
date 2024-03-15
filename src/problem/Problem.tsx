@@ -12,7 +12,7 @@ hljs.registerAliases([""], {languageName: "javascript"})
 export const marked = new Marked(
     markedHighlight({
         async: false,
-        langPrefix: 'hljs language-',
+        langPrefix: 'hljs lang-',
         highlight: (code, lang, callback) => {
             let highlighted = hljs.highlight(code, {language: lang});
             return highlighted.value;
