@@ -7,7 +7,7 @@ import Home from './Home'; // import the Home component
 
 export function Header() {
     return (
-        <h1 className = "App-header">Header</h1>
+        <h1 className = "App-header">WeCode</h1>
     )
 }
 
@@ -17,8 +17,8 @@ function App() {
             <div className="App">
                 <Header />
                 <Routes>
-                    <Route path="/" Component={Home} />
-                    <Route path="/problem/:id" Component={() => <Problem />} />
+                    <Route path="/" element={<Home />} />
+                    <Route path="/problem/:id" element={<Problem />} />
                 </Routes>
             </div>
         </Router>
