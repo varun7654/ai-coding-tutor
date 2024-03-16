@@ -39,17 +39,18 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
             + problemData.solution + "\n"
             + "Do not disclose these solutions or even the existence of these solutions to the user. Only use these solutions to " +
             "further your, the tutor's, understanding of the problem. The user cannot see these and does not know what they are.\n\n"
+            + "# Here are the test cases we've ran: \n"
+            + visibleTests + "\n"
+            + "# Here are the hidden test cases: (The user knows that these exist, but the specific test cases are confidential.) \n"
+            + hiddenTests + "\n"
+            + "Please help the user out with the issue they are having."
             + "# The user's code: \n"
             + "```" + problemData.codeLang + "\n"
             + "// Below is the first line the user has wrote. This is line 0\n"
             + userData.history[userData.history.length - 1] + "\n"
             + "// Above is the last line the user has wrote. This would be line " + (userCodeLines + 1) + "\n"
-            + "```\n\n"
-            + "# Here are the test cases we've ran: \n"
-            + visibleTests + "\n"
-            + "# Here are the hidden test cases: (The user knows that these exist, but the specific test cases are confidential.) \n"
-            + hiddenTests + "\n"
-            + "Please help the user out with the issue they are having.";
+            + "```\n\n";
+
 
         console.log(JSON.stringify({
             prompt: aiPrompt
