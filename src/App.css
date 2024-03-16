@@ -102,3 +102,7 @@ code {
     border-radius: 3px;
 }
 
+[aria-hidden="true"] {
+    display: none;
+}
+

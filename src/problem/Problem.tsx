@@ -7,6 +7,7 @@ import {getEditor} from "./Editor";
 import Sandbox from "@nyariv/sandboxjs";
 import {HelpBox} from "./Help";
 import {useParams} from "react-router-dom";
+import katex from 'katex';
 
 hljs.registerAliases([""], {languageName: "javascript"})
 export const marked = new Marked(
@@ -19,6 +20,24 @@ export const marked = new Marked(
         }
     })
 );
+
+marked.use({
+    renderer: {
+        text: function(text) {
+            let trimmed = text.trim();
+            if (trimmed.startsWith('$') && trimmed.endsWith('$')) {
+                console.log("Rendering latex: " + text);
+                const latex = trimmed.slice(1, -1);
+                return katex.renderToString(latex, {
+                    throwOnError: false
+                });
+            } else {
+                console.log("Rendering text: " + text);
+            }
+            return text;
+        }
+    }
+});
 
 let userCode = "";
 
