@@ -24,7 +24,9 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
 
         let hiddenTests = "";
         for (let i = 0; i < problemData.hiddenTests.length; i++) {
-            hiddenTests += "- " + getTestAsString(problemData.hiddenTests[i], problemData.hiddenTestExpectedResults[i], userData.testResults[i + problemData.tests.length]);
+            if (!userData.testResults[i + problemData.tests.length]) {
+                hiddenTests += "- " + getTestAsString(problemData.hiddenTests[i], problemData.hiddenTestExpectedResults[i], userData.testResults[i + problemData.tests.length]);
+            }
         }
 
         setResponse("Asking AI tutor for help...");
@@ -41,9 +43,10 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
             "further your, the tutor's, understanding of the problem. The user cannot see these and does not know what they are.\n\n"
             + "# Here are the test cases we've ran: \n"
             + visibleTests + "\n"
-            + "# Here are the hidden test cases: (The user knows that these exist, but the specific test cases are confidential.) \n"
+            + "# Here are the hidden test cases that failed: (The user knows that these exist, but the specific test cases are confidential.) \n"
             + hiddenTests + "\n"
             + "Please help the user out with the issue they are having."
+            + "The user failed " + userData.testResults.filter((result) => !result).length + " / " + userData.testResults.length + " test cases.\n\n"
             + "# The user's code: \n"
             + "```" + problemData.codeLang + "\n"
             + "// Below is the first line the user has wrote. This is line 0\n"
