@@ -102,7 +102,7 @@ code {
     border-radius: 3px;
 }
 
-[aria-hidden="true"] {
+.katex-mathml {
     display: none;
 }
 

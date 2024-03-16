@@ -8,6 +8,7 @@ import Sandbox from "@nyariv/sandboxjs";
 import {HelpBox} from "./Help";
 import {useParams} from "react-router-dom";
 import katex from 'katex';
+import 'katex/dist/katex.min.css';
 
 hljs.registerAliases([""], {languageName: "javascript"})
 export const marked = new Marked(
