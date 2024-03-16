@@ -6,7 +6,7 @@ import "ace-builds/src-noconflict/theme-github_dark";
 import "ace-builds/src-noconflict/ext-language_tools";
 
 
-export function getEditor(lang: string, onChange: (value: string) => void) {
+export function getEditor(lang: string, onChange: (value: string) => void, defaultValue: string = "") {
 
     try {
         require(`ace-builds/src-noconflict/mode-${lang}`);
@@ -18,9 +18,11 @@ export function getEditor(lang: string, onChange: (value: string) => void) {
         require(`ace-builds/src-noconflict/snippets/${lang}`);
     }
 
+    onChange(defaultValue);
 
     return <AceEditor
         placeholder={""}
+        defaultValue={defaultValue}
         mode={lang}
         theme="github_dark"
         onLoad={() => onChange("")}

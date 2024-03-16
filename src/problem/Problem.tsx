@@ -118,6 +118,9 @@ export function Problem() {
                 let hiddenTestExpectedResults: string[] = [];
                 extractTestCases(tokens, hiddenTests, hiddenTestExpectedResults);
 
+                removeNextHeading(tokens); // Remove the hidden tests heading
+                let nextProblemId = (tokens.shift() as Tokens.Paragraph).text;
+
                 setProblemData({
                     title,
                     preProblemDescription,
@@ -129,7 +132,8 @@ export function Problem() {
                     displayAbove,
                     displayBelow,
                     solution,
-                    codeLang
+                    codeLang,
+                    nextProblemId
                 });
             })
             .catch(e => {
@@ -155,14 +159,21 @@ export function Problem() {
     }
 
     let descParsed = DOMPurify.sanitize(marked.parse(problemData.preProblemDescription + "\n\n" + problemData.description) as string);
-    let displayAboveParsed = DOMPurify.sanitize(hljs.highlight(problemData.displayAbove, {language: hljsLang}).value);
-    let displayBelowParsed = DOMPurify.sanitize(hljs.highlight(problemData.displayBelow, {language: hljsLang}).value);
-    // let solutionParsed = DOMPurify.sanitize(marked.parse(problemData.solution) as string);
 
     let testsDisplay = [];
     for (let i = 0; i < problemData.tests.length; i++) {
         testsDisplay.push(getTestElement(problemData.tests[i], problemData.testExpectedResults[i], userData.testResults[i]));
     }
+
+    let testsDisplayJSX = <div>There are no visible test cases</div>;
+    if (testsDisplay.length > 0) {
+        testsDisplayJSX = <ul>
+            {testsDisplay.map((test, i) => <li key={i}>{test}</li>)}
+        </ul>
+    }
+
+
+
 
     let hiddenTestText: string;
     if (userData.testResults.length === 0) {
@@ -178,26 +189,27 @@ export function Problem() {
         hiddenTestText = hiddenTestsPassed + " / " + totalHiddenTests + " hidden tests passed";
     }
 
+    let defaultTextBoxVal = problemData.displayAbove + "\n\n" + problemData.displayBelow;
+
     return (
         <div className="Problem">
             <h1 className="Problem-title">{problemData.title}</h1>
             <div className="Problem-desc" dangerouslySetInnerHTML={{__html: descParsed}}/>
             <div className="Problem-Code">
-                <pre className="Problem-template-code" dangerouslySetInnerHTML={{__html: displayAboveParsed}}/>
-                {getEditor(problemData.codeLang, (value) => {userCode = value;})}
-                <pre className="Problem-template-code" dangerouslySetInnerHTML={{__html: displayBelowParsed}}/>
+                {getEditor(problemData.codeLang, (value) => {userCode = value;}, defaultTextBoxVal)}
                 <SubmitButton onClick={onCodeSubmit} />
             </div>
             <div className="Problem-test-results">
                 <h3>Tests</h3>
-                <ul>
-                    {testsDisplay.map((test, i) => <li key={i}>{test}</li>)}
-                </ul>
+                {testsDisplayJSX}
                 <p className="Problem-hidden-tests">
                     {hiddenTestText}
                 </p>
             </div>
             <HelpBox problemData={problemData} getUserData={() => userData} runTests={onCodeSubmit}/>
+            <button onClick={() => {
+                window.location.href = "/problem/" + problemData.nextProblemId;
+            }}>Next Problem</button>
         </div>
     );
 }
@@ -223,6 +235,7 @@ export class ProblemData {
     displayBelow: string = "";
     solution: string = "";
     codeLang: string = "";
+    nextProblemId: string = "";
 }
 
 export class UserData {
@@ -256,16 +269,21 @@ function onSubmission(problemData: ProblemData, userData: UserData, setUserData:
         }
     }
 
-    const sandbox = new Sandbox();
 
     const scope: {results: any[]} = {results: []};
 
-    let userRunnableCode = problemData.displayAbove + "\n"
-        + userCode + "\n"
-        + problemData.displayBelow
-    + "\n";
+    let userRunnableCode = userCode + "\n";
 
     let combinedTests = problemData.tests.concat(problemData.hiddenTests);
+
+    const prototypeWhitelist = Sandbox.SAFE_PROTOTYPES;
+    // fix the ** operator not being allowed
+    // @ts-ignore
+    console.log(prototypeWhitelist);
+
+    const globals = {...Sandbox.SAFE_GLOBALS};
+
+    const sandbox = new Sandbox({globals, prototypeWhitelist});
 
     for (let i = 0; i < combinedTests.length; i++) {
         let testSplitIntoLines = combinedTests[i].split("\n");
@@ -280,7 +298,7 @@ function onSubmission(problemData: ProblemData, userData: UserData, setUserData:
         exec(scope).run();
     } catch (e) {
         console.error(e);
-        // TODO: Handle error and display to user
+        console.log("Code that resulted in error: ", userRunnableCode)
         return;
     }
 
