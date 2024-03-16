@@ -1,6 +1,6 @@
 # Fibonacci Problem
 
-## Description
+# Description
 
 Write a function that takes in a number `n` and returns the `n`th number in the Fibonacci sequence.
 

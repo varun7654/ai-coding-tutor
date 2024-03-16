@@ -25,7 +25,7 @@ function App() {
                 <Header />
                 <Routes>
                     <Route path="/" Component={Home} />
-                    <Route path="/problem/:id" Component={() => <Problem />} />
+                    <Route path="/problem/*" Component={() => <Problem />} />
                     <Route path="/auth/login" Component={() => <Login />} />
                     <Route path="/auth/login_success" Component={() => <LoginSuccess/>} />
                 </Routes>

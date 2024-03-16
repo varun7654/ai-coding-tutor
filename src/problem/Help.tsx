@@ -29,6 +29,9 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
 
         setResponse("Asking AI tutor for help...");
 
+        let userCode = userData.history[userData.history.length - 1];
+        let userCodeLines = userCode.split("\n").length;
+
         let aiPrompt = "One of our users is stuck on this problem:\n"
             + "## " + problemData.title + "\n"
             + problemData.description + "\n\n"
@@ -39,9 +42,9 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
             + "# The user's code: \n"
             + "```" + problemData.codeLang + "\n"
             + problemData.displayAbove + "\n"
-            + "// Below is the first line the user has wrote\n"
+            + "// Below is the first line the user has wrote. They cannot edit anything above this. This is line 0\n"
             + userData.history[userData.history.length - 1] + "\n"
-            + "// Above is the last line the user has wrote\n"
+            + "// Above is the last line the user has wrote They cannot edit anything below this. This would be line " + (userCodeLines + 1) + "\n"
             + problemData.displayBelow + "\n"
             + "```\n\n"
             + "# Here are the test cases we've ran: \n"

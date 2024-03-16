@@ -25,17 +25,11 @@ export const marked = new Marked(
 marked.use({
     renderer: {
         text: function(text) {
-            let trimmed = text.trim();
-            if (trimmed.startsWith('$') && trimmed.endsWith('$')) {
-                console.log("Rendering latex: " + text);
-                const latex = trimmed.slice(1, -1);
+            return text.replace(/\$(.*?)\$/g, function(_, latex) {
                 return katex.renderToString(latex, {
                     throwOnError: false
                 });
-            } else {
-                console.log("Rendering text: " + text);
-            }
-            return text;
+            });
         }
     }
 });
@@ -45,7 +39,7 @@ let userCode = "";
 export function Problem() {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
     const [userData, setUserData] = useState(new UserData());
-    const { id } = useParams();
+    const { "*" : id } = useParams();
 
     function onCodeSubmit() {
         onSubmission(problemData, userData, setUserData);
@@ -82,11 +76,20 @@ export function Problem() {
                 let tokens = marked.lexer(text);
                 let title = (tokens.shift() as Tokens.Heading).text;
 
+                let preProblemDescription = "";
+                removeTillNextType(tokens, "heading"); // Collect everything under the description heading
+                if ((tokens[0] as Tokens.Heading).text === "Context") {
+                    tokens.shift();
+                    while (tokens.length > 0 && (tokens[0].type !== "heading" || (tokens[0] as Tokens.Heading).depth > 1)) {
+                        preProblemDescription += ((tokens.shift() as Token).raw);
+                    }
+                }
+
                 // Collect everything under the description heading
                 removeNextHeading(tokens); // Remove the description heading
 
                 let description = "";
-                while (tokens.length > 0 && tokens[0].type !== "heading") {
+                while (tokens.length > 0 && (tokens[0].type !== "heading" || (tokens[0] as Tokens.Heading).depth > 1)) {
                     description += ((tokens.shift() as Token).raw);
                 }
 
@@ -105,7 +108,6 @@ export function Problem() {
                     solution += ((tokens.shift() as Token).raw);
                 }
 
-
                 removeNextHeading(tokens); // Remove the tests heading
                 let tests: string[] = [];
                 let testExpectedResults: string[] = [];
@@ -118,6 +120,7 @@ export function Problem() {
 
                 setProblemData({
                     title,
+                    preProblemDescription,
                     description,
                     tests,
                     testExpectedResults,
@@ -151,10 +154,10 @@ export function Problem() {
         hljsLang = "javascript";
     }
 
-    let descParsed = DOMPurify.sanitize(marked.parse(problemData.description) as string);
+    let descParsed = DOMPurify.sanitize(marked.parse(problemData.preProblemDescription + "\n\n" + problemData.description) as string);
     let displayAboveParsed = DOMPurify.sanitize(hljs.highlight(problemData.displayAbove, {language: hljsLang}).value);
     let displayBelowParsed = DOMPurify.sanitize(hljs.highlight(problemData.displayBelow, {language: hljsLang}).value);
-    let solutionParsed = DOMPurify.sanitize(marked.parse(problemData.solution) as string);
+    // let solutionParsed = DOMPurify.sanitize(marked.parse(problemData.solution) as string);
 
     let testsDisplay = [];
     for (let i = 0; i < problemData.tests.length; i++) {
@@ -185,8 +188,6 @@ export function Problem() {
                 <pre className="Problem-template-code" dangerouslySetInnerHTML={{__html: displayBelowParsed}}/>
                 <SubmitButton onClick={onCodeSubmit} />
             </div>
-            <h1>Solution</h1>
-            <div className="Problem-solution" dangerouslySetInnerHTML={{__html: solutionParsed}} />
             <div className="Problem-test-results">
                 <h3>Tests</h3>
                 <ul>
@@ -212,6 +213,7 @@ function getTestElement(test: string, expectedResult: string, result: boolean | 
 
 export class ProblemData {
     title: string = 'Loading...';
+    preProblemDescription: string = "";
     description: string = "";
     tests: string[] = [];
     testExpectedResults: string[] = []
@@ -313,6 +315,12 @@ function onSubmission(problemData: ProblemData, userData: UserData, setUserData:
 
 function removeNextHeading(tokens: Token[]) {
     removeNextType(tokens, "heading");
+}
+
+function removeTillNextType(tokens: Token[], type: string) {
+    while (tokens.length > 0 && tokens[0].type !== type) {
+        tokens.shift();
+    }
 }
 
 function removeNextType(tokens: Token[], type: string) {
