@@ -352,6 +352,7 @@ function onSubmission(problemData: ProblemData, userData: UserData, setUserData:
     userData.lastUpdated = new Date();
 
     let testResults = testUserCode(userData, problemData);
+    console.log(testResults);
 
     let newUserData = new UserData(
         userData.history,

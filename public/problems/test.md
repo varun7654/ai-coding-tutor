@@ -22,18 +22,6 @@ There are many ways to solve this problem.
 ## Solution 1
 ```javascript
 function findNthFibonacci(n) {
-  if (n <= 1) return n;
-  return findNthFibonacci(n - 1) + findNthFibonacci(n - 2);
-}
-```
-
-This is a simple recursive solution to find the nth Fibonacci number. 
-
-It works by breaking down the problem into smaller subproblems where the nth Fibonacci number is the sum of the (n-1)th and (n-2)th Fibonacci numbers.
-
-## Solution 2
-```javascript
-function findNthFibonacci(n) {
     if (n <= 1) return n;
     let a = 0, b = 1, c;
     for (let i = 2; i <= n; i++) {

@@ -1,5 +1,4 @@
 import {ProblemData, UserData} from "./Problem";
-import * as VM from "vm";
 
 // Function to tokenize a JavaScript function signature
 function tokenizeFunctionSignature(signature: string) : StringLineNum[] {
@@ -14,6 +13,7 @@ function tokenizeFunctionSignature(signature: string) : StringLineNum[] {
         if (tokenChars.includes(signature[i])) {
             if (bufferStartIndex !== i) {
                 tokens.push(new StringLineNum(signature.substring(bufferStartIndex, i), lineNum));
+                bufferStartIndex = i + 1;
             }
 
             if (signature[i] === '\n') {
@@ -135,13 +135,16 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
 
     // Parse the solution code and replace the function name with a random name
     let solutionCode = problemData.solutionCode;
-    let functionName = solutionCode.split(' ')[1];
+    let functionName = tokenizeFunctionSignature(solutionCode.split('{')[0])[1].str;
     let randomFunctionName = "function" + crypto.randomUUID().replace(/-/g, '');
     solutionCode = solutionCode.replace(functionName, randomFunctionName);
     let resultsArrayName = "results" + crypto.randomUUID().replace(/-/g, '');
     let expectedResultsArrayName = "expectedResults" + crypto.randomUUID().replace(/-/g, '');
 
     let codeToRun = `
+    let ${resultsArrayName} = [] || [];
+    let ${expectedResultsArrayName} = [] || [];
+    
     ${solutionCode}
     `;
 
@@ -166,7 +169,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
         let testSplitByLines = testFull.split('\n');
         let setupCode = testSplitByLines.slice(0, testSplitByLines.length - 1).join('\n');
         let getResult = testSplitByLines[testSplitByLines.length - 1];
-        let getExpectedResult = testSplitByLines[testSplitByLines.length - 1].replace(functionName, randomFunctionName);
+        let getExpectedResult = getResult.replace(functionName, randomFunctionName);
 
         codeToRun += `
         {
@@ -174,15 +177,15 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
             let result;
             {
                 ${setupCode}
-                let result;
-                let expected;
                 try {
-                    result = ${getResult};
+                    result = ${getResult}
                 } catch (e) {
                     result = e;
                 }
+                console.log("${i} " + result);
                 try {
-                    expected = ${getExpectedResult};
+                    expected = ${getExpectedResult}
+                    console.log("${i} expected: " + expected);
                 } catch (e) {
                     expected = e;
                 }
@@ -193,18 +196,28 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
         `;
     }
 
+    codeToRun += `
+    console.log(${resultsArrayName});
+    console.log(${expectedResultsArrayName});
+    return [${resultsArrayName}, ${expectedResultsArrayName}];
+    `;
+
     console.log(codeToRun);
     // eslint-disable-next-line
     let resultsArray: any[] = [];
     // eslint-disable-next-line
     let expectedResultsArray: any[] = [];
 
-    VM.createContext({resultsArray, expectedResultsArray});
 
     let testResults = new TestResults();
 
     try {
-        VM.runInContext(codeToRun, VM);
+        let out = Function(codeToRun)();
+        console.log(out);
+
+        resultsArray = out[0];
+        expectedResultsArray = out[1];
+        testResults.ranSuccessfully = true;
     } catch (e: any) {
         testResults.ranSuccessfully = false;
         testResults.runtimeError = e;
@@ -214,11 +227,13 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
         if (expectedResultsArray[i] === undefined) {
             testResults.testResults.push(null);
             testResults.expectedResults.push("Unknown");
+            testResults.ranSuccessfully = false;
             continue;
         }
         if (resultsArray[i] === undefined) {
             testResults.testResults.push(null);
             testResults.expectedResults.push(expectedResultsArray[i].toString());
+            testResults.ranSuccessfully = false;
             continue;
         }
 
@@ -232,6 +247,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
             // TODO: Remove the bottom 2 lines
             console.log("Solution: " + problemData.solutionCode);
             console.log("User code: " + userCode);
+            testResults.ranSuccessfully = false;
             continue;
         } else {
             testResults.expectedResults.push(expectedResult.toString());
@@ -240,6 +256,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
         if (result instanceof Error) {
             testResults.testResults.push(false);
             testResults.runtimeError = result;
+            testResults.ranSuccessfully = false;
             continue;
         }
 
@@ -250,9 +267,8 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
         }
     }
 
-    console.log(testResults);
 
-    return new TestResults();
+    return testResults;
 }
 
 
