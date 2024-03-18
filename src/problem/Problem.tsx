@@ -10,6 +10,7 @@ import {useParams} from "react-router-dom";
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import {getUserName} from "../auth/AuthHelper";
+import {TestResults, testUserCode} from "./codeRunner";
 
 hljs.registerAliases([""], {languageName: "javascript"})
 export const marked = new Marked(
@@ -134,7 +135,12 @@ export function Problem() {
                 removeNextHeading(tokens); // Remove the solution heading
                 absorbWhitespace(tokens);
                 let solution = "";
+                let solutionCode = "";
                 while (tokens.length > 0 && !(tokens[0].type === "heading" && (tokens[0] as Tokens.Heading).depth <= 1)) {
+                    if (tokens[0].type === "code" && solutionCode === "") {
+                        // Get the first code block as the solution code
+                        solutionCode += (tokens[0] as Tokens.Code).text;
+                    }
                     solution += ((tokens.shift() as Token).raw);
                 }
 
@@ -169,6 +175,7 @@ export function Problem() {
                     displayAbove,
                     displayBelow,
                     solution,
+                    solutionCode,
                     codeLang,
                     nextProblemId
                 });
@@ -199,7 +206,9 @@ export function Problem() {
 
     let testsDisplay = [];
     for (let i = 0; i < problemData.tests.length; i++) {
-        testsDisplay.push(getTestElement(problemData.tests[i], problemData.testExpectedResults[i], userData.testResults[i]));
+        testsDisplay.push(getTestElement(problemData.tests[i],
+            userData.testResults.expectedResults[i],
+            userData.testResults.testResults[i]));
     }
 
     let testsDisplayJSX = <div>There are no visible test cases</div>;
@@ -213,13 +222,13 @@ export function Problem() {
 
 
     let hiddenTestText: string;
-    if (userData.testResults.length === 0) {
+    if (userData.testResults.testResults.length === 0) {
         hiddenTestText = "Hidden tests will be run when you submit your code";
     } else {
         let totalHiddenTests = problemData.hiddenTests.length;
         let hiddenTestsPassed = 0;
         for (let i = 0; i < problemData.hiddenTests.length; i++) {
-            if (userData.testResults[i + problemData.tests.length]) {
+            if (userData.testResults.testResults[i + problemData.tests.length] === true) {
                 hiddenTestsPassed++;
             }
         }
@@ -254,8 +263,8 @@ export function Problem() {
     );
 }
 
-function getTestElement(test: string, expectedResult: string, result: boolean | undefined) {
-    let resultText = result === undefined  ? "Not run" : (result ? "Passed" : "Failed");
+function getTestElement(test: string, expectedResult: string, result: boolean | null | undefined) {
+    let resultText = (result === undefined || result === null)  ? "Not run" : (result ? "Passed" : "Failed");
     return (
         <p className={"Test-" + resultText.toLowerCase()}>
             {test} {"->"} {expectedResult} : {resultText}
@@ -275,6 +284,7 @@ export class ProblemData {
     displayAbove: string = "";
     displayBelow: string = "";
     solution: string = "";
+    solutionCode: string = "";
     codeLang: string = "";
     nextProblemId: string = "";
 }
@@ -282,25 +292,17 @@ export class ProblemData {
 export class UserData {
     history: string[] = [];
     requestHelpHistory: string[] = [];
-    testResults: boolean[] = [];
+    testResults: TestResults = new TestResults();
     lastUpdated: Date = new Date();
     currentCode: string = null as unknown as string;
 
-    constructor(history: string[] = [], requestHelpHistory: string[] = [],  testResults: boolean[] = [], lastUpdated: Date = new Date(), currentCode: string = "") {
+    constructor(history: string[] = [], requestHelpHistory: string[] = [],  testResults: TestResults = new TestResults(), lastUpdated: Date = new Date(), currentCode: string = "") {
         this.history = history;
         this.testResults = testResults;
         this.requestHelpHistory = requestHelpHistory;
         this.lastUpdated = lastUpdated;
         this.currentCode = currentCode;
     }
-}
-
-function SubmitButton({onClick} : {onClick: () => void}){
-    return (
-        <button onClick={() => {
-            onClick();
-        }}>Test Code</button>
-    );
 }
 
 function getStorageKey(id: string, userName: string | undefined) {
@@ -328,6 +330,14 @@ function getUserData(id: string | undefined, userName: string | undefined) {
     return JSON.parse(userData) as UserData;
 }
 
+function SubmitButton({onClick} : {onClick: () => void}){
+    return (
+        <button onClick={() => {
+            onClick();
+        }}>Test Code</button>
+    );
+}
+
 function onSubmission(problemData: ProblemData, userData: UserData, setUserData: (data: UserData) => void) {
     if (userData.history.length === 0) {
         // First submission
@@ -340,59 +350,8 @@ function onSubmission(problemData: ProblemData, userData: UserData, setUserData:
     }
 
     userData.lastUpdated = new Date();
-    const scope: {results: any[]} = {results: []};
 
-    let userRunnableCode = userData.currentCode + "\n";
-
-    let combinedTests = problemData.tests.concat(problemData.hiddenTests);
-
-    const prototypeWhitelist = Sandbox.SAFE_PROTOTYPES;
-    // fix the ** operator not being allowed
-    // @ts-ignore
-    console.log(prototypeWhitelist);
-
-    const globals = {...Sandbox.SAFE_GLOBALS};
-
-    const sandbox = new Sandbox({globals, prototypeWhitelist});
-
-    for (let i = 0; i < combinedTests.length; i++) {
-        let testSplitIntoLines = combinedTests[i].split("\n");
-
-        let testCode = testSplitIntoLines.slice(0, -1).join("\n"); // run all but the last line
-        testCode += "let result" + i + " = " + testSplitIntoLines[testSplitIntoLines.length - 1]; // Run the test and store the result
-        testCode += "\nresults.push(result" + i + ");"; // Push the result to the result array
-        userRunnableCode += "\n{\n" + testCode + "\n}\n"; // Wrap the test in a block to avoid variable name conflicts
-    }
-    try {
-        const exec = sandbox.compile(userRunnableCode);
-        exec(scope).run();
-    } catch (e) {
-        console.error(e);
-        console.log("Code that resulted in error: ", userRunnableCode)
-        return;
-    }
-
-    let testResults: boolean[] = [];
-
-    for (let i = 0; i < combinedTests.length; i++) {
-        let result = scope.results[i];
-        if (result === undefined) {
-            result = "undefined";
-        } else if (result === null) {
-            result = "null";
-        }
-
-
-        let expectedResult : string;
-        if (i < problemData.tests.length) {
-            expectedResult = problemData.testExpectedResults[i];
-        } else {
-            expectedResult = problemData.hiddenTestExpectedResults[i - problemData.tests.length];
-        }
-        let testPassed = result.toString() === expectedResult;
-        // console.log(result.toString(), "===", expectedResult, testPassed);
-        testResults.push(testPassed);
-    }
+    let testResults = testUserCode(userData, problemData);
 
     let newUserData = new UserData(
         userData.history,

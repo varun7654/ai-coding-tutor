@@ -19,15 +19,17 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
 
         let visibleTests = "";
         for (let i = 0; i < problemData.tests.length; i++) {
-            visibleTests += "- " + getTestAsString(problemData.tests[i], problemData.testExpectedResults[i], userData.testResults[i]);
+            visibleTests += "- " + getTestAsString(problemData.tests[i], userData.testResults.expectedResults[i], userData.testResults.testResults[i]);
         }
 
-        let hiddenTests = "";
-        for (let i = 0; i < problemData.hiddenTests.length; i++) {
-            if (!userData.testResults[i + problemData.tests.length]) {
-                hiddenTests += "- " + getTestAsString(problemData.hiddenTests[i], problemData.hiddenTestExpectedResults[i], userData.testResults[i + problemData.tests.length]);
-            }
-        }
+
+        // TODO: fix
+        // let hiddenTests = "";
+        // for (let i = 0; i < problemData.hiddenTests.length; i++) {
+        //     if (!userData.testResults[i + problemData.tests.length]) {
+        //         hiddenTests += "- " + getTestAsString(problemData.hiddenTests[i], problemData.hiddenTestExpectedResults[i], userData.testResults[i + problemData.tests.length]);
+        //     }
+        // }
 
         setResponse("Asking AI tutor for help...");
 
@@ -44,9 +46,9 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
             + "# Here are the test cases we've ran: \n"
             + visibleTests + "\n"
             + "# Here are the hidden test cases that failed: (The user knows that these exist, but the specific test cases are confidential.) \n"
-            + hiddenTests + "\n"
+           // + hiddenTests + "\n"
             + "Please help the user out with the issue they are having."
-            + "The user failed " + userData.testResults.filter((result) => !result).length + " / " + userData.testResults.length + " test cases.\n\n"
+         // TODO: fix   + "The user failed " + userData.testResults.filter((result) => !result).length + " / " + userData.testResults.length + " test cases.\n\n"
             + "# The user's code: \n"
             + "```" + problemData.codeLang + "\n"
             + "// Below is the first line the user has wrote. This is line 0\n"
@@ -117,7 +119,7 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
     );
 }
 
-function getTestAsString(test: string, expectedResult: string, result: boolean | undefined) {
-    let resultText = result === undefined ? "Not run" : (result ? "Passed" : "Failed");
+function getTestAsString(test: string, expectedResult: string, result: boolean | undefined | null) {
+    let resultText = (result === undefined || result === null) ? "Not run" : (result ? "Passed" : "Failed");
     return test + " -> " + expectedResult + " : " + resultText + "\n"
 }
