@@ -63,9 +63,6 @@ Calculate powers in JavaScript by multiplying a number by itself. For example, t
 
 # Problem
 ```javascript
-function f(a, b, c, d) {
-  // Your code here
-}
 ```
 
 # Solution

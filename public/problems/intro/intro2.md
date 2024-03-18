@@ -12,9 +12,6 @@ Let's write a function that returns a constant value. Write the algebraic functi
 
 # Problem
 ```javascript
-function f(x) {
-  // Your code here
-}
 ```
 
 # Solution

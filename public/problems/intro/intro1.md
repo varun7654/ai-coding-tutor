@@ -109,9 +109,6 @@ $ f(x) = x + 5 $
 
 # Problem
 ```javascript
-function f(x) {
-  // Your code here
-}
 ```
 
 # Solution

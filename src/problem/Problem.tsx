@@ -101,12 +101,35 @@ export function Problem() {
                 }
 
                 removeNextHeading(tokens); // Remove the problem heading
+                if (tokens[0].type !== "code") {
+                    console.error("Problem Parse: No code block found after problem heading. If no template code is needed, please use a code block with no content (with the correct language).");
+                }
                 let problem = tokens.shift() as Tokens.Code;
-                let splitProblem = problem.text.split("// Your code here");
+                if (!problem.lang) {
+                    console.error("Problem Parse: No code language specified for problem " + id);
+                }
                 let codeLang = problem.lang ? problem.lang : "javascript";
 
-                let displayAbove = splitProblem[0].trim();
-                let displayBelow = splitProblem[1].trim();
+                let splitProblem = problem.text.split("// Your code here");
+
+                let displayAbove;
+                let displayBelow;
+
+                if (splitProblem.length === 0 || splitProblem[0].trim() === "") {
+                    console.log("Problem Parse: Code block has no content");
+                    displayAbove = "";
+                    displayBelow = "";
+                } else {
+                    displayAbove = splitProblem[0].trim();
+                    if (splitProblem.length === 1) {
+                        displayBelow = "";
+                        console.error("Problem Parse: No secondary display content found in problem " + id +
+                            ". It is unlikely that this is intentional. Ensure that you have a comment with the text '// Your code here' in the problem description.");
+                    } else {
+                        displayBelow = splitProblem[1].trim();
+                    }
+                }
+
 
                 removeNextHeading(tokens); // Remove the solution heading
                 absorbWhitespace(tokens);

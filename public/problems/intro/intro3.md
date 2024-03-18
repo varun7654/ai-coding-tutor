@@ -33,9 +33,6 @@ Notice that the function doesn't take any input value at all.
 
 # Problem
 ```javascript
-function f() {
-  // Your code here
-}
 ```
 
 # Solution
