@@ -1,4 +1,5 @@
 import {ProblemData, UserData} from "./Problem";
+import assert from "node:assert";
 
 const functionHeaderOffset = 2;
 
@@ -15,7 +16,7 @@ export class TestResults {
     public expectedResults: string[] = [];
     public parseError: string = "";
     public errorLine: number = -1;
-    public runtimeError: any = null;
+    public runtimeError: string = "";
     public output: string = "";
     public ranSuccessfully: boolean = false;
 }
@@ -100,6 +101,8 @@ function reformatStackTrace(result: Error, userCodeLineNumberBegin: number, user
 
     //result.stack += "\nNew Stack:\n" + stackTraceLines.join('\n');
     result.stack = stackTraceLines.join('\n');
+
+    return errorLine;
 }
 
 export function testUserCode(userData: UserData, problemData: ProblemData) : TestResults {
@@ -295,12 +298,17 @@ ${userCode}
         resultsArray = out[0];
         expectedResultsArray = out[1];
         testResults.ranSuccessfully = true;
-    } catch (e: any) {
+    } catch (e) {
         testResults.ranSuccessfully = false;
         console.error("Failed to run the solution: " + e);
         testResults.expectedResults = getExpectedResults(problemData);
-        reformatStackTrace(e, userCodeLineNumberBegin, userCodeLineNumberEnd);
-        testResults.runtimeError = e;
+        if (e instanceof Error) {
+            testResults.errorLine = reformatStackTrace(e, userCodeLineNumberBegin, userCodeLineNumberEnd);
+            testResults.runtimeError = e.stack as string;
+        } else {
+            testResults.runtimeError = e as string;
+        }
+
     }
 
     for (let i = 0; i < combinedTests.length; i++) {
@@ -341,9 +349,9 @@ ${userCode}
             testResults.returnedResults.push("Error");
             testResults.testResults.push(TestResult.Exception);
             // End the stack trace at the user's code
-            reformatStackTrace(result, userCodeLineNumberBegin, userCodeLineNumberEnd);
+            testResults.errorLine = reformatStackTrace(result, userCodeLineNumberBegin, userCodeLineNumberEnd);
 
-            testResults.runtimeError = result;
+            testResults.runtimeError = result.stack as string;
             testResults.ranSuccessfully = false;
             continue;
         } else {
@@ -356,7 +364,6 @@ ${userCode}
             testResults.testResults.push(TestResult.Passed);
         }
     }
-
 
     return testResults;
 }
