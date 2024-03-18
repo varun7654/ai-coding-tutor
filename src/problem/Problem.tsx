@@ -62,7 +62,29 @@ export function Problem() {
             absorbWhitespace(tokens);
             // @ts-ignore - ts seems to not believe that type could be paragraph
             if (tokens.length === 0 || tokens[0].type === "paragraph") {
-                tokens.shift(); // Remove the expected result (not used anymore)
+                let str = (tokens.shift() as Tokens.Paragraph).text.trim().toLowerCase(); // Remove the expected result (not used anymore)
+                // check if it begins with "repeat =" or "repeat="
+                if (str.startsWith("repeat")){
+                    if (str.startsWith("repeat =")) {
+                        str = str.substring(8);
+                    } else if (str.startsWith("repeat=")) {
+                        str = str.substring(7);
+                    } else {
+                        console.error("Failed to parse repeat value: " + str);
+                    }
+
+                    let num = parseInt(str);
+                    if (isNaN(num)) {
+                        console.error("Failed to parse repeat value: " + str);
+                    } else {
+                        for (let i = 0; i < num - 1; i++) { // Add the test case the number of times specified (minus 1 to account for the original)
+                            tests.push(test.text);
+                        }
+                    }
+                }
+
+
+
             }
 
             tests.push(test.text);
