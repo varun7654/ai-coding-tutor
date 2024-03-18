@@ -11,6 +11,7 @@ export enum TestResult {
 
 export class TestResults {
     public testResults: TestResult[]  = [];
+    public returnedResults: string[] = [];
     public expectedResults: string[] = [];
     public parseError: string = "";
     public errorLine: number = -1;
@@ -115,6 +116,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
                     return {
                         testResults: [],
                         expectedResults: getExpectedResults(problemData),
+                        returnedResults: [],
                         parseError: "You began a new function after closing your first one. You cannot do that. If you want to define a new function, do it inside the first function.",
                         errorLine: lineNum,
                         runtimeError: "",
@@ -136,6 +138,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
             if (brackets < 0) {
                 return {
                     testResults: [],
+                    returnedResults: [],
                     expectedResults: getExpectedResults(problemData),
                     parseError: "Unbalanced brackets. Extra '}' found.",
                     errorLine: lineNum,
@@ -149,6 +152,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
         if (brackets !== 0) {
             return {
                 testResults: [],
+                returnedResults: [],
                 expectedResults: getExpectedResults(problemData),
                 parseError: "Unbalanced brackets. Missing '}'.",
                 errorLine: lineNum,
@@ -161,6 +165,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
         if (!foundFirstBracket) {
             return {
                 testResults: [],
+                returnedResults: [],
                 expectedResults: getExpectedResults(problemData),
                 parseError: "No function found.",
                 errorLine: lineNum,
@@ -183,6 +188,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
             if (tokens[i].str !== expectedTokens[i].str) {
                 return {
                     testResults: [],
+                    returnedResults: [],
                     expectedResults: getExpectedResults(problemData),
                     parseError: "Function signature does not match the expected signature. " +
                         "Expected: " + expectedFunctionSignature + " but got: " + functionSignature,
@@ -197,6 +203,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
         if (tokens.length !== expectedTokens.length) {
             return {
                 testResults: [],
+                returnedResults: [],
                 expectedResults: getExpectedResults(problemData),
                 parseError: "Function signature does not match the expected signature. " +
                     "Expected: " + expectedFunctionSignature + " but got: " + functionSignature,
@@ -290,6 +297,8 @@ ${userCode}
         testResults.ranSuccessfully = true;
     } catch (e: any) {
         testResults.ranSuccessfully = false;
+        console.error("Failed to run the solution: " + e);
+        testResults.expectedResults = getExpectedResults(problemData);
         reformatStackTrace(e, userCodeLineNumberBegin, userCodeLineNumberEnd);
         testResults.runtimeError = e;
     }
@@ -298,12 +307,14 @@ ${userCode}
         if (expectedResultsArray[i] === undefined) {
             testResults.testResults.push(TestResult.NotRun);
             testResults.expectedResults.push("Unknown");
+            testResults.returnedResults.push("Unknown");
             testResults.ranSuccessfully = false;
             continue;
         }
         if (resultsArray[i] === undefined) {
             testResults.testResults.push(TestResult.NotRun);
             testResults.expectedResults.push(expectedResultsArray[i].toString());
+            testResults.returnedResults.push("Unknown");
             testResults.ranSuccessfully = false;
             continue;
         }
@@ -312,6 +323,8 @@ ${userCode}
         let expectedResult = expectedResultsArray[i];
 
         if (expectedResult instanceof Error) {
+            testResults.expectedResults.push("Error");
+            testResults.returnedResults.push("Error");
             testResults.testResults.push(TestResult.NotRun);
             console.error("A test case failed to run the solution: " + expectedResult);
             console.log("Test: " + combinedTests[i]);
@@ -325,6 +338,7 @@ ${userCode}
         }
 
         if (result instanceof Error) {
+            testResults.returnedResults.push("Error");
             testResults.testResults.push(TestResult.Exception);
             // End the stack trace at the user's code
             reformatStackTrace(result, userCodeLineNumberBegin, userCodeLineNumberEnd);
@@ -332,6 +346,8 @@ ${userCode}
             testResults.runtimeError = result;
             testResults.ranSuccessfully = false;
             continue;
+        } else {
+            testResults.returnedResults.push(result.toString());
         }
 
         if (result !== expectedResult) {
