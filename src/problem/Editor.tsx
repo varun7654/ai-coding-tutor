@@ -18,14 +18,11 @@ export function getEditor(lang: string, onChange: (value: string) => void, defau
         require(`ace-builds/src-noconflict/snippets/${lang}`);
     }
 
-    onChange(defaultValue);
-
     return <AceEditor
         placeholder={""}
         defaultValue={defaultValue}
         mode={lang}
         theme="github_dark"
-        onLoad={() => onChange("")}
         onChange={onChange}
         width={"90%"}
         name="editor"

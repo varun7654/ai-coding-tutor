@@ -5,12 +5,15 @@ export function getToken() {
 }
 
 export function expireToken() {
-    localStorage.setItem("token", "expired")
-    localStorage.setItem("userName", "")
+    localStorage.setItem("token", "expired");
+    localStorage.setItem("userName", "");
 }
 
 export function getUserName() {
-    return localStorage.getItem("userName")
+    let username =  localStorage.getItem("userName");
+    if (username === null || username === undefined || username === "") {
+        return undefined;
+    }
 }
 
 export function isLoggedIn() {

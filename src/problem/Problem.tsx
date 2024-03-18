@@ -9,6 +9,7 @@ import {HelpBox} from "./Help";
 import {useParams} from "react-router-dom";
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import {getUserName} from "../auth/AuthHelper";
 
 hljs.registerAliases([""], {languageName: "javascript"})
 export const marked = new Marked(
@@ -34,12 +35,18 @@ marked.use({
     }
 });
 
-let userCode = "";
+function saveUserData(problemData: ProblemData, userData: UserData) {
+    if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
+        console.error("User data is being saved with no code");
+    }
+    localStorage.setItem(getStorageKey(problemData.id, getUserName()), JSON.stringify(userData));
+}
 
 export function Problem() {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
-    const [userData, setUserData] = useState(new UserData());
     const { "*" : id } = useParams();
+    const [userData, setUserData] = useState(getUserData(id, getUserName()));
+
 
     function onCodeSubmit() {
         onSubmission(problemData, userData, setUserData);
@@ -121,7 +128,14 @@ export function Problem() {
                 removeNextHeading(tokens); // Remove the hidden tests heading
                 let nextProblemId = (tokens.shift() as Tokens.Paragraph).text;
 
+                // set the template data if the user has not saved any data
+                if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
+                    console.log("First time loading problem, setting template data");
+                    userData.currentCode = displayAbove + "\n\n" + displayBelow;
+                }
+
                 setProblemData({
+                    id,
                     title,
                     preProblemDescription,
                     description,
@@ -189,14 +203,17 @@ export function Problem() {
         hiddenTestText = hiddenTestsPassed + " / " + totalHiddenTests + " hidden tests passed";
     }
 
-    let defaultTextBoxVal = problemData.displayAbove + "\n\n" + problemData.displayBelow;
+    function updateUserCode(value: string) {
+        userData.currentCode = value;
+        saveUserData(problemData, userData);
+    }
 
     return (
         <div className="Problem">
             <h1 className="Problem-title">{problemData.title}</h1>
             <div className="Problem-desc" dangerouslySetInnerHTML={{__html: descParsed}}/>
             <div className="Problem-Code">
-                {getEditor(problemData.codeLang, (value) => {userCode = value;}, defaultTextBoxVal)}
+                {getEditor(problemData.codeLang, (value) => {updateUserCode(value);}, userData.currentCode)}
                 <SubmitButton onClick={onCodeSubmit} />
             </div>
             <div className="Problem-test-results">
@@ -224,6 +241,7 @@ function getTestElement(test: string, expectedResult: string, result: boolean | 
 }
 
 export class ProblemData {
+    id: string = "";
     title: string = 'Loading...';
     preProblemDescription: string = "";
     description: string = "";
@@ -242,11 +260,15 @@ export class UserData {
     history: string[] = [];
     requestHelpHistory: string[] = [];
     testResults: boolean[] = [];
+    lastUpdated: Date = new Date();
+    currentCode: string = null as unknown as string;
 
-    constructor(history: string[] = [], requestHelpHistory: string[] = [],  testResults: boolean[] = []) {
+    constructor(history: string[] = [], requestHelpHistory: string[] = [],  testResults: boolean[] = [], lastUpdated: Date = new Date(), currentCode: string = "") {
         this.history = history;
         this.testResults = testResults;
         this.requestHelpHistory = requestHelpHistory;
+        this.lastUpdated = lastUpdated;
+        this.currentCode = currentCode;
     }
 }
 
@@ -258,21 +280,46 @@ function SubmitButton({onClick} : {onClick: () => void}){
     );
 }
 
+function getStorageKey(id: string, userName: string | undefined) {
+    if (userName === undefined) {
+        return "problem " + id;
+    }
+    return "problem " + id + " " + userName;
+}
+
+function getUserData(id: string | undefined, userName: string | undefined) {
+    if (id === undefined) {
+        console.error("No problem id was specified, so no user data could be retrieved.");
+        return new UserData();
+    }
+    let userData = localStorage.getItem(getStorageKey(id, userName));
+    if (userData === null) {
+        // try to get the data without the username
+        userData = localStorage.getItem(getStorageKey(id, undefined));
+        console.log("Got user data without username");
+    }
+    if (userData === null) {
+        return new UserData();
+    }
+
+    return JSON.parse(userData) as UserData;
+}
+
 function onSubmission(problemData: ProblemData, userData: UserData, setUserData: (data: UserData) => void) {
     if (userData.history.length === 0) {
         // First submission
-        userData.history.push(userCode);
+        userData.history.push(userData.currentCode);
     } else {
         let lastSubmission = userData.history[userData.history.length - 1];
-        if (lastSubmission !== userCode) {
-            userData.history.push(userCode);
+        if (lastSubmission !== userData.currentCode) {
+            userData.history.push(userData.currentCode);
         }
     }
 
-
+    userData.lastUpdated = new Date();
     const scope: {results: any[]} = {results: []};
 
-    let userRunnableCode = userCode + "\n";
+    let userRunnableCode = userData.currentCode + "\n";
 
     let combinedTests = problemData.tests.concat(problemData.hiddenTests);
 
@@ -324,11 +371,16 @@ function onSubmission(problemData: ProblemData, userData: UserData, setUserData:
         testResults.push(testPassed);
     }
 
-    setUserData(new UserData(
+    let newUserData = new UserData(
         userData.history,
         userData.requestHelpHistory,
-        testResults
-    ));
+        testResults,
+        new Date(),
+        userData.currentCode
+    )
+
+    setUserData(newUserData);
+    saveUserData(problemData, newUserData);
 }
 
 function removeNextHeading(tokens: Token[]) {
