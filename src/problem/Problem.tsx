@@ -4,13 +4,12 @@ import hljs from "highlight.js/lib/common";
 import React, {useState} from "react";
 import DOMPurify from "dompurify";
 import {getEditor} from "./Editor";
-import Sandbox from "@nyariv/sandboxjs";
 import {HelpBox} from "./Help";
 import {useParams} from "react-router-dom";
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import {getUserName} from "../auth/AuthHelper";
-import {TestResults, testUserCode} from "./codeRunner";
+import {getExpectedResults, TestResult, TestResults, testUserCode} from "./codeRunner";
 
 hljs.registerAliases([""], {languageName: "javascript"})
 export const marked = new Marked(
@@ -53,7 +52,7 @@ export function Problem() {
         onSubmission(problemData, userData, setUserData);
     }
 
-    function extractTestCases(tokens: Token[], tests: string[], testExpectedResults: string[]) {
+    function extractTestCases(tokens: Token[], tests: string[]) {
         // Tests are formatted as a list of functions in a code block with the expected result below it
         while (tokens.length > 0) {
             absorbWhitespace(tokens);
@@ -62,11 +61,11 @@ export function Problem() {
 
             absorbWhitespace(tokens);
             // @ts-ignore - ts seems to not believe that type could be paragraph
-            if (tokens.length === 0 || tokens[0].type !== "paragraph") break;
-            let expectedResult = tokens.shift() as Tokens.Paragraph;
+            if (tokens.length === 0 || tokens[0].type === "paragraph") {
+                tokens.shift(); // Remove the expected result (not used anymore)
+            }
 
             tests.push(test.text);
-            testExpectedResults.push(expectedResult.text);
         }
     }
 
@@ -146,16 +145,29 @@ export function Problem() {
 
                 removeNextHeading(tokens); // Remove the tests heading
                 let tests: string[] = [];
-                let testExpectedResults: string[] = [];
-                extractTestCases(tokens, tests, testExpectedResults);
+                extractTestCases(tokens, tests);
 
                 removeNextHeading(tokens); // Remove the hidden tests heading
                 let hiddenTests: string[] = [];
-                let hiddenTestExpectedResults: string[] = [];
-                extractTestCases(tokens, hiddenTests, hiddenTestExpectedResults);
+                extractTestCases(tokens, hiddenTests);
 
                 removeNextHeading(tokens); // Remove the hidden tests heading
                 let nextProblemId = (tokens.shift() as Tokens.Paragraph).text;
+
+                let problemData = {
+                    id,
+                    title,
+                    preProblemDescription,
+                    description,
+                    tests,
+                    hiddenTests,
+                    displayAbove,
+                    displayBelow,
+                    solution,
+                    solutionCode,
+                    codeLang,
+                    nextProblemId
+                }
 
                 // set the template data if the user has not saved any data
                 if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
@@ -163,22 +175,14 @@ export function Problem() {
                     userData.currentCode = displayAbove + "\n\n" + displayBelow;
                 }
 
-                setProblemData({
-                    id,
-                    title,
-                    preProblemDescription,
-                    description,
-                    tests,
-                    testExpectedResults,
-                    hiddenTests,
-                    hiddenTestExpectedResults,
-                    displayAbove,
-                    displayBelow,
-                    solution,
-                    solutionCode,
-                    codeLang,
-                    nextProblemId
-                });
+                if (userData.testResults === undefined || userData.testResults === null || userData.testResults.expectedResults.length === 0) {
+                    console.log("First time loading problem, getting expected results");
+                    userData.testResults = new TestResults()
+                    userData.testResults.expectedResults = getExpectedResults(problemData);
+
+                }
+
+                setProblemData(problemData);
             })
             .catch(e => {
                 console.error(e);
@@ -228,7 +232,7 @@ export function Problem() {
         let totalHiddenTests = problemData.hiddenTests.length;
         let hiddenTestsPassed = 0;
         for (let i = 0; i < problemData.hiddenTests.length; i++) {
-            if (userData.testResults.testResults[i + problemData.tests.length] === true) {
+            if (userData.testResults.testResults[i + problemData.tests.length] === TestResult.Passed) {
                 hiddenTestsPassed++;
             }
         }
@@ -263,8 +267,8 @@ export function Problem() {
     );
 }
 
-function getTestElement(test: string, expectedResult: string, result: boolean | null | undefined) {
-    let resultText = (result === undefined || result === null)  ? "Not run" : (result ? "Passed" : "Failed");
+function getTestElement(test: string, expectedResult: string, result: TestResult | undefined) {
+    let resultText = result === undefined ? "Not Run" : result.toString();
     return (
         <p className={"Test-" + resultText.toLowerCase()}>
             {test} {"->"} {expectedResult} : {resultText}
@@ -278,9 +282,7 @@ export class ProblemData {
     preProblemDescription: string = "";
     description: string = "";
     tests: string[] = [];
-    testExpectedResults: string[] = []
     hiddenTests: string[] = []
-    hiddenTestExpectedResults: string[] = [];
     displayAbove: string = "";
     displayBelow: string = "";
     solution: string = "";
@@ -352,7 +354,6 @@ function onSubmission(problemData: ProblemData, userData: UserData, setUserData:
     userData.lastUpdated = new Date();
 
     let testResults = testUserCode(userData, problemData);
-    console.log(testResults);
 
     let newUserData = new UserData(
         userData.history,

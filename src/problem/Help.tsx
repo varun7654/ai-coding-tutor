@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import {marked, ProblemData, UserData} from "./Problem";
 import DOMPurify from "dompurify";
 import {expireToken, getToken, isLoggedIn, logIn} from "../auth/AuthHelper";
+import {TestResult} from "./codeRunner";
 
 export function HelpBox({problemData, getUserData, runTests}: { problemData: ProblemData, getUserData: () => UserData, runTests: () => void}) {
     const [response, setResponse] = useState("");
@@ -119,7 +120,7 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
     );
 }
 
-function getTestAsString(test: string, expectedResult: string, result: boolean | undefined | null) {
-    let resultText = (result === undefined || result === null) ? "Not run" : (result ? "Passed" : "Failed");
+function getTestAsString(test: string, expectedResult: string, result: TestResult | undefined): string {
+    let resultText = result === undefined ? "Not Run" : result.toString();
     return test + " -> " + expectedResult + " : " + resultText + "\n"
 }
