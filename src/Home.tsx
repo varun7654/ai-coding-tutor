@@ -7,7 +7,7 @@ function Home() {
     return (
         <div>
             <h1>Hi and welcome to our page</h1>
-            <Link to="/Problem">Go to Problem Page</Link> // Use Link to navigate to Problem Page
+            <Link to="/Problem/test">Go to Problem Page</Link> // Use Link to navigate to Problem Page
         </div>
     )
 }
