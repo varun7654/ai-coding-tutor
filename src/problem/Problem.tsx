@@ -266,6 +266,30 @@ export function Problem() {
         saveUserData(problemData, userData);
     }
 
+    let errorText: string = ""
+
+    if (!userData.testResults.ranSuccessfully) {
+
+        if (userData.testResults.parseError !== "") {
+            errorText += "We couldn't run your code due to a syntax error on line " + userData.testResults.errorLine + ".\n";
+            errorText += indentText(userData.testResults.parseError, 1);
+        } else if (userData.testResults.runtimeError !== "") {
+            errorText += "Something went wrong trying to run you code"
+            if (userData.testResults.errorLine !== -1) {
+                errorText += " on line " + userData.testResults.errorLine + ".\n";
+            } else {
+                errorText += ".\n";
+            }
+            errorText += indentText(userData.testResults.runtimeError, 1);
+        } else {
+
+            errorText += "No error message was provided."
+        }
+    }
+
+    errorText = errorText.replace(/\n/g, "<br>");
+    errorText = DOMPurify.sanitize(errorText);
+
     return (
         <div className="Problem">
             <h1 className="Problem-title">{problemData.title}</h1>
@@ -274,6 +298,7 @@ export function Problem() {
                 {getEditor(problemData.codeLang, (value) => {updateUserCode(value);}, userData.currentCode)}
                 <SubmitButton onClick={onCodeSubmit} />
             </div>
+            <div className="Problem-error" dangerouslySetInnerHTML={{__html: errorText}}/>
             <div className="Problem-test-results">
                 <h3>Tests</h3>
                 {testsDisplayJSX}
@@ -296,6 +321,12 @@ function getTestElement(test: string, expectedResult: string, result: TestResult
             {test} {"->"} {expectedResult} : {resultText}
         </p>
     );
+}
+
+function indentText(text: string, indent: number) {
+    let indentText = "<span style='margin-left: " + (indent * 2) + "em'> </span>";
+
+    return text.split("\n").map(line => indentText + line).join("\n");
 }
 
 export class ProblemData {

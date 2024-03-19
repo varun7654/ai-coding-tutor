@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {AUTH_API_URL} from "../App";
 import {getToken, isLoggedIn} from "./AuthHelper";
+import {Button} from "@mui/material";
 
 export default function Login() {
     const [userName, setUserName] = useState(undefined as string | undefined);
@@ -39,32 +40,13 @@ export default function Login() {
         window.location.href = AUTH_API_URL;
     }
 
-    if (loggedIn) {
-        if (userName) {
-            return (
-                <div>
-                    <p id="signed-in">
-                        Hello there, <span id="login">{userName}</span>. <LogoutButton />
-                    </p>
-                </div>
-            )
-        } else {
-            return (
-                <div>
-                    <p id="signed-in">
-                        Checking that we've signed you in properly.  <LogoutButton />
-                    </p>
-                </div>
-            )
-        }
+    let loggedInText = loggedIn ? (userName ? `Hello there, ${userName}.` : "Finishing Sign In.") : "You are not logged in.";
+    if (!loggedIn || true) {
+        // return a rounded button with the github logo and "Sign in with GitHub"
+        return <Button variant="contained">Hello world</Button>;
+
     } else {
-        return (
-            <div>
-                <h1>
-                    You are not logged in. <button onClick={logIn}>Log in</button>
-                </h1>
-            </div>
-        )
+
     }
 }
 

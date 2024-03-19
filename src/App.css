@@ -67,6 +67,10 @@
     max-width: 50em;
 }
 
+.Problem-error {
+    color: #EF4547;
+}
+
 .Test-passed {
     background: #49CA67;
     color: #1C1F23;

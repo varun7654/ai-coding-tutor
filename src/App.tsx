@@ -22,12 +22,13 @@ function App() {
     return (
         <Router>
             <div className="App">
-                <Header />
+                <meta name="viewport" content="initial-scale=1, width=device-width"/>
+                <Header/>
                 <Routes>
-                    <Route path="/" Component={Home} />
-                    <Route path="/problem/*" Component={() => <Problem />} />
-                    <Route path="/auth/login" Component={() => <Login />} />
-                    <Route path="/auth/login_success" Component={() => <LoginSuccess/>} />
+                    <Route path="/" Component={Home}/>
+                    <Route path="/problem/*" Component={() => <Problem/>}/>
+                    <Route path="/auth/login" Component={() => <Login/>}/>
+                    <Route path="/auth/login_success" Component={() => <LoginSuccess/>}/>
                 </Routes>
             </div>
         </Router>
