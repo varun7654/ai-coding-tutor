@@ -1,9 +1,10 @@
 {
   "files": {
-    "main.css": "/static/css/main.ef022073.css",
-    "main.js": "/static/js/main.91ac97ce.js",
-    "static/js/453.4ba5cc60.chunk.js": "/static/js/453.4ba5cc60.chunk.js",
-    "static/js/780.930f675a.chunk.js": "/static/js/780.930f675a.chunk.js",
+    "main.css": "/static/css/main.a5455fa9.css",
+    "main.js": "/static/js/main.a49ce70e.js",
+    "static/js/453.7579e5fe.chunk.js": "/static/js/453.7579e5fe.chunk.js",
+    "static/js/780.b4e93c13.chunk.js": "/static/js/780.b4e93c13.chunk.js",
+    "static/js/802.ad7e52f6.chunk.js": "/static/js/802.ad7e52f6.chunk.js",
     "static/media/KaTeX_AMS-Regular.ttf": "/static/media/KaTeX_AMS-Regular.853be92419a6c3766b9a.ttf",
     "static/media/KaTeX_Main-Regular.ttf": "/static/media/KaTeX_Main-Regular.9eba1d77abcf2aa6e94e.ttf",
     "static/media/KaTeX_Main-Bold.ttf": "/static/media/KaTeX_Main-Bold.8169508bf58f8bd92ad8.ttf",
@@ -64,14 +65,16 @@
     "static/media/KaTeX_Size4-Regular.woff2": "/static/media/KaTeX_Size4-Regular.e418bf257af1052628d8.woff2",
     "static/media/KaTeX_Size3-Regular.woff": "/static/media/KaTeX_Size3-Regular.7947224e8a9914fa332b.woff",
     "static/media/KaTeX_Size3-Regular.woff2": "/static/media/KaTeX_Size3-Regular.e1951519f6f0596f7356.woff2",
+    "static/media/github-mark-white.svg": "/static/media/github-mark-white.ac7f5ce28096dc43a49cbedeabffa77b.svg",
     "index.html": "/index.html",
-    "main.ef022073.css.map": "/static/css/main.ef022073.css.map",
-    "main.91ac97ce.js.map": "/static/js/main.91ac97ce.js.map",
-    "453.4ba5cc60.chunk.js.map": "/static/js/453.4ba5cc60.chunk.js.map",
-    "780.930f675a.chunk.js.map": "/static/js/780.930f675a.chunk.js.map"
+    "main.a5455fa9.css.map": "/static/css/main.a5455fa9.css.map",
+    "main.a49ce70e.js.map": "/static/js/main.a49ce70e.js.map",
+    "453.7579e5fe.chunk.js.map": "/static/js/453.7579e5fe.chunk.js.map",
+    "780.b4e93c13.chunk.js.map": "/static/js/780.b4e93c13.chunk.js.map",
+    "802.ad7e52f6.chunk.js.map": "/static/js/802.ad7e52f6.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.ef022073.css",
-    "static/js/main.91ac97ce.js"
+    "static/css/main.a5455fa9.css",
+    "static/js/main.a49ce70e.js"
   ]
 }
