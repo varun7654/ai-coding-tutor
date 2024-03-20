@@ -14,6 +14,8 @@ export function getUserName() {
     if (username === null || username === undefined || username === "") {
         return undefined;
     }
+
+    return username;
 }
 
 export function isLoggedIn() {
@@ -21,10 +23,8 @@ export function isLoggedIn() {
 }
 
 export function logIn(forceLogin = false) {
-    localStorage.setItem("closeWindowAfterLogin", "true");
+    localStorage.setItem("loginRedirect", window.location.href);
     if (getToken() === "expired" || forceLogin) {
-        window.open(AUTH_API_URL, "_blank");
-    } else {
-        window.open("/auth/login", "_blank");
+        window.location.href = AUTH_API_URL;
     }
 }

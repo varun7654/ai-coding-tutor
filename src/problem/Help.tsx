@@ -17,10 +17,6 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
 
         let token = getToken();
 
-        console.log(problemData);
-        console.log(getUserData());
-
-
         fetch("https://codehelp.api.dacubeking.com/ai-tutor", {
             method: "POST",
             headers: {

@@ -38,7 +38,8 @@
     "sort-by": "^1.2.0",
     "typescript": "^4.9.5",
     "vm-browserify": "^1.1.2",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "@react-buddy/palette-mui": "^5.0.1"
   },
   "scripts": {
     "predeploy": "npm run build && shx cp build/index.html build/404.html",

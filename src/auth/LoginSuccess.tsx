@@ -23,7 +23,14 @@ export default function LoginSuccess(){
                     if (result.token) {
                         console.log("Finished logging in. Token: " + result.token);
                         localStorage.setItem("token", result.token);
-                        window.location.href = "/auth/login";
+                        let loginRedirect = localStorage.getItem("LoginRedirect");
+
+                        if (loginRedirect !== null && loginRedirect !== undefined && loginRedirect !== "" && loginRedirect !== "undefined") {
+                            localStorage.setItem("LoginRedirect", "");
+                            window.location.href = loginRedirect;
+                        } else {
+                            window.location.href = "/";
+                        }
                     } else {
                         console.error(result);
                     }
@@ -36,17 +43,10 @@ export default function LoginSuccess(){
     }, []);
 
     
-    if (getToken()) {
-        return (
-            <div>
-                <h1>Logging in...</h1>
-            </div>
-        )
-    } else {
-        return (
-            <div>
-                <h1>Something went wrong logging in (no code was sent)</h1>
-            </div>
-        )
-    }
+
+    return (
+        <div>
+            <h1>Logging in...</h1>
+        </div>
+    )
 }
