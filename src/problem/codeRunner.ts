@@ -101,7 +101,6 @@ function reformatStackTrace(result: Error, userCodeLineNumberBegin: number, user
 
     //result.stack += "\nNew Stack:\n" + stackTraceLines.join('\n');
     result.stack = stackTraceLines.join('\n');
-
     return errorLine;
 }
 
@@ -113,7 +112,13 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
         let brackets = 0;
         let lineNum = 1;
         let foundFirstBracket = false;
+        let whitespaceRegex = /^\s*$/;
+        let characterAfterLastBracket = {value: false, lineNum: -1};
         for (let i = 0; i < userCode.length; i++) {
+            if (brackets === 0 && foundFirstBracket && !userCode[i].match(whitespaceRegex) && !characterAfterLastBracket.value) {
+                characterAfterLastBracket = {value: true, lineNum: lineNum};
+            }
+
             if (userCode[i] === '{') {
                 if (foundFirstBracket && brackets === 0){
                     return {
@@ -172,6 +177,19 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
                 expectedResults: getExpectedResults(problemData),
                 parseError: "No function found.",
                 errorLine: lineNum,
+                runtimeError: "",
+                output: "",
+                ranSuccessfully: false
+            };
+        }
+
+        if (characterAfterLastBracket.value) {
+            return {
+                testResults: [],
+                returnedResults: [],
+                expectedResults: getExpectedResults(problemData),
+                parseError: "You have stray character(s) after the last '}'.",
+                errorLine: characterAfterLastBracket.lineNum,
                 runtimeError: "",
                 output: "",
                 ranSuccessfully: false
@@ -304,11 +322,11 @@ ${userCode}
         testResults.expectedResults = getExpectedResults(problemData);
         if (e instanceof Error) {
             testResults.errorLine = reformatStackTrace(e, userCodeLineNumberBegin, userCodeLineNumberEnd);
+            console.log(e.stack);
             testResults.runtimeError = e.stack as string;
         } else {
             testResults.runtimeError = e as string;
         }
-
     }
 
     for (let i = 0; i < combinedTests.length; i++) {
