@@ -1,7 +1,7 @@
 import {Marked, Token, Tokens} from "marked";
 import {markedHighlight} from "marked-highlight";
 import hljs from "highlight.js/lib/common";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import DOMPurify from "dompurify";
 import {getEditor} from "./Editor";
 import {HelpBox} from "./Help";
@@ -25,8 +25,8 @@ export const marked = new Marked(
 
 marked.use({
     renderer: {
-        text: function(text) {
-            return text.replace(/\$(.*?)\$/g, function(_, latex) {
+        text: function (text) {
+            return text.replace(/\$(.*?)\$/g, function (_, latex) {
                 return katex.renderToString(latex, {
                     throwOnError: false
                 });
@@ -45,175 +45,176 @@ function saveUserData(problemData: ProblemData, userData: UserData) {
 
 export function Problem() {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
-    const { "*" : id } = useParams();
+    const {"*": id} = useParams();
     const [userData, setUserData] = useState(getUserData(id, getUserName()));
-
 
     function onCodeSubmit() {
         onSubmission(problemData, userData, setUserData);
     }
 
-    function extractTestCases(tokens: Token[], tests: string[]) {
-        // Tests are formatted as a list of functions in a code block with the expected result below it
-        while (tokens.length > 0) {
-            absorbWhitespace(tokens);
-            if (tokens.length === 0 || tokens[0].type !== "code") break;
-            let test = tokens.shift() as Tokens.Code;
+    useEffect(() => {
+        function extractTestCases(tokens: Token[], tests: string[]) {
+            // Tests are formatted as a list of functions in a code block with the expected result below it
+            while (tokens.length > 0) {
+                absorbWhitespace(tokens);
+                if (tokens.length === 0 || tokens[0].type !== "code") break;
+                let test = tokens.shift() as Tokens.Code;
 
-            absorbWhitespace(tokens);
-            // @ts-ignore - ts seems to not believe that type could be paragraph
-            if (tokens.length === 0 || tokens[0].type === "paragraph") {
-                let str = (tokens.shift() as Tokens.Paragraph).text.trim().toLowerCase(); // Remove the expected result (not used anymore)
-                // check if it begins with "repeat =" or "repeat="
-                if (str.startsWith("repeat")){
-                    if (str.startsWith("repeat =")) {
-                        str = str.substring(8);
-                    } else if (str.startsWith("repeat=")) {
-                        str = str.substring(7);
-                    } else {
-                        console.error("Failed to parse repeat value: " + str);
-                    }
+                absorbWhitespace(tokens);
+                // @ts-ignore - ts seems to not believe that type could be paragraph
+                if (tokens.length === 0 || tokens[0].type === "paragraph") {
+                    let str = (tokens.shift() as Tokens.Paragraph).text.trim().toLowerCase(); // Remove the expected result (not used anymore)
+                    // check if it begins with "repeat =" or "repeat="
+                    if (str.startsWith("repeat")) {
+                        if (str.startsWith("repeat =")) {
+                            str = str.substring(8);
+                        } else if (str.startsWith("repeat=")) {
+                            str = str.substring(7);
+                        } else {
+                            console.error("Failed to parse repeat value: " + str);
+                        }
 
-                    let num = parseInt(str);
-                    if (isNaN(num)) {
-                        console.error("Failed to parse repeat value: " + str);
-                    } else {
-                        for (let i = 0; i < num - 1; i++) { // Add the test case the number of times specified (minus 1 to account for the original)
-                            tests.push(test.text);
+                        let num = parseInt(str);
+                        if (isNaN(num)) {
+                            console.error("Failed to parse repeat value: " + str);
+                        } else {
+                            for (let i = 0; i < num - 1; i++) { // Add the test case the number of times specified (minus 1 to account for the original)
+                                tests.push(test.text);
+                            }
                         }
                     }
+
+
                 }
 
-
-
+                tests.push(test.text);
             }
-
-            tests.push(test.text);
         }
-    }
 
-    if (problemData === null && id !== undefined) {
-        fetch(process.env.PUBLIC_URL + "/problems/" + id + ".md")
-            .then(async r => {
-                let text = await r.text()
-                if (!r.ok || !text.startsWith("#")) {
-                    throw new Error("Failed to fetch problem data");
-                } else {
-                    return text;
-                }
-            })
-            .then(async text => {
-                let tokens = marked.lexer(text);
-                let title = (tokens.shift() as Tokens.Heading).text;
-
-                let preProblemDescription = "";
-                removeTillNextType(tokens, "heading"); // Collect everything under the description heading
-                if ((tokens[0] as Tokens.Heading).text === "Context") {
-                    tokens.shift();
-                    while (tokens.length > 0 && (tokens[0].type !== "heading" || (tokens[0] as Tokens.Heading).depth > 1)) {
-                        preProblemDescription += ((tokens.shift() as Token).raw);
-                    }
-                }
-
-                // Collect everything under the description heading
-                removeNextHeading(tokens); // Remove the description heading
-
-                let description = "";
-                while (tokens.length > 0 && (tokens[0].type !== "heading" || (tokens[0] as Tokens.Heading).depth > 1)) {
-                    description += ((tokens.shift() as Token).raw);
-                }
-
-                removeNextHeading(tokens); // Remove the problem heading
-                if (tokens[0].type !== "code") {
-                    console.error("Problem Parse: No code block found after problem heading. If no template code is needed, please use a code block with no content (with the correct language).");
-                }
-                let problem = tokens.shift() as Tokens.Code;
-                if (!problem.lang) {
-                    console.error("Problem Parse: No code language specified for problem " + id);
-                }
-                let codeLang = problem.lang ? problem.lang : "javascript";
-
-                let splitProblem = problem.text.split("// Your code here");
-
-                let displayAbove;
-                let displayBelow;
-
-                if (splitProblem.length === 0 || splitProblem[0].trim() === "") {
-                    console.log("Problem Parse: Code block has no content");
-                    displayAbove = "";
-                    displayBelow = "";
-                } else {
-                    displayAbove = splitProblem[0].trim();
-                    if (splitProblem.length === 1) {
-                        displayBelow = "";
-                        console.error("Problem Parse: No secondary display content found in problem " + id +
-                            ". It is unlikely that this is intentional. Ensure that you have a comment with the text '// Your code here' in the problem description.");
+        if (id !== undefined) {
+            fetch(process.env.PUBLIC_URL + "/problems/" + id + ".md")
+                .then(async r => {
+                    let text = await r.text()
+                    if (!r.ok || !text.startsWith("#")) {
+                        throw new Error("Failed to fetch problem data");
                     } else {
-                        displayBelow = splitProblem[1].trim();
+                        return text;
                     }
-                }
+                })
+                .then(async text => {
+                    let tokens = marked.lexer(text);
+                    let title = (tokens.shift() as Tokens.Heading).text;
 
-
-                removeNextHeading(tokens); // Remove the solution heading
-                absorbWhitespace(tokens);
-                let solution = "";
-                let solutionCode = "";
-                while (tokens.length > 0 && !(tokens[0].type === "heading" && (tokens[0] as Tokens.Heading).depth <= 1)) {
-                    if (tokens[0].type === "code" && solutionCode === "") {
-                        // Get the first code block as the solution code
-                        solutionCode += (tokens[0] as Tokens.Code).text;
+                    let preProblemDescription = "";
+                    removeTillNextType(tokens, "heading"); // Collect everything under the description heading
+                    if ((tokens[0] as Tokens.Heading).text === "Context") {
+                        tokens.shift();
+                        while (tokens.length > 0 && (tokens[0].type !== "heading" || (tokens[0] as Tokens.Heading).depth > 1)) {
+                            preProblemDescription += ((tokens.shift() as Token).raw);
+                        }
                     }
-                    solution += ((tokens.shift() as Token).raw);
-                }
 
-                removeNextHeading(tokens); // Remove the tests heading
-                let tests: string[] = [];
-                extractTestCases(tokens, tests);
+                    // Collect everything under the description heading
+                    removeNextHeading(tokens); // Remove the description heading
 
-                removeNextHeading(tokens); // Remove the hidden tests heading
-                let hiddenTests: string[] = [];
-                extractTestCases(tokens, hiddenTests);
+                    let description = "";
+                    while (tokens.length > 0 && (tokens[0].type !== "heading" || (tokens[0] as Tokens.Heading).depth > 1)) {
+                        description += ((tokens.shift() as Token).raw);
+                    }
 
-                removeNextHeading(tokens); // Remove the hidden tests heading
-                let nextProblemId = (tokens.shift() as Tokens.Paragraph).text;
+                    removeNextHeading(tokens); // Remove the problem heading
+                    if (tokens[0].type !== "code") {
+                        console.error("Problem Parse: No code block found after problem heading. If no template code is needed, please use a code block with no content (with the correct language).");
+                    }
+                    let problem = tokens.shift() as Tokens.Code;
+                    if (!problem.lang) {
+                        console.error("Problem Parse: No code language specified for problem " + id);
+                    }
+                    let codeLang = problem.lang ? problem.lang : "javascript";
 
-                let problemData = {
-                    id,
-                    title,
-                    preProblemDescription,
-                    description,
-                    tests,
-                    hiddenTests,
-                    displayAbove,
-                    displayBelow,
-                    solution,
-                    solutionCode,
-                    codeLang,
-                    nextProblemId
-                }
+                    let splitProblem = problem.text.split("// Your code here");
 
-                // set the template data if the user has not saved any data
-                if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
-                    console.log("First time loading problem, setting template data");
-                    userData.currentCode = displayAbove + "\n\n" + displayBelow;
-                }
+                    let displayAbove;
+                    let displayBelow;
 
-                if (userData.testResults === undefined || userData.testResults === null || userData.testResults.expectedResults.length === 0) {
-                    console.log("First time loading problem, getting expected results");
-                    userData.testResults = new TestResults()
-                    userData.testResults.expectedResults = getExpectedResults(problemData);
+                    if (splitProblem.length === 0 || splitProblem[0].trim() === "") {
+                        console.log("Problem Parse: Code block has no content");
+                        displayAbove = "";
+                        displayBelow = "";
+                    } else {
+                        displayAbove = splitProblem[0].trim();
+                        if (splitProblem.length === 1) {
+                            displayBelow = "";
+                            console.error("Problem Parse: No secondary display content found in problem " + id +
+                                ". It is unlikely that this is intentional. Ensure that you have a comment with the text '// Your code here' in the problem description.");
+                        } else {
+                            displayBelow = splitProblem[1].trim();
+                        }
+                    }
 
-                }
 
-                setProblemData(problemData);
-            })
-            .catch(e => {
-                console.error(e);
-                let problemData = new ProblemData();
-                problemData.title = "Failed to load problem " + id;
-                setProblemData(problemData);
-            })
-    }
+                    removeNextHeading(tokens); // Remove the solution heading
+                    absorbWhitespace(tokens);
+                    let solution = "";
+                    let solutionCode = "";
+                    while (tokens.length > 0 && !(tokens[0].type === "heading" && (tokens[0] as Tokens.Heading).depth <= 1)) {
+                        if (tokens[0].type === "code" && solutionCode === "") {
+                            // Get the first code block as the solution code
+                            solutionCode += (tokens[0] as Tokens.Code).text;
+                        }
+                        solution += ((tokens.shift() as Token).raw);
+                    }
+
+                    removeNextHeading(tokens); // Remove the tests heading
+                    let tests: string[] = [];
+                    extractTestCases(tokens, tests);
+
+                    removeNextHeading(tokens); // Remove the hidden tests heading
+                    let hiddenTests: string[] = [];
+                    extractTestCases(tokens, hiddenTests);
+
+                    removeNextHeading(tokens); // Remove the hidden tests heading
+                    let nextProblemId = (tokens.shift() as Tokens.Paragraph).text;
+
+                    let problemData = {
+                        id,
+                        title,
+                        preProblemDescription,
+                        description,
+                        tests,
+                        hiddenTests,
+                        displayAbove,
+                        displayBelow,
+                        solution,
+                        solutionCode,
+                        codeLang,
+                        nextProblemId
+                    }
+
+                    // set the template data if the user has not saved any data
+                    if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
+                        console.log("First time loading problem, setting template data");
+                        userData.currentCode = displayAbove + "\n\n" + displayBelow;
+                    }
+
+                    if (userData.testResults === undefined || userData.testResults === null || userData.testResults.expectedResults.length === 0) {
+                        console.log("First time loading problem, getting expected results");
+                        userData.testResults = new TestResults()
+                        userData.testResults.expectedResults = getExpectedResults(problemData);
+
+                    }
+
+                    setProblemData(problemData);
+                })
+                .catch(e => {
+                    console.error(e);
+                    let problemData = new ProblemData();
+                    problemData.title = "Failed to load problem " + id;
+                    setProblemData(problemData);
+                })
+        }
+    }, [id]);
+
 
     if (problemData === null) {
         if (id !== undefined) {
@@ -244,8 +245,6 @@ export function Problem() {
             {testsDisplay.map((test, i) => <li key={i}>{test}</li>)}
         </ul>
     }
-
-
 
 
     let hiddenTestText: string;
@@ -296,8 +295,10 @@ export function Problem() {
             <h1 className="Problem-title">{problemData.title}</h1>
             <div className="Problem-desc" dangerouslySetInnerHTML={{__html: descParsed}}/>
             <div className="Problem-Code">
-                {getEditor(problemData.codeLang, (value) => {updateUserCode(value);}, userData.currentCode)}
-                <SubmitButton onClick={onCodeSubmit} />
+                {getEditor(problemData.codeLang, (value) => {
+                    updateUserCode(value);
+                }, userData.currentCode)}
+                <SubmitButton onClick={onCodeSubmit}/>
             </div>
             <div className="Problem-error" dangerouslySetInnerHTML={{__html: errorText}}/>
             <div className="Problem-test-results">
@@ -310,7 +311,8 @@ export function Problem() {
             <HelpBox problemData={problemData} getUserData={() => userData} runTests={onCodeSubmit}/>
             <button onClick={() => {
                 window.location.href = "/problem/" + problemData.nextProblemId;
-            }}>Next Problem</button>
+            }}>Next Problem
+            </button>
         </div>
     );
 }
@@ -352,7 +354,7 @@ export class UserData {
     lastUpdated: Date = new Date();
     currentCode: string = null as unknown as string;
 
-    constructor(history: string[] = [], requestHelpHistory: string[] = [],  testResults: TestResults = new TestResults(), lastUpdated: Date = new Date(), currentCode: string = "") {
+    constructor(history: string[] = [], requestHelpHistory: string[] = [], testResults: TestResults = new TestResults(), lastUpdated: Date = new Date(), currentCode: string = "") {
         this.history = history;
         this.testResults = testResults;
         this.requestHelpHistory = requestHelpHistory;
@@ -385,7 +387,7 @@ function getUserData(id: string | undefined, userName: string | undefined) {
     return JSON.parse(userData) as UserData;
 }
 
-function SubmitButton({onClick} : {onClick: () => void}){
+function SubmitButton({onClick}: { onClick: () => void }) {
     return (
         <button onClick={() => {
             onClick();
