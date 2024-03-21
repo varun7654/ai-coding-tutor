@@ -23,11 +23,11 @@ export default function LoginSuccess(){
                     if (result.token) {
                         console.log("Finished logging in. Token: " + result.token);
                         localStorage.setItem("token", result.token);
-                        let loginRedirect = localStorage.getItem("LoginRedirect");
+                        let loginRedirect = localStorage.getItem("loginRedirect");
 
                         if (loginRedirect !== null && loginRedirect !== undefined && loginRedirect !== "" && loginRedirect !== "undefined") {
-                            localStorage.setItem("LoginRedirect", "");
                             window.location.href = loginRedirect;
+                            localStorage.setItem("LoginRedirect", "");
                         } else {
                             window.location.href = "/";
                         }

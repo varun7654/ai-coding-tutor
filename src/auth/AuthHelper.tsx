@@ -10,12 +10,27 @@ export function expireToken() {
 }
 
 export function getUserName() {
-    let username =  localStorage.getItem("userName");
-    if (username === null || username === undefined || username === "") {
-        return undefined;
+    let userData = localStorage.getItem("userData");
+    let username = undefined;
+    if (userData !== null) {
+        let user = JSON.parse(userData);
+        username = user.name;
+        if (username === null || username === undefined) {
+            username = user.login;
+        }
     }
 
     return username;
+}
+
+export function getUserId() {
+    let userData = localStorage.getItem("userData");
+    let userId = undefined;
+    if (userData !== null) {
+        let user = JSON.parse(userData);
+        userId = user.id;
+    }
+    return userId;
 }
 
 export function isLoggedIn() {

@@ -39,6 +39,7 @@ function saveUserData(problemData: ProblemData, userData: UserData) {
     if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
         console.error("User data is being saved with no code");
     }
+    console.log(getUserName())
     localStorage.setItem(getStorageKey(problemData.id, getUserName()), JSON.stringify(userData));
 }
 
@@ -361,10 +362,7 @@ export class UserData {
 }
 
 function getStorageKey(id: string, userName: string | undefined) {
-    if (userName === undefined) {
-        return "problem " + id;
-    }
-    return "problem " + id + " " + userName;
+    return "problem " + id;
 }
 
 function getUserData(id: string | undefined, userName: string | undefined) {
@@ -376,7 +374,9 @@ function getUserData(id: string | undefined, userName: string | undefined) {
     if (userData === null) {
         // try to get the data without the username
         userData = localStorage.getItem(getStorageKey(id, undefined));
-        console.log("Got user data without username");
+        if (userData !== null) {
+            console.log("Got user data without username");
+        }
     }
     if (userData === null) {
         return new UserData();
