@@ -15,7 +15,7 @@ But we can also write functions that don't take any input value at all, like thi
 
 ```javascript
 function f() {
-  return 2.71828
+  return 2.71828;
 }
 ```
 
