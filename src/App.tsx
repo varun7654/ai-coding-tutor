@@ -7,7 +7,6 @@ import Home from './Home';
 import Login from "./auth/Login";
 import LoginSuccess from "./auth/LoginSuccess";
 
-
 export const API_URL = "https://codehelp.api.dacubeking.com/";
 export const AUTH_API_URL = `${API_URL}auth`;
 
