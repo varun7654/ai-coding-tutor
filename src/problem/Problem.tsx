@@ -39,7 +39,6 @@ function saveUserData(problemData: ProblemData, userData: UserData) {
     if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
         console.error("User data is being saved with no code");
     }
-    console.log(getUserName())
     localStorage.setItem(getStorageKey(problemData.id, getUserName()), JSON.stringify(userData));
 }
 
@@ -269,7 +268,6 @@ export function Problem() {
     let errorText: string = ""
 
     if (!userData.testResults.ranSuccessfully) {
-
         if (userData.testResults.parseError !== "") {
             errorText += "We couldn't run your code due to a syntax error on line " + userData.testResults.errorLine + ".\n";
             errorText += indentText(userData.testResults.parseError, 1);
@@ -282,7 +280,7 @@ export function Problem() {
             }
             errorText += indentText(userData.testResults.runtimeError, 1);
         } else {
-
+            console.log(userData.testResults);
             errorText += "No error message was provided."
         }
     }
