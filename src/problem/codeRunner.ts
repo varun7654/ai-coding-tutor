@@ -44,8 +44,8 @@ function tokenizeFunctionSignature(signature: string) : StringLineNum[] {
         if (tokenChars.includes(signature[i])) {
             if (bufferStartIndex !== i) {
                 tokens.push(new StringLineNum(signature.substring(bufferStartIndex, i), lineNum));
-                bufferStartIndex = i + 1;
             }
+            bufferStartIndex = i + 1;
 
             if (signature[i] === '\n') {
                 lineNum++;
