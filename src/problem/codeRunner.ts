@@ -45,14 +45,23 @@ function tokenizeFunctionSignature(signature: string) : StringLineNum[] {
             if (bufferStartIndex !== i) {
                 tokens.push(new StringLineNum(signature.substring(bufferStartIndex, i), lineNum));
             }
-            bufferStartIndex = i + 1;
+            // We also need to add the token character as a separate token.
+            // Don't add a token for a space character.
+            // Don't add a token for a new line character
+            // (but if we haven't seen a semicolon, on a line with content, add a token).
+            if (signature[i] !== ' ' && signature[i] !== '\n') {
+                tokens.push(new StringLineNum(signature[i], lineNum));
+            }
 
             if (signature[i] === '\n') {
                 lineNum++;
             }
+
+            bufferStartIndex = i + 1;
         }
     }
 
+    console.log(tokens);
     // Filter out any empty tokens
     return tokens.filter(token => token.str !== "");
 }
