@@ -18,7 +18,7 @@ export class TestResults {
     public errorLine: number = -1;
     public runtimeError: string = "";
     public output: string = "";
-    public ranSuccessfully: boolean = false;
+    public ranSuccessfully: boolean = true; // Prevents the user from seeing an error message on first load
 }
 
 class StringLineNum {
