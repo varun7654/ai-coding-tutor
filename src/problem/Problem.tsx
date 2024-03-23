@@ -190,7 +190,9 @@ export function Problem() {
                     // set the template data if the user has not saved any data
                     if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
                         console.log("First time loading problem, setting template data");
-                        userData.currentCode = displayAbove + "\n\n" + displayBelow;
+                        if (displayAbove !== "" && displayBelow !== "") {
+                            userData.currentCode = displayAbove + "\n\t\n" + displayBelow;
+                        }
                     }
 
                     if (userData.testResults === undefined || userData.testResults === null || userData.testResults.expectedResults.length === 0) {
