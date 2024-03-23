@@ -4,12 +4,14 @@ import hljs from "highlight.js/lib/common";
 import React, {useEffect, useState} from "react";
 import DOMPurify from "dompurify";
 import {getEditor} from "./Editor";
-import {HelpBox} from "./Help";
+import {HelpBoxAndButton} from "./Help";
 import {useParams} from "react-router-dom";
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import {getUserName} from "../auth/AuthHelper";
 import {getExpectedResults, TestResult, TestResults, testUserCode} from "./codeRunner";
+import {Button, createTheme, Shadows, ThemeProvider} from "@mui/material";
+import {buttonTheme, mutedButtonTheme} from "../App";
 
 hljs.registerAliases([""], {languageName: "javascript"})
 export const marked = new Marked(
@@ -46,6 +48,7 @@ export function Problem() {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
     const {"*": id} = useParams();
     const [userData, setUserData] = useState(getUserData(id, getUserName()));
+    const [helpResponse, setHelpResponse] = useState("");
 
     function onCodeSubmit() {
         onSubmission(problemData, userData, setUserData);
@@ -266,6 +269,8 @@ export function Problem() {
     }
 
     let errorText: string = ""
+    let problemSolved = userData.testResults.testResults.every(result => result === TestResult.Passed) &&
+        userData.testResults.testResults.length === userData.testResults.expectedResults.length;
 
     if (!userData.testResults.ranSuccessfully) {
         if (userData.testResults.parseError !== "") {
@@ -288,6 +293,23 @@ export function Problem() {
     errorText = errorText.replace(/\n/g, "<br>");
     errorText = DOMPurify.sanitize(errorText);
 
+    let {helpButton, helpBox} =
+        HelpBoxAndButton(problemData, () => userData, onCodeSubmit, helpResponse, setHelpResponse);
+
+    let nextProblem;
+    if (problemData.nextProblemId !== "" && problemData.nextProblemId.toLowerCase() !== "nothing") {
+        nextProblem = <ThemeProvider theme={mutedButtonTheme}>
+            <Button variant="contained"
+                    color={problemSolved ? "secondary" : "primary"}
+                    href={"/problem/" + problemData.nextProblemId}
+                    className={"nextProblemButton"}>
+                Next Problem
+            </Button>
+        </ThemeProvider>
+    } else {
+        nextProblem = <div/>
+    }
+
     return (
         <div className="Problem">
             <h1 className="Problem-title">{problemData.title}</h1>
@@ -296,8 +318,9 @@ export function Problem() {
                 {getEditor(problemData.codeLang, (value) => {
                     updateUserCode(value);
                 }, userData.currentCode)}
-                <SubmitButton onClick={onCodeSubmit}/>
+                <SubmitButton onClick={onCodeSubmit}/> {helpButton}
             </div>
+            {helpBox}
             <div className="Problem-error" dangerouslySetInnerHTML={{__html: errorText}}/>
             <div className="Problem-test-results">
                 <h3>Tests</h3>
@@ -306,11 +329,7 @@ export function Problem() {
                     {hiddenTestText}
                 </p>
             </div>
-            <HelpBox problemData={problemData} getUserData={() => userData} runTests={onCodeSubmit}/>
-            <button onClick={() => {
-                window.location.href = "/problem/" + problemData.nextProblemId;
-            }}>Next Problem
-            </button>
+            {nextProblem}
         </div>
     );
 }
@@ -384,12 +403,16 @@ function getUserData(id: string | undefined, userName: string | undefined) {
 
     return JSON.parse(userData) as UserData;
 }
-
 function SubmitButton({onClick}: { onClick: () => void }) {
     return (
-        <button onClick={() => {
-            onClick();
-        }}>Test Code</button>
+        <ThemeProvider theme={buttonTheme}>
+            <Button variant="contained"
+                    color="primary"
+                    onClick={onClick}
+                    className={"submitButton"}>
+                Test Code
+            </Button>
+        </ThemeProvider>
     );
 }
 

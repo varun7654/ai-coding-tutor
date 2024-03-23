@@ -2,9 +2,11 @@ import React, {useState} from "react";
 import {marked, ProblemData, UserData} from "./Problem";
 import DOMPurify from "dompurify";
 import {expireToken, getToken, isLoggedIn, logIn} from "../auth/AuthHelper";
+import {Button, ThemeProvider} from "@mui/material";
+import {buttonTheme} from "../App";
 
-export function HelpBox({problemData, getUserData, runTests}: { problemData: ProblemData, getUserData: () => UserData, runTests: () => void}) {
-    const [response, setResponse] = useState("");
+export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => UserData, runTests: () => void, response: string, setResponse: (response: string) => void):
+    {helpButton: React.JSX.Element, helpBox: React.JSX.Element} {
 
     function handleHelpRequest() {
         runTests();
@@ -59,14 +61,27 @@ export function HelpBox({problemData, getUserData, runTests}: { problemData: Pro
                 setResponse(DOMPurify.sanitize(marked.parse(json.response) as string));
             });
     }
+    let button = (
+        <ThemeProvider theme={buttonTheme}>
+            <Button variant="contained"
+                    color="secondary"
+                    onClick={handleHelpRequest}
 
-    return (
+                    className="helpButton">
+                I'm stuck!
+            </Button>
+        </ThemeProvider>
+    );
+
+    let helpBox = (
         <div className="AI-help-area">
-            <button onClick={() => {
-                handleHelpRequest();
-            }} className="Help Button">I'm Stuck
-            </button>
             <p className="Code-tutor-response" dangerouslySetInnerHTML={{__html: response}}/>
         </div>
     );
+
+
+    return {
+        helpButton: button,
+        helpBox: helpBox
+    }
 }

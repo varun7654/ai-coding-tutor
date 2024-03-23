@@ -61,7 +61,6 @@ function tokenizeFunctionSignature(signature: string) : StringLineNum[] {
         }
     }
 
-    console.log(tokens);
     // Filter out any empty tokens
     return tokens.filter(token => token.str !== "");
 }
@@ -224,14 +223,33 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
         let expectedFunctionSignature = problemData.solutionCode.split('{')[0];
         let expectedTokens = tokenizeFunctionSignature(expectedFunctionSignature);
 
+        console.log(tokens);
+        console.log(expectedTokens);
+
         for (let i = 0; i < tokens.length; i++) {
             if (tokens[i].str !== expectedTokens[i].str) {
+
+                let parseError = "Function signature does not match the expected signature. ";
+                if (i === 0) {
+                    parseError += "\nThe function signature should begin with `" + expectedTokens[i].str + "` but you have ";
+                    if (tokens[i] === undefined || tokens[i].str === "") {
+                        parseError += "nothing.";
+                    } else {
+                        parseError += "`" + tokens[i].str + "`.";
+                    }
+                } else {
+                    if (tokens[i] === undefined || tokens[i].str === "") {
+                        parseError += "Expected: `" + expectedTokens[i].str + "` but got nothing.";
+                    } else {
+                        parseError += "Expected: `" + expectedTokens[i].str + "` after `" + tokens.slice(0, i)
+                            .map(t => t.str).join(" ") + "` but got: `" + tokens[i].str + "`.";
+                    }
+                }
                 return {
                     testResults: [],
                     returnedResults: [],
                     expectedResults: getExpectedResults(problemData),
-                    parseError: "Function signature does not match the expected signature. " +
-                        "Expected: " + expectedFunctionSignature + " but got: " + functionSignature,
+                    parseError,
                     errorLine: tokens[i].lineNum,
                     runtimeError: "",
                     output: "",
