@@ -13,7 +13,7 @@
     "@react-buddy/palette-mui": "^5.0.1",
     "@testing-library/react": "^14.2.2",
     "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
+    "@types/jest": "^29.5.12",
     "@types/katex": "^0.16.7",
     "@types/node": "^16.18.83",
     "@types/react": "^18.2.69",
