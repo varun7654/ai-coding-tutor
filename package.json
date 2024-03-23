@@ -11,7 +11,7 @@
     "@nyariv/sandboxjs": "^0.8.23",
     "@react-buddy/ide-toolbox": "^2.4.0",
     "@react-buddy/palette-mui": "^5.0.1",
-    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.2.2",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
