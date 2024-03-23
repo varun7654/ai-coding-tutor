@@ -11,28 +11,27 @@ While we'll be using JavaScript, the concepts you'll learn are applicable to any
 We'll avoid going too deep into the language-specific details, and instead focus on the core concepts that are common to all programming languages.
 
 ## Prerequisites
-- No prior programming experience is required
-- Knowledge of algebra will be extremely helpful
+- No prior programming experience is required.
+- Knowledge of algebra will be extremely helpful.
   - A lot of our problems will build on the concepts of algebra, so having a good understanding of algebra will be very helpful.
   - You don't need to be an expert, but you should be comfortable with basic algebraic concepts like variables, functions, function notation, and function composition.
 
 ## What you'll learn
-- How to write javascript code
-- How to solve problems using code
-- How to think like a programmer
-- How to break down complex problems into smaller, more manageable parts
-- How to use code to solve real-world problems
-- How to use code to automate repetitive tasks
+- How to write javascript code.
+- How to solve problems using code.
+- How to think like a programmer.
+- How to break down complex problems into smaller, more manageable parts.
+- How to use code to solve real-world problems.
+- How to use code to automate repetitive tasks.
 
 ## How to use this course
-- Each problem will be presented as a challenge that you need to solve
-- You'll be given a problem statement, and you'll need to write a function that solves the problem
-- You'll be given a set of test cases that your function should pass
-  - Some of the test cases will be visible to you, but some will be hidden to keep you from specializing your solution to the visible test cases
-  - You should write your function so that it passes all the test cases
-  - You have unlimited attempts to solve each problem`
-- Feel free to skip around and work on the problems in any order you like
-- If you get stuck, press the "I'm stuck" button and an AI-powered tutor will analyze your code and give you a hint to help you get unstuck!
+- Each problem will be presented as a challenge that you need to solve.
+- You'll be given a problem statement, and you'll need to write a function that solves the problem.
+- You'll be given a set of test cases that your function should pass.
+  - Some of the test cases will be visible to you, while others will be hidden to prevent you from basing your solution on the visible test cases. You should write your function so that it passes all the test cases.
+  - You have unlimited attempts to solve each problem`.
+- Feel free to skip around and work on the problems in any order you like.
+- If you get stuck, press the "I'm stuck" button, and an AI-powered tutor will analyze your code and give you a hint to help get you unstuck!
 
 ## Let's get started!
 You're probably familiar with functions from algebra. 
