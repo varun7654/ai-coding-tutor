@@ -6,36 +6,30 @@ import DOMPurify from "dompurify";
 import {getEditor} from "./Editor";
 import {HelpBoxAndButton} from "./Help";
 import {useParams} from "react-router-dom";
-import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import {getUserName} from "../auth/AuthHelper";
 import {getExpectedResults, TestResult, TestResults, testUserCode} from "./codeRunner";
-import {Button, createTheme, Shadows, ThemeProvider} from "@mui/material";
+import {Button, ThemeProvider} from "@mui/material";
 import {buttonTheme, mutedButtonTheme} from "../App";
+import markedKatex from "marked-katex-extension";
 
 hljs.registerAliases([""], {languageName: "javascript"})
 export const marked = new Marked(
     markedHighlight({
-        async: false,
-        langPrefix: 'hljs lang-',
-        highlight: (code, lang, callback) => {
-            let highlighted = hljs.highlight(code, {language: lang});
-            return highlighted.value;
+        langPrefix: 'hljs language-',
+        highlight(code, lang, info) {
+            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+            return hljs.highlight(code, { language }).value;
         }
     })
 );
 
-marked.use({
-    renderer: {
-        text: function (text) {
-            return text.replace(/\$(.*?)\$/g, function (_, latex) {
-                return katex.renderToString(latex, {
-                    throwOnError: false
-                });
-            });
-        }
-    }
-});
+const options = {
+    throwOnError: false,
+    displayMode: false,
+};
+
+marked.use(markedKatex(options));
 
 function saveUserData(problemData: ProblemData, userData: UserData) {
     if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
