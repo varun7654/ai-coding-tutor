@@ -1,4 +1,4 @@
-# More on Functions 3
+# Multiple Inputs
 
 # Context
 Like in math, we can create a function that takes multiple input values and returns a single value.
@@ -130,8 +130,6 @@ f(1003, 123, -1256, 0);
 f(-28,4,12,-4);
 ```
 −6960
-
-# Hidden Test Cases
 
 # Next
 /intro/intro5
