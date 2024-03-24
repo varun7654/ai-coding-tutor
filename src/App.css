@@ -86,6 +86,16 @@ body {
     font-weight: bold;
 }
 
+.helpButton {
+    margin-top: 0.5em;
+    height: 2em;
+}
+
+.submitButton {
+    margin-top: 0.5em;
+    height: 2em;
+}
+
 code[class^="hljs-"] {
     background: #000;
 }
@@ -104,7 +114,7 @@ code {
     background-color: #282c34;
     color: #efe9e7;
     padding: 0.2em 0.4em;
-    font-size: 90%;
+    font-size: 80%;
     font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
     border-radius: 3px;
 }

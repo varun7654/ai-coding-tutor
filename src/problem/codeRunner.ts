@@ -18,7 +18,7 @@ export class TestResults {
     public errorLine: number = -1;
     public runtimeError: string = "";
     public output: string = "";
-    public ranSuccessfully: boolean = false;
+    public ranSuccessfully: boolean = true; // Prevents the user from seeing an error message on first load
 }
 
 class StringLineNum {
@@ -44,12 +44,20 @@ function tokenizeFunctionSignature(signature: string) : StringLineNum[] {
         if (tokenChars.includes(signature[i])) {
             if (bufferStartIndex !== i) {
                 tokens.push(new StringLineNum(signature.substring(bufferStartIndex, i), lineNum));
-                bufferStartIndex = i + 1;
+            }
+            // We also need to add the token character as a separate token.
+            // Don't add a token for a space character.
+            // Don't add a token for a new line character
+            // (but if we haven't seen a semicolon, on a line with content, add a token).
+            if (signature[i] !== ' ' && signature[i] !== '\n') {
+                tokens.push(new StringLineNum(signature[i], lineNum));
             }
 
             if (signature[i] === '\n') {
                 lineNum++;
             }
+
+            bufferStartIndex = i + 1;
         }
     }
 
@@ -102,6 +110,16 @@ function reformatStackTrace(result: Error, userCodeLineNumberBegin: number, user
     //result.stack += "\nNew Stack:\n" + stackTraceLines.join('\n');
     result.stack = stackTraceLines.join('\n');
     return errorLine;
+}
+
+function safeToString(expectedResult: any) {
+    if (expectedResult === undefined) {
+        return "undefined";
+    }
+    if (expectedResult === null) {
+        return "null";
+    }
+    return expectedResult.toString();
 }
 
 export function testUserCode(userData: UserData, problemData: ProblemData) : TestResults {
@@ -205,14 +223,33 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
         let expectedFunctionSignature = problemData.solutionCode.split('{')[0];
         let expectedTokens = tokenizeFunctionSignature(expectedFunctionSignature);
 
+        console.log(tokens);
+        console.log(expectedTokens);
+
         for (let i = 0; i < tokens.length; i++) {
             if (tokens[i].str !== expectedTokens[i].str) {
+
+                let parseError = "Function signature does not match the expected signature. ";
+                if (i === 0) {
+                    parseError += "\nThe function signature should begin with `" + expectedTokens[i].str + "` but you have ";
+                    if (tokens[i] === undefined || tokens[i].str === "") {
+                        parseError += "nothing.";
+                    } else {
+                        parseError += "`" + tokens[i].str + "`.";
+                    }
+                } else {
+                    if (tokens[i] === undefined || tokens[i].str === "") {
+                        parseError += "Expected: `" + expectedTokens[i].str + "` but got nothing.";
+                    } else {
+                        parseError += "Expected: `" + expectedTokens[i].str + "` after `" + tokens.slice(0, i)
+                            .map(t => t.str).join(" ") + "` but got: `" + tokens[i].str + "`.";
+                    }
+                }
                 return {
                     testResults: [],
                     returnedResults: [],
                     expectedResults: getExpectedResults(problemData),
-                    parseError: "Function signature does not match the expected signature. " +
-                        "Expected: " + expectedFunctionSignature + " but got: " + functionSignature,
+                    parseError,
                     errorLine: tokens[i].lineNum,
                     runtimeError: "",
                     output: "",
@@ -238,24 +275,15 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
 
     // Parse the solution code and replace the function name with a random name
     let solutionCode = problemData.solutionCode;
-    let functionName = tokenizeFunctionSignature(solutionCode.split('{')[0])[1].str;
-    let randomFunctionName = "function" + crypto.randomUUID().replace(/-/g, '');
-    solutionCode = solutionCode.replace(functionName, randomFunctionName);
     let resultsArrayName = "results" + crypto.randomUUID().replace(/-/g, '');
     let expectedResultsArrayName = "expectedResults" + crypto.randomUUID().replace(/-/g, '');
 
     let codeToRun = `
 let ${resultsArrayName} = [] || [];
 let ${expectedResultsArrayName} = [] || [];
-    
-${solutionCode}
     `;
 
     let userCodeLineNumberBegin = codeToRun.split('\n').length + 1;
-
-    codeToRun += `
-${userCode}
-    `;
 
     let userCodeLineNumberEnd = codeToRun.split('\n').length + 1;
 
@@ -272,7 +300,6 @@ ${userCode}
         let testSplitByLines = testFull.split('\n');
         let setupCode = testSplitByLines.slice(0, testSplitByLines.length - 1).join('\n');
         let getResult = testSplitByLines[testSplitByLines.length - 1];
-        let getExpectedResult = getResult.replace(functionName, randomFunctionName);
 
         codeToRun += `
         {
@@ -280,15 +307,21 @@ ${userCode}
             let result;
             {
                 ${setupCode}
-                try {
-                    result = ${getResult}
-                } catch (e) {
-                    result = e;
+                {
+${solutionCode}
+                    try {
+                        expected = ${getResult}
+                    } catch (e) {
+                        expected = e;
+                    }
                 }
-                try {
-                    expected = ${getExpectedResult}
-                } catch (e) {
-                    expected = e;
+                {
+${userCode}
+                    try {
+                        result = ${getResult}
+                    } catch (e) {
+                        result = e;
+                    }
                 }
             }
             ${resultsArrayName}.push(result);
@@ -330,14 +363,16 @@ ${userCode}
     }
 
     for (let i = 0; i < combinedTests.length; i++) {
-        if (expectedResultsArray[i] === undefined) {
+
+        if (i >= expectedResultsArray.length) {
             testResults.testResults.push(TestResult.NotRun);
             testResults.expectedResults.push("Unknown");
             testResults.returnedResults.push("Unknown");
             testResults.ranSuccessfully = false;
             continue;
         }
-        if (resultsArray[i] === undefined) {
+
+        if (i >= resultsArray.length) {
             testResults.testResults.push(TestResult.NotRun);
             testResults.expectedResults.push(expectedResultsArray[i].toString());
             testResults.returnedResults.push("Unknown");
@@ -360,7 +395,7 @@ ${userCode}
             testResults.ranSuccessfully = false;
             continue;
         } else {
-            testResults.expectedResults.push(expectedResult.toString());
+            testResults.expectedResults.push(safeToString(expectedResult));
         }
 
         if (result instanceof Error) {
@@ -373,7 +408,7 @@ ${userCode}
             testResults.ranSuccessfully = false;
             continue;
         } else {
-            testResults.returnedResults.push(result.toString());
+            testResults.returnedResults.push(safeToString(result));
         }
 
         if (result !== expectedResult) {
@@ -390,9 +425,6 @@ ${userCode}
 export function getExpectedResults(problemData: ProblemData) : string[] {
     // Parse the solution code and replace the function name with a random name
     let solutionCode = problemData.solutionCode;
-    let functionName = tokenizeFunctionSignature(solutionCode.split('{')[0])[1].str;
-    let randomFunctionName = "function" + crypto.randomUUID().replace(/-/g, '');
-    solutionCode = solutionCode.replace(functionName, randomFunctionName);
     let expectedResultsArrayName = "expectedResults" + crypto.randomUUID().replace(/-/g, '');
 
     let codeToRun = `
@@ -414,7 +446,6 @@ ${solutionCode}
         let testSplitByLines = testFull.split('\n');
         let setupCode = testSplitByLines.slice(0, testSplitByLines.length - 1).join('\n');
         let getResult = testSplitByLines[testSplitByLines.length - 1];
-        let getExpectedResult = getResult.replace(functionName, randomFunctionName);
 
         codeToRun += `
         {
@@ -423,7 +454,7 @@ ${solutionCode}
             {
                 ${setupCode}
                 try {
-                    expected = ${getExpectedResult}
+                    expected = ${getResult}
                 } catch (e) {
                     expected = e;
                 }
@@ -448,6 +479,6 @@ ${solutionCode}
         return [];
     }
 
-    return expectedResultsArray.map(result => result.toString());
+    return expectedResultsArray.map(result => safeToString(result));
 
 }

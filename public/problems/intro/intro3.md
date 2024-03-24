@@ -1,4 +1,4 @@
-# More on Functions 2
+# Constant Functions 2
 
 # Context
 In algebra, it would be weird to define a function that has no input value. In programming, it's not so weird, and we do it all the time. 

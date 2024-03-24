@@ -6,9 +6,50 @@ import {Problem} from "./problem/Problem";
 import Home from './Home';
 import LoginButton from "./auth/LoginButton";
 import LoginSuccess from "./auth/LoginSuccess";
+import {createTheme, Shadows} from "@mui/material";
 
 export const API_URL = "https://codehelp.api.dacubeking.com/";
 export const AUTH_API_URL = `${API_URL}auth`;
+
+export const buttonTheme = createTheme({
+    shadows: Array(25).fill("none") as Shadows,
+    palette: {
+        primary: {
+            main: "#0062cb",
+        },
+        secondary: {
+            main: "#2B2D42",
+        },
+    },
+    typography: {
+        fontFamily: "Roboto",
+        fontSize: 16,
+        button: {
+            fontWeight: "bold",
+            color: "blue",
+        }
+    }
+});
+
+export const mutedButtonTheme = createTheme({
+    shadows: Array(25).fill("none") as Shadows,
+    palette: {
+        primary: {
+            main: "#626c80",
+        },
+        secondary: {
+            main: "#49CA67",
+        },
+    },
+    typography: {
+        fontFamily: "Roboto",
+        fontSize: 16,
+        button: {
+            fontWeight: "bold",
+            color: "blue",
+        }
+    }
+});
 
 
 export function Header() {

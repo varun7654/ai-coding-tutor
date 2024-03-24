@@ -4,42 +4,37 @@ import hljs from "highlight.js/lib/common";
 import React, {useEffect, useState} from "react";
 import DOMPurify from "dompurify";
 import {getEditor} from "./Editor";
-import {HelpBox} from "./Help";
+import {HelpBoxAndButton} from "./Help";
 import {useParams} from "react-router-dom";
-import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import {getUserName} from "../auth/AuthHelper";
 import {getExpectedResults, TestResult, TestResults, testUserCode} from "./codeRunner";
+import {Button, ThemeProvider} from "@mui/material";
+import {buttonTheme, mutedButtonTheme} from "../App";
+import markedKatex from "marked-katex-extension";
 
 hljs.registerAliases([""], {languageName: "javascript"})
 export const marked = new Marked(
     markedHighlight({
-        async: false,
-        langPrefix: 'hljs lang-',
-        highlight: (code, lang, callback) => {
-            let highlighted = hljs.highlight(code, {language: lang});
-            return highlighted.value;
+        langPrefix: 'hljs language-',
+        highlight(code, lang, info) {
+            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+            return hljs.highlight(code, { language }).value;
         }
     })
 );
 
-marked.use({
-    renderer: {
-        text: function (text) {
-            return text.replace(/\$(.*?)\$/g, function (_, latex) {
-                return katex.renderToString(latex, {
-                    throwOnError: false
-                });
-            });
-        }
-    }
-});
+const options = {
+    throwOnError: false,
+    displayMode: false,
+};
+
+marked.use(markedKatex(options));
 
 function saveUserData(problemData: ProblemData, userData: UserData) {
     if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
         console.error("User data is being saved with no code");
     }
-    console.log(getUserName())
     localStorage.setItem(getStorageKey(problemData.id, getUserName()), JSON.stringify(userData));
 }
 
@@ -47,6 +42,7 @@ export function Problem() {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
     const {"*": id} = useParams();
     const [userData, setUserData] = useState(getUserData(id, getUserName()));
+    const [helpResponse, setHelpResponse] = useState("");
 
     function onCodeSubmit() {
         onSubmission(problemData, userData, setUserData);
@@ -194,7 +190,9 @@ export function Problem() {
                     // set the template data if the user has not saved any data
                     if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
                         console.log("First time loading problem, setting template data");
-                        userData.currentCode = displayAbove + "\n\n" + displayBelow;
+                        if (displayAbove !== "" && displayBelow !== "") {
+                            userData.currentCode = displayAbove + "\n\t\n" + displayBelow;
+                        }
                     }
 
                     if (userData.testResults === undefined || userData.testResults === null || userData.testResults.expectedResults.length === 0) {
@@ -267,9 +265,10 @@ export function Problem() {
     }
 
     let errorText: string = ""
+    let problemSolved = userData.testResults.testResults.every(result => result === TestResult.Passed) &&
+        userData.testResults.testResults.length === userData.testResults.expectedResults.length;
 
     if (!userData.testResults.ranSuccessfully) {
-
         if (userData.testResults.parseError !== "") {
             errorText += "We couldn't run your code due to a syntax error on line " + userData.testResults.errorLine + ".\n";
             errorText += indentText(userData.testResults.parseError, 1);
@@ -282,13 +281,30 @@ export function Problem() {
             }
             errorText += indentText(userData.testResults.runtimeError, 1);
         } else {
-
+            console.log(userData.testResults);
             errorText += "No error message was provided."
         }
     }
 
     errorText = errorText.replace(/\n/g, "<br>");
     errorText = DOMPurify.sanitize(errorText);
+
+    let {helpButton, helpBox} =
+        HelpBoxAndButton(problemData, () => userData, onCodeSubmit, helpResponse, setHelpResponse);
+
+    let nextProblem;
+    if (problemData.nextProblemId !== "" && problemData.nextProblemId.toLowerCase() !== "nothing") {
+        nextProblem = <ThemeProvider theme={mutedButtonTheme}>
+            <Button variant="contained"
+                    color={problemSolved ? "secondary" : "primary"}
+                    href={"/problem/" + problemData.nextProblemId}
+                    className={"nextProblemButton"}>
+                Next Problem
+            </Button>
+        </ThemeProvider>
+    } else {
+        nextProblem = <div/>
+    }
 
     return (
         <div className="Problem">
@@ -298,8 +314,9 @@ export function Problem() {
                 {getEditor(problemData.codeLang, (value) => {
                     updateUserCode(value);
                 }, userData.currentCode)}
-                <SubmitButton onClick={onCodeSubmit}/>
+                <SubmitButton onClick={onCodeSubmit}/> {helpButton}
             </div>
+            {helpBox}
             <div className="Problem-error" dangerouslySetInnerHTML={{__html: errorText}}/>
             <div className="Problem-test-results">
                 <h3>Tests</h3>
@@ -308,11 +325,7 @@ export function Problem() {
                     {hiddenTestText}
                 </p>
             </div>
-            <HelpBox problemData={problemData} getUserData={() => userData} runTests={onCodeSubmit}/>
-            <button onClick={() => {
-                window.location.href = "/problem/" + problemData.nextProblemId;
-            }}>Next Problem
-            </button>
+            {nextProblem}
         </div>
     );
 }
@@ -386,12 +399,16 @@ function getUserData(id: string | undefined, userName: string | undefined) {
 
     return JSON.parse(userData) as UserData;
 }
-
 function SubmitButton({onClick}: { onClick: () => void }) {
     return (
-        <button onClick={() => {
-            onClick();
-        }}>Test Code</button>
+        <ThemeProvider theme={buttonTheme}>
+            <Button variant="contained"
+                    color="primary"
+                    onClick={onClick}
+                    className={"submitButton"}>
+                Test Code
+            </Button>
+        </ThemeProvider>
     );
 }
 

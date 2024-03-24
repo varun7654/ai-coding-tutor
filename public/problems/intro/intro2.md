@@ -1,4 +1,4 @@
-# More on Functions 1
+# Constant Functions
 
 # Context
 In algebra, we can define a function that returns a constant value.
