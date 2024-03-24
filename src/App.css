@@ -26,9 +26,14 @@ body {
     margin-top: 0;
     padding-top: 0;
     padding-bottom: 10em;
-    justify-content: left;
-    padding-left: 2em;
+    padding-left: 1em;
+    justify-content: center;
+    align-items: center;
     text-align: left;
+    min-height: 100vh;
+    width: 95%;
+    max-width: 80em;
+    flex-direction: column;
 }
 
 .Problem-title {
@@ -57,7 +62,7 @@ body {
     padding-bottom: 0;
     padding-left: 0;
     width: 95%;
-    max-width: 50em;
+    max-width: 70em;
 }
 
 .Problem-solution {
@@ -78,21 +83,23 @@ body {
     background: #49CA67;
     color: #1C1F23;
     font-weight: bold;
+    width: 100%;
+    max-width: 50em
 }
 
 .Test-failed {
     background: #EF4547;
     color: #1C1F23;
     font-weight: bold;
+    width: 100%;
+    max-width: 50em
 }
 
 .helpButton {
-    margin-top: 0.5em;
     height: 2em;
 }
 
 .submitButton {
-    margin-top: 0.5em;
     height: 2em;
 }
 

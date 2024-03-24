@@ -66,8 +66,8 @@ export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => Us
             <Button variant="contained"
                     color="secondary"
                     onClick={handleHelpRequest}
-
-                    className="helpButton">
+                    className="helpButton"
+                    style={{marginTop: "0.25em"}}>
                 I'm stuck!
             </Button>
         </ThemeProvider>
