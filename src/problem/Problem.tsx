@@ -405,7 +405,8 @@ function SubmitButton({onClick}: { onClick: () => void }) {
             <Button variant="contained"
                     color="primary"
                     onClick={onClick}
-                    className={"submitButton"}>
+                    className={"submitButton"}
+                    style={{marginTop: "0.25em"}}>
                 Test Code
             </Button>
         </ThemeProvider>
