@@ -5,12 +5,16 @@ import {expireToken, getToken, isLoggedIn, logIn} from "../auth/AuthHelper";
 import {Button, ThemeProvider} from "@mui/material";
 import {buttonTheme} from "../App";
 
+
+export const LOADING_MESSAGE = "Requesting help from the AI tutor...";
+
 export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => UserData, runTests: () => void, response: string, setResponse: (response: string) => void):
     {helpButton: React.JSX.Element, helpBox: React.JSX.Element} {
 
-    function handleHelpRequest() {
-        runTests();
+    function handleHelpRequest(event: React.MouseEvent<HTMLButtonElement>) {
+        event.currentTarget.setAttribute("disabled", "true");
 
+        runTests();
         if (!isLoggedIn()) {
             logIn();
             setResponse("You must be logged in to use the AI tutor. Please log in and try again.");
@@ -18,7 +22,8 @@ export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => Us
         }
 
         let token = getToken();
-
+        let target = event.currentTarget;
+        setResponse(LOADING_MESSAGE);
         fetch("https://codehelp.api.dacubeking.com/ai-tutor", {
             method: "POST",
             headers: {
@@ -59,6 +64,12 @@ export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => Us
                 console.log(json.response);
                 console.log(DOMPurify.sanitize(marked.parse(json.response) as string));
                 setResponse(DOMPurify.sanitize(marked.parse(json.response) as string));
+                target.removeAttribute("disabled");
+            })
+            .catch((error) => {
+                console.error(error);
+                setResponse("An error occurred while using the AI tutor. Please try again later.");
+                target.removeAttribute("disabled");
             });
     }
     let button = (
