@@ -1,5 +1,4 @@
 import {ProblemData, UserData} from "./Problem";
-import assert from "node:assert";
 
 const functionHeaderOffset = 2;
 
@@ -11,7 +10,7 @@ export enum TestResult {
 }
 
 export class TestResults {
-    public testResults: TestResult[]  = [];
+    public testResults: TestResult[] = [];
     public returnedResults: string[] = [];
     public expectedResults: string[] = [];
     public parseError: string = "";
@@ -32,7 +31,7 @@ class StringLineNum {
 }
 
 // Function to tokenize a JavaScript function signature
-function tokenizeFunctionSignature(signature: string) : StringLineNum[] {
+function tokenizeFunctionSignature(signature: string): StringLineNum[] {
     let tokens: StringLineNum[] = [];
     let lineNum = 1;
 
@@ -122,7 +121,7 @@ function safeToString(expectedResult: any) {
     return expectedResult.toString();
 }
 
-export function testUserCode(userData: UserData, problemData: ProblemData) : TestResults {
+export function testUserCode(userData: UserData, problemData: ProblemData): TestResults {
     let userCode = userData.currentCode;
 
     // Check that we have balanced brackets
@@ -138,7 +137,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData) : Tes
             }
 
             if (userCode[i] === '{') {
-                if (foundFirstBracket && brackets === 0){
+                if (foundFirstBracket && brackets === 0) {
                     return {
                         testResults: [],
                         expectedResults: getExpectedResults(problemData),
@@ -422,7 +421,7 @@ ${userCode}
 }
 
 
-export function getExpectedResults(problemData: ProblemData) : string[] {
+export function getExpectedResults(problemData: ProblemData): string[] {
     // Parse the solution code and replace the function name with a random name
     let solutionCode = problemData.solutionCode;
     let expectedResultsArrayName = "expectedResults" + crypto.randomUUID().replace(/-/g, '');

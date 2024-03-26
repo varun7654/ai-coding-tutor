@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React from "react";
 import {marked, ProblemData, UserData} from "./Problem";
 import DOMPurify from "dompurify";
 import {expireToken, getToken, isLoggedIn, logIn} from "../auth/AuthHelper";
@@ -9,7 +9,7 @@ import {buttonTheme} from "../App";
 export const LOADING_MESSAGE = "Requesting help from the AI tutor...";
 
 export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => UserData, runTests: () => void, response: string, setResponse: (response: string) => void):
-    {helpButton: React.JSX.Element, helpBox: React.JSX.Element} {
+    { helpButton: React.JSX.Element, helpBox: React.JSX.Element } {
 
     function handleHelpRequest(event: React.MouseEvent<HTMLButtonElement>) {
         event.currentTarget.setAttribute("disabled", "true");
@@ -72,6 +72,7 @@ export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => Us
                 target.removeAttribute("disabled");
             });
     }
+
     let button = (
         <ThemeProvider theme={buttonTheme}>
             <Button variant="contained"

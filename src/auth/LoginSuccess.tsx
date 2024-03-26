@@ -1,9 +1,8 @@
 import {useSearchParams} from "react-router-dom";
 import {useEffect} from "react";
 import {AUTH_API_URL} from "../App";
-import {getToken} from "./AuthHelper";
 
-export default function LoginSuccess(){
+export default function LoginSuccess() {
     const [searchParams, setSearchParams] = useSearchParams();
     useEffect(() => {
         let code = searchParams.get("code");
@@ -18,7 +17,7 @@ export default function LoginSuccess(){
                 },
                 body: JSON.stringify({code})
             })
-            .then(response => response.json())
+                .then(response => response.json())
                 .then(result => {
                     if (result.token) {
                         console.log("Finished logging in. Token: " + result.token);
@@ -42,7 +41,6 @@ export default function LoginSuccess(){
         }
     }, []);
 
-    
 
     return (
         <div>
