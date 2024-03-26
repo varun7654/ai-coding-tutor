@@ -1,10 +1,5 @@
 import {Fragment} from "react";
-import {
-    Category,
-    Component,
-    Variant,
-    Palette,
-} from "@react-buddy/ide-toolbox";
+import {Category, Component, Palette, Variant,} from "@react-buddy/ide-toolbox";
 import MUIPalette from "@react-buddy/palette-mui";
 
 export const PaletteTree = () => (

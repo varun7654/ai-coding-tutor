@@ -1,9 +1,8 @@
 import {useEffect, useState} from "react";
 import {AUTH_API_URL} from "../App";
 import {getToken, getUserName, isLoggedIn} from "./AuthHelper";
-import {Button, createTheme, Shadows, ThemeProvider} from "@mui/material";
-import { ReactComponent as GithubLogo } from "./assets/github-logo/github-mark-white.svg";
-import { Tooltip } from "@mui/material";
+import {Button, createTheme, Shadows, ThemeProvider, Tooltip} from "@mui/material";
+import {ReactComponent as GithubLogo} from "./assets/github-logo/github-mark-white.svg";
 
 const theme = createTheme({
     shadows: Array(25).fill("none") as Shadows,
@@ -31,7 +30,7 @@ export default function LoginButton() {
                 }
             })
                 .then(response => response.json())
-                .then(({login, id, name }) => {
+                .then(({login, id, name}) => {
                     let userData = JSON.stringify({login, id, name});
                     if (localStorage.getItem("userData") !== userData && login !== undefined && id !== undefined && name !== undefined) {
                         localStorage.setItem("userData", userData);
@@ -54,7 +53,7 @@ export default function LoginButton() {
         // return a rounded button with the github logo and "Sign in with GitHub"
         return <ThemeProvider theme={theme}>
             <Button variant="contained" color="primary" onClick={logIn}>
-                <GithubLogo style={{width: '2em', height: '2em', paddingRight:"1em"}}/> Sign in with GitHub
+                <GithubLogo style={{width: '2em', height: '2em', paddingRight: "1em"}}/> Sign in with GitHub
             </Button>
         </ThemeProvider>
 
@@ -67,7 +66,7 @@ export default function LoginButton() {
                         color="secondary"
                         onClick={logout}
                         fullWidth={false}>
-                    <GithubLogo style={{width: '2em', height: '2em', paddingRight:"1em"}}/> {loggedInText}
+                    <GithubLogo style={{width: '2em', height: '2em', paddingRight: "1em"}}/> {loggedInText}
                 </Button>
             </Tooltip>
         </ThemeProvider>

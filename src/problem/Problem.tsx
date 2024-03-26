@@ -19,7 +19,7 @@ export const marked = new Marked(
         langPrefix: 'hljs language-',
         highlight(code, lang, info) {
             const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-            return hljs.highlight(code, { language }).value;
+            return hljs.highlight(code, {language}).value;
         }
     })
 );
@@ -399,6 +399,7 @@ function getUserData(id: string | undefined, userName: string | undefined) {
 
     return JSON.parse(userData) as UserData;
 }
+
 function SubmitButton({onClick}: { onClick: () => void }) {
     return (
         <ThemeProvider theme={buttonTheme}>

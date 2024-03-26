@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import "./index.css"
-import {Header} from "./App";
 import {Link} from "react-router-dom"; // Import Link from react-router-dom
 
 class ProblemData {
-    problemName : string = "";
+    problemName: string = "";
     id: string = "";
 }
 
@@ -40,4 +39,5 @@ function Home() {
         </div>
     )
 }
+
 export default Home;
