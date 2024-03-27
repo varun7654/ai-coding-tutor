@@ -64,7 +64,7 @@ function tokenizeFunctionSignature(signature: string): StringLineNum[] {
     return tokens.filter(token => token.str !== "");
 }
 
-function reformatStackTrace(result: Error, userCodeLineNumberBegin: number, userCodeLineNumberEnd: number) {
+function reformatStackTrace(result: Error, userCodeLineNumbersBegin: number[], userCodeLineNumbersEnd: number[]) {
     let stackTrace = result.stack;
     if (stackTrace === undefined) {
         stackTrace = "";
@@ -74,6 +74,7 @@ function reformatStackTrace(result: Error, userCodeLineNumberBegin: number, user
     for (let j = 0; j < stackTraceLines.length; j++) {
         let thisLine = stackTraceLines[j].trim();
         if (thisLine.startsWith("at testUserCode") || thisLine.startsWith("at Function") || thisLine.startsWith("at eval")) {
+            console.log("Discarding: " + thisLine);
             stackTraceLines = stackTraceLines.slice(0, j);
             break;
         }
@@ -93,9 +94,22 @@ function reformatStackTrace(result: Error, userCodeLineNumberBegin: number, user
         let thisLine = stackTraceLines[j].trim();
         let matches = thisLine.match(/(\d+):(\d+)/);
         if (matches !== null) {
-            let lineNumber = parseInt(matches[1]); // Retrieve the line number
-            if (lineNumber >= userCodeLineNumberBegin && lineNumber <= userCodeLineNumberEnd) {
-                let newLineNumber = lineNumber - userCodeLineNumberBegin - functionHeaderOffset + 1;
+            let lineNumber = parseInt(matches[1]) - functionHeaderOffset; // Retrieve the line number
+
+            let userCodeLineNumberBegin = -1;
+            let userCodeLineNumberEnd = -1;
+
+            for (let i = 0; i < userCodeLineNumbersBegin.length; i++) {
+                if (lineNumber >= userCodeLineNumbersBegin[i] && lineNumber <= userCodeLineNumbersEnd[i]) {
+                    userCodeLineNumberBegin = userCodeLineNumbersBegin[i];
+                    userCodeLineNumberEnd = userCodeLineNumbersEnd[i];
+                    break;
+                }
+            }
+            
+
+            if (userCodeLineNumberBegin !== -1 && userCodeLineNumberEnd !== -1) {
+                let newLineNumber = lineNumber - userCodeLineNumberBegin + 1;
                 let columnNumber = parseInt(matches[2]); // Retrieve the column number
                 let newLine = `${newLineNumber}:${columnNumber}`; // Construct the new line with adjusted line number
                 stackTraceLines[j] = thisLine.replace(matches[0], newLine); // Replace the entire matched portion with the new line
@@ -279,9 +293,9 @@ let ${resultsArrayName} = [] || [];
 let ${expectedResultsArrayName} = [] || [];
     `;
 
-    let userCodeLineNumberBegin = codeToRun.split('\n').length + 1;
+    let userCodeLineNumbersBegin: number[] = [];
 
-    let userCodeLineNumberEnd = codeToRun.split('\n').length + 1;
+    let userCodeLineNumbersEnd: number[] = [];
 
     let combinedTests = problemData.tests.concat(problemData.hiddenTests);
 
@@ -312,7 +326,12 @@ ${solutionCode}
                     }
                 }
                 {
-${userCode}
+                `;
+        userCodeLineNumbersBegin.push(codeToRun.split('\n').length);
+        codeToRun += userCode;
+        userCodeLineNumbersEnd.push(codeToRun.split('\n').length);
+
+        codeToRun += `
                     try {
                         result = ${getResult}
                     } catch (e) {
@@ -350,7 +369,7 @@ ${userCode}
         console.error("Failed to run the solution: " + e);
         testResults.expectedResults = getExpectedResults(problemData);
         if (e instanceof Error) {
-            testResults.errorLine = reformatStackTrace(e, userCodeLineNumberBegin, userCodeLineNumberEnd);
+            testResults.errorLine = reformatStackTrace(e, userCodeLineNumbersBegin, userCodeLineNumbersEnd);
             console.log(e.stack);
             testResults.runtimeError = e.stack as string;
         } else {
@@ -398,7 +417,7 @@ ${userCode}
             testResults.returnedResults.push("Error");
             testResults.testResults.push(TestResult.Exception);
             // End the stack trace at the user's code
-            testResults.errorLine = reformatStackTrace(result, userCodeLineNumberBegin, userCodeLineNumberEnd);
+            testResults.errorLine = reformatStackTrace(result, userCodeLineNumbersBegin, userCodeLineNumbersEnd);
 
             testResults.runtimeError = result.stack as string;
             testResults.ranSuccessfully = false;
