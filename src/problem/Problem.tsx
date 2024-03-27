@@ -49,7 +49,7 @@ export function Problem() {
     }
 
     useEffect(() => {
-        function extractTestCases(tokens: Token[], tests: string[]) {
+        function extractTestCases(tokens: Token[], tests: string[], testsDisplay: string[]) {
             // Tests are formatted as a list of functions in a code block with the expected result below it
             while (tokens.length > 0) {
                 absorbWhitespace(tokens);
@@ -57,33 +57,48 @@ export function Problem() {
                 let test = tokens.shift() as Tokens.Code;
 
                 absorbWhitespace(tokens);
+                let repeatTimes = 1;
+                let displayAs = "";
+
                 // @ts-ignore - ts seems to not believe that type could be paragraph
                 if (tokens.length === 0 || tokens[0].type === "paragraph") {
-                    let str = (tokens.shift() as Tokens.Paragraph).text.trim().toLowerCase(); // Remove the expected result (not used anymore)
+                    let str = (tokens.shift() as Tokens.Paragraph).text.trim(); // Remove the expected result (not used anymore)
                     // check if it begins with "repeat =" or "repeat="
-                    if (str.startsWith("repeat")) {
-                        if (str.startsWith("repeat =")) {
-                            str = str.substring(8);
-                        } else if (str.startsWith("repeat=")) {
-                            str = str.substring(7);
-                        } else {
-                            console.error("Failed to parse repeat value: " + str);
-                        }
+                    let metaData = str.split(",").map(s => s.trim());
 
-                        let num = parseInt(str);
-                        if (isNaN(num)) {
-                            console.error("Failed to parse repeat value: " + str);
-                        } else {
-                            for (let i = 0; i < num - 1; i++) { // Add the test case the number of times specified (minus 1 to account for the original)
-                                tests.push(test.text);
+                    for (let str of metaData) {
+                        let split = str.split("=").map(s => s.trim());
+                        if (split.length !== 2) {
+                            console.error("Failed to parse metadata: " + str);
+                            continue;
+                        }
+                        let key = split[0].toLowerCase();
+                        let value = split[1];
+
+                        if (key === "repeat") {
+                            let num = parseInt(value);
+                            if (isNaN(num)) {
+                                console.error("Failed to parse repeat value: " + value);
+                            } else {
+                                repeatTimes = num;
                             }
+                        } else if (key === "displayas") {
+                            displayAs = value;
                         }
+
                     }
-
-
                 }
-
-                tests.push(test.text);
+                if (displayAs === "") {
+                    displayAs = test.text.trim();
+                    // Remove the last ; if it exists
+                    if (displayAs.endsWith(";")) {
+                        displayAs = displayAs.substring(0, displayAs.length - 1);
+                    }
+                }
+                for (let i = 0; i < repeatTimes; i++) {
+                    tests.push(test.text);
+                    testsDisplay.push(displayAs);
+                }
             }
         }
 
@@ -163,11 +178,13 @@ export function Problem() {
 
                     removeNextHeading(tokens); // Remove the tests heading
                     let tests: string[] = [];
-                    extractTestCases(tokens, tests);
+                    let testsDisplay: string[] = [];
+                    extractTestCases(tokens, tests, testsDisplay);
 
                     removeNextHeading(tokens); // Remove the hidden tests heading
                     let hiddenTests: string[] = [];
-                    extractTestCases(tokens, hiddenTests);
+                    let hiddenTestsDisplay: string[] = [];
+                    extractTestCases(tokens, hiddenTests, hiddenTestsDisplay);
 
                     removeNextHeading(tokens); // Remove the hidden tests heading
                     let nextProblemId = (tokens.shift() as Tokens.Paragraph).text;
@@ -178,7 +195,9 @@ export function Problem() {
                         preProblemDescription,
                         description,
                         tests,
+                        testsDisplay,
                         hiddenTests,
+                        hiddenTestsDisplay,
                         displayAbove,
                         displayBelow,
                         solution,
@@ -222,17 +241,11 @@ export function Problem() {
         }
     }
 
-    let hljsLang = problemData.codeLang;
-
-    if (hljs.getLanguage(hljsLang) === undefined) {
-        hljsLang = "javascript";
-    }
-
     let descParsed = DOMPurify.sanitize(marked.parse(problemData.preProblemDescription + "\n\n" + problemData.description) as string);
 
     let testsDisplay = [];
     for (let i = 0; i < problemData.tests.length; i++) {
-        testsDisplay.push(getTestElement(problemData.tests[i],
+        testsDisplay.push(getTestElement(problemData.testsDisplay[i],
             userData.testResults.expectedResults[i],
             userData.testResults.returnedResults[i],
             userData.testResults.testResults[i]));
@@ -338,7 +351,7 @@ function getTestElement(test: string, expectedResult: string, actualResult: stri
     }
     return (
         <p className={"Test-" + resultText.toLowerCase()}>
-            {test} {"->"} {expectedResult} : {resultText}
+            {test} {"➔"} {expectedResult} : {resultText}
         </p>
     );
 }
@@ -355,7 +368,9 @@ export class ProblemData {
     preProblemDescription: string = "";
     description: string = "";
     tests: string[] = [];
+    testsDisplay: string[] = [];
     hiddenTests: string[] = []
+    hiddenTestsDisplay: string[] = [];
     displayAbove: string = "";
     displayBelow: string = "";
     solution: string = "";
