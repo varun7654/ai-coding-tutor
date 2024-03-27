@@ -11,7 +11,7 @@
 
 .welcome-message {
     color: #333;
-    font-size: 24px;
+    font-size: 50px;
     margin-bottom: 20px;
 }
 
@@ -26,6 +26,7 @@
 .custom-header {
     font-weight: bold;
     text-transform: uppercase;
+
 }
 
 .custom-link {
@@ -34,4 +35,19 @@
     padding: 10px 20px;
     border-radius: 5px;
     text-decoration: none;
+}
+.content-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.main-content {
+    width: 70%;
+    padding-left: 20px; /* adjust this value as needed */
+    }
+
+.explanation {
+    width: 25%;
+    padding: 20px;
+    border-left: 1px solid #ccc;
 }
