@@ -126,14 +126,14 @@ export function Problem() {
                     }
 
                     // Collect everything under the description heading
-                    removeNextHeading(tokens); // Remove the description heading
+                    removeNextHeading(tokens, "description"); // Remove the description heading
 
                     let description = "";
                     while (tokens.length > 0 && (tokens[0].type !== "heading" || (tokens[0] as Tokens.Heading).depth > 1)) {
                         description += ((tokens.shift() as Token).raw);
                     }
 
-                    removeNextHeading(tokens); // Remove the problem heading
+                    removeNextHeading(tokens, "Problem"); // Remove the problem heading
                     if (tokens[0].type !== "code") {
                         console.error("Problem Parse: No code block found after problem heading. If no template code is needed, please use a code block with no content (with the correct language).");
                     }
@@ -164,7 +164,7 @@ export function Problem() {
                     }
 
 
-                    removeNextHeading(tokens); // Remove the solution heading
+                    removeNextHeading(tokens, "Solution"); // Remove the solution heading
                     absorbWhitespace(tokens);
                     let solution = "";
                     let solutionCode = "";
@@ -176,18 +176,24 @@ export function Problem() {
                         solution += ((tokens.shift() as Token).raw);
                     }
 
-                    removeNextHeading(tokens); // Remove the tests heading
+                    removeNextHeading(tokens, "Test Cases"); // Remove the tests heading
                     let tests: string[] = [];
                     let testsDisplay: string[] = [];
                     extractTestCases(tokens, tests, testsDisplay);
 
-                    removeNextHeading(tokens); // Remove the hidden tests heading
+                    removeNextHeading(tokens, "Hidden Test Cases"); // Remove the hidden tests heading
                     let hiddenTests: string[] = [];
                     let hiddenTestsDisplay: string[] = [];
                     extractTestCases(tokens, hiddenTests, hiddenTestsDisplay);
 
-                    removeNextHeading(tokens); // Remove the hidden tests heading
-                    let nextProblemId = (tokens.shift() as Tokens.Paragraph).text;
+                    removeNextHeading(tokens, "Next");
+                    let nextProblemId;
+                    if (tokens.length === 0 || tokens[0].type !== "paragraph") {
+                        nextProblemId = "nothing";
+                    } else {
+                        nextProblemId = (tokens.shift() as Tokens.Paragraph).text;
+                    }
+
 
                     let problemData = {
                         id,
@@ -460,8 +466,17 @@ function onSubmission(problemData: ProblemData, userData: UserData, setUserData:
     saveUserData(problemData, newUserData);
 }
 
-function removeNextHeading(tokens: Token[]) {
-    removeNextType(tokens, "heading");
+function removeNextHeading(tokens: Token[], expectedText: string) {
+    removeTillNextType(tokens, "heading");
+    if (tokens.length === 0) {
+        new Error("Problem Parse: Expected a heading with text: " + expectedText);
+        return;
+    } else {
+        let heading = tokens.shift() as Tokens.Heading;
+        if (heading.text.trim().toLowerCase() === expectedText.trim().toLowerCase()) {
+            new Error("Problem Parse: Expected a heading with text: " + expectedText + " but got: " + heading.text);
+        }
+    }
 }
 
 function removeTillNextType(tokens: Token[], type: string) {
