@@ -131,6 +131,7 @@ code {
 }
 
 .wecode-title {
-    font-size: 50px; /* adjust this value to change the size */
-    color: #FFC300; /* adjust this value to change the color */
+    font-size: 1.5em;
+    text-decoration: none;
+    color: #FFC300;
 }
