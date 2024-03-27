@@ -130,3 +130,7 @@ code {
     display: none;
 }
 
+.wecode-title {
+    font-size: 50px; /* adjust this value to change the size */
+    color: #FFC300; /* adjust this value to change the color */
+}

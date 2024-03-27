@@ -6,15 +6,15 @@ Binary Search Trees (BST) are a fundamental data structure in computer science. 
 ## Example 1
 Consider a BST with the following nodes: 8, 3, 10, 1, 6, 14, 4, 7, 13. The BST would look like this:
 
-\`\`\`
-8
-/ \\
-3  10
+```
+   8
+   / \\
+  3  10
 / \\   \\
 1   6  14
 / \\  /
 4  7 13
-\`\`\`
+```
 
 A common traversal method is the in-order traversal, which visits the nodes in ascending order. The in-order traversal for this BST would be: 1, 3, 4, 6, 7, 8, 10, 13, 14.
 
@@ -23,14 +23,14 @@ A common traversal method is the in-order traversal, which visits the nodes in a
 Write a function that performs an in-order traversal of a BST. The function should take the root of the BST as input and return an array of the nodes in ascending order.
 
 # Problem
-\`\`\`javascript
+```javascript
 function inOrderTraversal(root) {
 // Your code here
 }
-\`\`\`
+```
 
 # Solution
-\`\`\`javascript
+```javascript
 function inOrderTraversal(root) {
 let result = [];
 function traverse(node) {
@@ -41,10 +41,16 @@ if (node.right) traverse(node.right);
 traverse(root);
 return result;
 }
-\`\`\`
+```
 
 # Test Cases
-\`\`\`javascript
+```javascript
+class TreeNode {
+constructor(val) {
+    this.val = val;
+        this.left = this.right = null;
+    }
+}
 let root = new TreeNode(8);
 root.left = new TreeNode(3);
 root.right = new TreeNode(10);
@@ -55,18 +61,17 @@ root.left.right.left = new TreeNode(4);
 root.left.right.right = new TreeNode(7);
 root.right.right.left = new TreeNode(13);
 inOrderTraversal(root);
-\`\`\`
-Expected output: [1, 3, 4, 6, 7, 8, 10, 13, 14]
-
+```
+display = 
 # Hidden Test Cases
-\`\`\`javascript
+```javascript
 let random = Math.floor(Math.random() * 20) - 10;
 inOrderTraversal(random);
-\`\`\`
+```
 repeat=25
 
 # Next
-Try implementing other BST traversal methods, such as pre-order and post-order traversal.
+
 
 # Tags
 Binary Search Tree, Traversal, Medium
