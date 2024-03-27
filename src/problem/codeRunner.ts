@@ -222,9 +222,6 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
         let expectedFunctionSignature = problemData.solutionCode.split('{')[0];
         let expectedTokens = tokenizeFunctionSignature(expectedFunctionSignature);
 
-        console.log(tokens);
-        console.log(expectedTokens);
-
         for (let i = 0; i < tokens.length; i++) {
             if (tokens[i].str !== expectedTokens[i].str) {
 
