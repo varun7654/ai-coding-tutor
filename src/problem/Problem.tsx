@@ -234,6 +234,7 @@ export function Problem() {
     for (let i = 0; i < problemData.tests.length; i++) {
         testsDisplay.push(getTestElement(problemData.tests[i],
             userData.testResults.expectedResults[i],
+            userData.testResults.returnedResults[i],
             userData.testResults.testResults[i]));
     }
 
@@ -330,8 +331,11 @@ export function Problem() {
     );
 }
 
-function getTestElement(test: string, expectedResult: string, result: TestResult | undefined) {
+function getTestElement(test: string, expectedResult: string, actualResult: string, result: TestResult | undefined) {
     let resultText = result === undefined ? "Not Run" : result.toString();
+    if (result === TestResult.Failed) {
+        resultText += " (Returned: " + actualResult + ")";
+    }
     return (
         <p className={"Test-" + resultText.toLowerCase()}>
             {test} {"->"} {expectedResult} : {resultText}
