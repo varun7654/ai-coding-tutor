@@ -1,5 +1,5 @@
 import React from 'react';
-import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import {BrowserRouter as Router, Link, Route, Routes} from 'react-router-dom';
 import './App.css';
 import 'highlight.js/styles/atom-one-dark.min.css';
 import {Problem} from "./problem/Problem";
@@ -55,7 +55,7 @@ export const mutedButtonTheme = createTheme({
 export function Header() {
     return (
         <span className="App-header">
-            <span className="wecode-title">WeCode</span> <LoginButton/>
+            <Link to="/" className="wecode-title">WeCode</Link> <LoginButton/>
         </span>
     )
 }
