@@ -130,8 +130,8 @@ code {
     display: none;
 }
 
-.wecode-title {
+.wecode-header {
     font-size: 1.5em;
     text-decoration: none;
-    color: #FFC300;
+    color: #f8e6f7;
 }

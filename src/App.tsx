@@ -55,7 +55,7 @@ export const mutedButtonTheme = createTheme({
 export function Header() {
     return (
         <span className="App-header">
-            <Link to="/" className="wecode-title">WeCode</Link> <LoginButton/>
+            <Link to="/" className="wecode-header">WeCode</Link> <LoginButton/>
         </span>
     )
 }
