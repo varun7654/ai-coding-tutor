@@ -16,7 +16,9 @@ function getCategoryFromFilePath(id: string): string {
     }
     return parts[parts.length - 2];
 }
-
+function capitalizeFirstLetter(string: string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 function Home() {
     const [data, setData] = useState(null as ProblemData[] | null);
     const [groupedData, setGroupedData] = useState(new Map<string, ProblemData[]>());
@@ -53,7 +55,7 @@ function Home() {
                 <p>This is a webpage that helps beginners practice coding problems in JavaScript. We are so excited for you to learn!</p>
                 {Array.from(groupedData.entries()).map(([category, problems]) => (
                     <div key={category}>
-                        <h2 className="text-2xl">{category}</h2>
+                        <h2 className="text-2xl">{capitalizeFirstLetter(category)}</h2>
                         {problems.map((item, index) => (
                             <div key={index}>
                                 <Link to={"/Problem" + item.id} className={'text-blue-500 underline text-lg'} ><h3>{item.problemName}</h3></Link>
