@@ -4,22 +4,29 @@
 
 Write a function that takes in a number `n` and returns the `n`th number in the Fibonacci sequence.
 
-The Fibonacci sequence is a series of numbers in which each number is the sum of the two preceding ones.
+The Fibonacci sequence is a series of numbers in which each number is the sum of the two preceding ones. So,
 
-For reference, the 0th and 1st numbers in the Fibonacci sequence are `0` and `1`, respectively. 
-The sequence starts like this: `0, 1, 1, 2, 3, 5, 8, 13, 21, 34` and so on.
+$ f_n = f_{n-1} + f_{n-2} $
+
+For reference, the 0th and 1st numbers in the Fibonacci sequence are `0` and `1`, respectively.
+The sequence starts like the following:
+
+$0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, ...$
 
 # Problem
+
 ```javascript
 function findNthFibonacci(n) {
-  // Your code here
+    // Your code here
 }
 ```
 
 # Solution
+
 There are many ways to solve this problem.
 
 ## Solution 1
+
 ```javascript
 function findNthFibonacci(n) {
     if (n <= 1) return n;
@@ -33,18 +40,21 @@ function findNthFibonacci(n) {
 }
 ```
 
-This is an iterative solution to find the nth Fibonacci number. 
+This is an iterative solution to find the nth Fibonacci number.
 It works by using a loop to calculate the nth Fibonacci number by adding the previous two numbers in the sequence.
 
-
 # Test Cases
+
 ```javascript
 findNthFibonacci(0);
 ```
+
 0
+
 ```javascript
 findNthFibonacci(1);
 ```
+
 1
 
 ```javascript
@@ -52,6 +62,7 @@ findNthFibonacci(2);
 ```
 
 1
+
 ```javascript
 findNthFibonacci(3);
 ```
@@ -67,49 +78,60 @@ findNthFibonacci(4);
 ```javascript
 findNthFibonacci(5);
 ```
+
 5
 
 ```javascript
 findNthFibonacci(6);
 ```
+
 8
 
 ```javascript
 findNthFibonacci(7);
 ```
+
 13
 
 ```javascript
 findNthFibonacci(8);
 ```
+
 21
 
 ```javascript
 findNthFibonacci(9);
 ```
+
 34
 
 ```javascript
 findNthFibonacci(10);
 ```
+
 55
 
 ```javascript
 findNthFibonacci(11);
 ```
+
 89
 
 # Hidden Test Cases
+
 ```javascript
 let num = Math.floor(Math.random() * 1000);
 findNthFibonacci(num);
 ```
+
 repeat = 100
 
 # Next
+
 nothing
 
 # Tags
+
 - Recursion
 - Fibonacci
 - JavaScript
