@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import "./Home.css"
 import {Link} from "react-router-dom";
 
 class ProblemData {
@@ -48,26 +47,37 @@ function Home() {
     }, []);
 
     return (
+<<<<<<< Updated upstream
         <div className="content-container">
             <div className="main-content">
                 <h1>Welcome to</h1>
                 <p className={"wecode-title"}>WeCode</p>
                 <p>This is a webpage that helps beginners practice coding problems in JavaScript. We are so excited for
                     you to learn! </p>
+=======
+        <div className="flex justify-between">
+            <div className="w-7/10 pl-4">
+                <h1 className="text-4xl">Hi and welcome to WeCode!</h1>
+                <p>This is a webpage that helps beginners practice coding problems in JavaScript. We are so excited for you to learn!</p>
+>>>>>>> Stashed changes
                 {Array.from(groupedData.entries()).map(([category, problems]) => (
                     <div key={category}>
-                        <h2>{category}</h2>
+                        <h2 className="text-2xl">{category}</h2>
                         {problems.map((item, index) => (
                             <div key={index}>
+<<<<<<< Updated upstream
                                 <Link to={"/Problem" + item.id} className={'problem-link'}><h3>{item.problemName}</h3>
                                 </Link>
+=======
+                                <Link to={"/Problem" + item.id} className={'text-blue-500 underline text-lg'} ><h3>{item.problemName}</h3></Link>
+>>>>>>> Stashed changes
                             </div>
                         ))}
                     </div>
                 ))}
             </div>
-            <div className="explanation">
-                <h2>How it works</h2>
+            <div className="w-1/4 p-4 border-l border-gray-300">
+                <h2 className="text-2xl">How it works</h2>
                 <p>We have organized practice problems on levels of introductory, medium, and hard.</p>
                 <p>Each problem will give you enough background information to get started as well as input, output, and
                     test cases.</p>
