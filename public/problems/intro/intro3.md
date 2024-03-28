@@ -25,8 +25,8 @@ Notice that there's no `x` in the parentheses after `f`. This means that `f` doe
 
 Also did you notice that the `return` value is a number with a decimal point?
 Numbers can have decimal points in JavaScript, just like in math.
-For us right now, you can write any real number you want in JavaScript, just like in math. (This isn't technically true,
-but it's true enough for now.)
+For us right now, you can write any real number you want in JavaScript.
+(This isn't technically true, but it's true enough for now.)
 
 # Description
 
