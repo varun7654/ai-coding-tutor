@@ -53,7 +53,7 @@ export default function LoginButton() {
         // return a rounded button with the github logo and "Sign in with GitHub"
         return <ThemeProvider theme={theme}>
             <Button variant="contained" color="primary" onClick={logIn}>
-                <GithubLogo style={{width: '2em', height: '2em', paddingRight: "1em"}}/> Sign in with GitHub
+                <GithubLogo/> Sign in with GitHub
             </Button>
         </ThemeProvider>
 

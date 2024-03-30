@@ -65,6 +65,12 @@ function tokenizeFunctionSignature(signature: string): StringLineNum[] {
     return tokens.filter(token => token.str !== "");
 }
 
+/**
+ * Reformat the stack trace to show the user's code line numbers
+ * @param result The error object
+ * @param userCodeLineNumbersBegin The line numbers of the user's code
+ * @param userCodeLineNumbersEnd The line numbers of the user's code
+ */
 function reformatStackTrace(result: Error, userCodeLineNumbersBegin: number[], userCodeLineNumbersEnd: number[]) {
     let stackTrace = result.stack;
     if (stackTrace === undefined) {
@@ -284,7 +290,6 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
         }
     }
 
-    // Parse the solution code and replace the function name with a random name
     let solutionCode = problemData.solutionCode;
     let resultsArrayName = "results" + crypto.randomUUID().replace(/-/g, '');
     let expectedResultsArrayName = "expectedResults" + crypto.randomUUID().replace(/-/g, '');
@@ -304,8 +309,8 @@ let ${expectedResultsArrayName} = [] || [];
         // Split out everything except the last line of the test case
         // The result is the output of the last line
         // We need to run that twice:
-        //  - Once with the user's code
         //  - Once with the solution code
+        //  - Once with the user's code
         // We'll then compare the results
         let testFull = combinedTests[i];
         let testSplitByLines = testFull.split('\n');
@@ -379,7 +384,7 @@ ${solutionCode}
     }
 
     for (let i = 0; i < combinedTests.length; i++) {
-
+        // Check that we've actually run the test (i.e. we have a result)
         if (i >= expectedResultsArray.length) {
             testResults.testResults.push(TestResult.NotRun);
             testResults.expectedResults.push("Unknown");
@@ -454,9 +459,6 @@ ${solutionCode}
     for (let i = 0; i < combinedTests.length; i++) {
         // Split out everything except the last line of the test case
         // The result is the output of the last line
-        // We need to run that twice:
-        //  - Once with the user's code
-        //  - Once with the solution code
         // We'll then compare the results
         let testFull = combinedTests[i];
         let testSplitByLines = testFull.split('\n');
@@ -496,5 +498,4 @@ ${solutionCode}
     }
 
     return expectedResultsArray.map(result => safeToString(result));
-
 }

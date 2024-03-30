@@ -132,8 +132,7 @@ function extractTestCases(tokens: Token[], tests: string[], testsDisplay: string
 
         // @ts-ignore - ts seems to not believe that type could be paragraph
         if (tokens.length === 0 || tokens[0].type === "paragraph") {
-            let str = (tokens.shift() as Tokens.Paragraph).text.trim(); // Remove the expected result (not used anymore)
-            // check if it begins with "repeat =" or "repeat="
+            let str = (tokens.shift() as Tokens.Paragraph).text.trim();
             let metaData = str.split(",").map(s => s.trim());
 
             for (let str of metaData) {

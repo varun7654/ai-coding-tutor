@@ -39,6 +39,10 @@ function saveUserData(problemData: ProblemData, userData: UserData) {
     localStorage.setItem(getStorageKey(problemData.id, getUserName()), JSON.stringify(userData));
 }
 
+function getStorageKey(id: string, userName: string | undefined) {
+    return "problem " + id;
+}
+
 export function Problem() {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
     const {"*": id} = useParams();
@@ -130,6 +134,7 @@ export function Problem() {
         hiddenTestText = hiddenTestsPassed + " / " + totalHiddenTests + " hidden tests passed";
     }
 
+    // Callback when the user updates their code
     function updateUserCode(value: string) {
         userData.currentCode = value;
         saveUserData(problemData, userData);
@@ -201,6 +206,9 @@ export function Problem() {
     );
 }
 
+/**
+ * Returns a JSX element for a test case
+ */
 function getTestElement(test: string, expectedResult: string, actualResult: string, result: TestResult | undefined) {
     let resultText = result === undefined ? "Not Run" : result.toString();
     if (result === TestResult.Failed) {
@@ -215,6 +223,9 @@ function getTestElement(test: string, expectedResult: string, actualResult: stri
     );
 }
 
+/**
+ * Returns the text indented by a number of tabs
+ */
 function indentText(text: string, indent: number) {
     let indentText = "<span style='margin-left: " + (indent * 2) + "em'> </span>";
 
@@ -237,10 +248,11 @@ export class UserData {
     }
 }
 
-function getStorageKey(id: string, userName: string | undefined) {
-    return "problem " + id;
-}
-
+/**
+ * Loads the user data from local storage
+ * @param id The id of the problem
+ * @param userName The username of the user
+ */
 function getUserData(id: string | undefined, userName: string | undefined) {
     if (id === undefined) {
         console.error("No problem id was specified, so no user data could be retrieved.");
@@ -274,6 +286,7 @@ function SubmitButton({onClick}: { onClick: () => void }) {
         </ThemeProvider>
     );
 }
+
 
 function onSubmission(problemData: ProblemData, userData: UserData, setUserData: (data: UserData) => void) {
     if (userData.history.length === 0) {

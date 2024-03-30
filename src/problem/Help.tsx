@@ -17,7 +17,6 @@ export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => Us
 
         runTests();
         if (!isLoggedIn()) {
-            logIn();
             setResponse("You must be logged in to use the AI tutor. Please log in and try again.");
             return;
         }
@@ -29,7 +28,7 @@ export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => Us
             method: "POST",
             headers: {
                 "content-type": "application/json",
-                "user-agent": "cloudflare-worker-ai-tutor-login",
+                "user-agent": "WeCode/1.0.0",
                 accept: "application/json",
                 "Authorization": `token ${token}`
             },
