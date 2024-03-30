@@ -1,9 +1,10 @@
 import React from "react";
-import {marked, ProblemData, UserData} from "./Problem";
+import {marked, UserData} from "./Problem";
 import DOMPurify from "dompurify";
 import {expireToken, getToken, isLoggedIn, logIn} from "../auth/AuthHelper";
 import {Button, ThemeProvider} from "@mui/material";
 import {buttonTheme} from "../App";
+import {ProblemData} from "./ProblemParse";
 
 
 export const LOADING_MESSAGE = "Requesting help from the AI tutor...";

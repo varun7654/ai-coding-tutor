@@ -1,4 +1,5 @@
-import {ProblemData, UserData} from "./Problem";
+import {UserData} from "./Problem";
+import {ProblemData} from "./ProblemParse";
 
 const functionHeaderOffset = 2;
 
@@ -106,7 +107,7 @@ function reformatStackTrace(result: Error, userCodeLineNumbersBegin: number[], u
                     break;
                 }
             }
-            
+
 
             if (userCodeLineNumberBegin !== -1 && userCodeLineNumberEnd !== -1) {
                 let newLineNumber = lineNumber - userCodeLineNumberBegin + 1;

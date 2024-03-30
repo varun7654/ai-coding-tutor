@@ -1,4 +1,3 @@
-
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
@@ -78,10 +77,6 @@ body {
     padding-left: 0;
     width: 95%;
     max-width: 50em;
-}
-
-.Problem-error {
-    color: #EF4547;
 }
 
 .Test-passed {
