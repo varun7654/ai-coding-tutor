@@ -44,14 +44,14 @@ function Home() {
                 if ('directory' in item) {
                     return <div key={index}>
                         <div className="pb-5">
-                            <div className="text-2xl font-bold"> {item.meta.title} </div>
-                            <div className=""> {item.meta.description} </div>
+                            <div className="text-3xl font-bold"> {item.meta.title} </div>
+                            <div className="text-lg"> {item.meta.description} </div>
                             <div className="pl-4"> {getProblemFolderAsJSX(item.files)} </div>
                         </div>
                     </div>
                 } else {
                     return <div key={index}>
-                        <Link to={"/Problem" + item.problemId} className={'text-blue-500 underline text-lg'}>
+                        <Link to={"/Problem" + item.problemId} className={'text-bright-blue underline text-lg'}>
                             {item.problemName}
                         </Link>
                     </div>
@@ -84,9 +84,31 @@ function Home() {
                         c72.83,13.76,91.25,18.65,123.67,12.56c55.51-10.42,56.68-35.11,104.35-37.2c52.67-2.31,79.26,26.62,124.64,10.63
                         c17.13-6.04,29.35-15.8,36.71-22.71L720,0H0V60.56z"></path>
             </svg>
-            <div className="ml-5">
-                <p>This is a webpage that helps beginners practice coding problems in JavaScript. We are so excited for
-                    you to learn!</p>
+            <div className="ml-5 mt-16">
+                <div className="text-5xl font-bold">How it Works</div>
+                <div className="flex flex-row ml-5 mr-5 ">
+                    <div className="">
+                        <div className="text-2xl font-semibold mt-5">1. Code</div>
+                        <img className="w-96" src="/assets/home/ex-code.png"
+                             alt="An attempt at solving the fibbinachi problem"/>
+                    </div>
+                    <div className="ml-5">
+                        <div className="text-2xl font-semibold mt-5">2. Test</div>
+                        <img className="w-96" src="/assets/home/ex-test.png"
+                             alt="Test results for the attempt at solving the fibbinachi problem. All but the first two tests failed"/>
+                    </div>
+                    <div className="ml-5">
+                        <div className="text-2xl font-semibold mt-5">3. Ask for help</div>
+                        <img className="w-96" src="/assets/home/ask-for-help.png"
+                             alt="The AI tutor explaining why the remaining tests failed"/>
+                    </div>
+                    <div className="ml-5">
+                        <div className="text-2xl font-semibold mt-5">4. Repeat & Learn</div>
+                        <img className="w-96" src="/assets/home/ex-repeat.png"
+                             alt="User going back to the problem to fix the issue"/>
+                    </div>
+                </div>
+                <div className="text-5xl font-bold mt-8">Problems</div>
                 <div id="problems" className="w-2/3 pb-96">
                     {getProblemFolderAsJSX(data?.files || [])}
                 </div>
