@@ -115,7 +115,7 @@ export function Problem() {
     let testsDisplayJSX = <div>There are no visible test cases</div>;
     if (testsDisplay.length > 0) {
         testsDisplayJSX = <ul>
-            {testsDisplay.map((test, i) => <li className="pt-2" key={i}>{test}</li>)}
+            {testsDisplay.map((test, i) => <li className="" key={i}>{test}</li>)}
         </ul>
     }
 
@@ -184,8 +184,8 @@ export function Problem() {
 
     return (
         <div className="Problem">
-            <h1 className="text-4xl font-bold pb-3 pt-2">{problemData.title}</h1>
-            <div className="pb-2" dangerouslySetInnerHTML={{__html: descParsed}}/>
+            <h1 className="text-4xl font-bold">{problemData.title}</h1>
+            <div className="" dangerouslySetInnerHTML={{__html: descParsed}}/>
             <div className="Problem-Code">
                 {getEditor(problemData.codeLang, (value) => {
                     updateUserCode(value);
