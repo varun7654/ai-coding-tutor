@@ -98,6 +98,16 @@ export function parseProblem(text: string, id: string): ProblemData {
         nextProblemId = "nothing";
     } else {
         nextProblemId = (tokens.shift() as Tokens.Paragraph).text;
+        nextProblemId = nextProblemId.trim();
+        if (nextProblemId.startsWith("/")) {
+            nextProblemId = nextProblemId.substring(1);
+        }
+        if (nextProblemId.endsWith("/")) {
+            nextProblemId = nextProblemId.substring(0, nextProblemId.length - 1);
+        }
+        if (nextProblemId === "") {
+            nextProblemId = "nothing";
+        }
     }
 
 

@@ -46,16 +46,26 @@ function getStorageKey(id: string, userName: string | undefined) {
 export function Problem() {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
     const {"*": id} = useParams();
-    const [userData, setUserData] = useState(getUserData(id, getUserName()));
+    const [userData, setUserData] = useState(null as unknown as UserData);
     const [helpResponse, setHelpResponse] = useState("");
 
     function onCodeSubmit() {
         onSubmission(problemData, userData, setUserData);
     }
 
+    let normalizedId = id?.toLowerCase();
+    normalizedId?.trim()
+    if (normalizedId?.startsWith("/")) {
+        normalizedId = normalizedId.substring(1)
+    }
+
+    if (normalizedId?.endsWith("/")) {
+        normalizedId = normalizedId.substring(0, normalizedId.length - 1)
+    }
+
     useEffect(() => {
-        if (id !== undefined) {
-            fetch(process.env.PUBLIC_URL + "/problems/" + id + ".md")
+        if (normalizedId !== undefined) {
+            fetch(process.env.PUBLIC_URL + "/problems/" + normalizedId + ".md")
                 .then(async r => {
                     let text = await r.text()
                     if (!r.ok || !text.startsWith("#")) {
@@ -65,7 +75,9 @@ export function Problem() {
                     }
                 })
                 .then(async text => {
-                    let problemData = parseProblem(text, id);
+                    // @ts-ignore - we've check that the id isn't undefined
+                    let problemData = parseProblem(text, normalizedId);
+                    let userData = getUserData(normalizedId, getUserName());
 
                     // set the template data if the user has not saved any data
                     if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
@@ -83,19 +95,20 @@ export function Problem() {
                     }
 
                     setProblemData(problemData);
+                    setUserData(userData);
                 })
                 .catch(e => {
                     console.error(e);
                     let problemData = new ProblemData();
-                    problemData.title = "Failed to load problem " + id;
+                    problemData.title = "Failed to load problem " + normalizedId;
                     setProblemData(problemData);
                 })
         }
-    }, [id]);
+    }, [normalizedId]);
 
 
-    if (problemData === null) {
-        if (id !== undefined) {
+    if (problemData === null || userData === null) {
+        if (normalizedId !== undefined) {
             return <div>Loading...</div>;
         } else {
             return <div>A problem wasn't specified</div>;
