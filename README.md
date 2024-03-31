@@ -24,6 +24,9 @@ Each problem is a markdown file in the `public/problems` directory.
 
 ## Problem Structure
 
+The following is the structure of the markdown file for a problem.
+Each of the following parts are required/optional h1 headings.
+
 ### Title (required)
 
 The title of the problem is the first heading in the markdown file.
@@ -84,9 +87,9 @@ In the code block, you should call the function with the test case and log the r
 For example:
 
 ```
-\`\`\`javascript
+```javascript
 f(0);
-\`\`\`
+\```
 ```
 
 Test cases can also be longer than one line. This allows you to write extra code to set up parameters for the function
@@ -111,10 +114,10 @@ If you want to add modifiers to the test cases, you should separate them with co
   This is useful for testing functions where you're randomly generating input values.
   For example:
     ```
-    \`\`\`javascript
+    ```javascript
     let random = Math.floor(Math.random() * 1000);
     f(random);
-    \`\`\`
+   \```
     ```
   repeat=100
 - displayas=\<string\>: This modifier will display the test case as the specified string.
