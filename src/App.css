@@ -51,6 +51,10 @@
         margin-left: 1.5em;
     }
 
+    li {
+        margin-bottom: -0.2em;
+    }
+
     p {
         @apply text-base;
         margin-bottom: 1em;
@@ -139,6 +143,10 @@ body {
 }
 
 .submitButton {
+    height: 2em;
+}
+
+.nextProblemButton {
     height: 2em;
 }
 
