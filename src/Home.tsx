@@ -67,7 +67,7 @@ function Home() {
             <div className="w-1/4 p-4 border-l border-gray-300">
                 <h2 className="text-2xl">How it works</h2>
                 <p>We have organized practice problems on levels of introductory, medium, and hard.</p>
-                <p>Each problem will give you enough backround informatuion to get started as well as  input, output, and test cases.</p>
+                <p>Each problem will give you enough backround information to get started as well as  input, output, and test cases.</p>
                 <p>Click on a problem to see the details and try to solve it.</p>
                 <p>After you solve a problem, you can see the solution and explanation.</p>
                 <p>Feel free to ask for help if you are stuck. Our help button will provide you with feedback

@@ -1,26 +1,51 @@
-#  Merge Sorted Arrays
+# Merge Sort
 
-# Context
-Merging sorted arrays is a common task in computer science and software development. It's a fundamental part of the merge sort algorithm, and it's also useful in many other contexts. For example, if you have multiple sorted lists of data that you want to combine into a single sorted list, you would need to merge the lists.
+## Context
+Merge Sort is a fundamental algorithm in computer science. It is a divide and conquer algorithm that was invented by John von Neumann in 1945. Merge Sort is efficient, stable and works well for large datasets.
 
 ## Example
-Consider two sorted arrays: `[1, 3, 5, 7]` and `[2, 4, 6, 8]`. The merged array would be: `[1, 2, 3, 4, 5, 6, 7, 8]`.
+Consider an unsorted array: `[38, 27, 43, 3, 9, 82, 10]`. After applying the merge sort algorithm, the array becomes: `[3, 9, 10, 27, 38, 43, 82]`.
 
-# Description
-## Let's try this
-Write a function that merges two sorted arrays into a single sorted array. The function should take two arrays as input and return a new array that contains all the elements from both input arrays, in sorted order.
+## Description
+Write a function that sorts an array of numbers using the merge sort algorithm. The function should take an unsorted array as input and return a new array that contains all the elements from the input array, in sorted order.
 
-# Problem
+## Problem
 ```javascript
-function mergeSortedArrays(arr1, arr2) {
+function mergeSort(arr) {
     // Your code here
 }
-function mergeSortedArrays(arr1, arr2) {
-    let merged = [...arr1, ...arr2];
-    return merged.sort((a, b) => a - b);
+```
+function mergeSort(arr) {
+if (arr.length <= 1) {
+return arr;
 }
-mergeSortedArrays([1, 3, 5, 7], [2, 4, 6, 8]);
-mergeSortedArrays([10, 20, 30], [15, 25, 35]);
-mergeSortedArrays([1, 1, 1, 1], [2, 2, 2, 2]);
-mergeSortedArrays([], [1, 2, 3, 4]);
-This markdown file contains a medium level problem about merging sorted arrays. It includes a problem description, context, an example, a problem function, a solution, test cases, what to do next, and tags. You can replace the placeholders with the actual content for your problem.
+
+    const mid = Math.floor(arr.length / 2);
+    const left = arr.slice(0, mid);
+    const right = arr.slice(mid);
+
+    return merge(mergeSort(left), mergeSort(right));
+}
+
+function merge(left, right) {
+let result = [], leftIndex = 0, rightIndex = 0;
+
+    while (leftIndex < left.length && rightIndex < right.length) {
+        if (left[leftIndex] < right[rightIndex]) {
+            result.push(left[leftIndex]);
+            leftIndex++;
+        } else {
+            result.push(right[rightIndex]);
+            rightIndex++;
+        }
+    }
+
+    return result.concat(left.slice(leftIndex)).concat(right.slice(rightIndex));
+}
+console.log(mergeSort([38, 27, 43, 3, 9, 82, 10])); // [3, 9, 10, 27, 38, 43, 82]
+console.log(mergeSort([5, 3, 8, 4, 2, 6, 1, 7])); // [1, 2, 3, 4, 5, 6, 7, 8]
+console.log(mergeSort([1, 2, 3, 4, 5, 6, 7, 8])); // [1, 2, 3, 4, 5, 6, 7, 8]
+console.log(mergeSort([8, 7, 6, 5, 4, 3, 2, 1])); // [1, 2, 3, 4, 5, 6, 7, 8]
+
+let random = Math.floor(Math.random() * 100) - 50;
+console.log(mergeSort(Array.from({length: random}, () => Math.floor(Math.random() * 100))));
