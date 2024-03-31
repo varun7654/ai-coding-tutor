@@ -182,7 +182,7 @@ function extractTestCases(tokens: Token[], tests: string[], testsDisplay: string
 }
 
 
-function removeNextHeading(tokens: Token[], expectedText: string) {
+export function removeNextHeading(tokens: Token[], expectedText: string) {
     removeTillNextType(tokens, "heading");
     if (tokens.length === 0) {
         new Error("Problem Parse: Expected a heading with text: " + expectedText);
@@ -195,20 +195,20 @@ function removeNextHeading(tokens: Token[], expectedText: string) {
     }
 }
 
-function removeTillNextType(tokens: Token[], type: string) {
+export function removeTillNextType(tokens: Token[], type: string) {
     while (tokens.length > 0 && tokens[0].type !== type) {
         tokens.shift();
     }
 }
 
-function removeNextType(tokens: Token[], type: string) {
+export function removeNextType(tokens: Token[], type: string) {
     while (tokens.length > 0 && tokens[0].type !== type) {
         tokens.shift();
     }
     tokens.shift();
 }
 
-function absorbWhitespace(tokens: Token[]) {
+export function absorbWhitespace(tokens: Token[]) {
     while (tokens.length > 0 && tokens[0].type === "space") {
         tokens.shift();
     }

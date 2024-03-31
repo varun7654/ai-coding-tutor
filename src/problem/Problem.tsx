@@ -32,10 +32,11 @@ const options = {
 
 marked.use(markedKatex(options));
 
-function saveUserData(problemData: ProblemData, userData: UserData) {
+export function saveUserData(problemData: ProblemData, userData: UserData) {
     if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
         console.error("User data is being saved with no code");
     }
+
     localStorage.setItem(getStorageKey(problemData.id, getUserName()), JSON.stringify(userData));
 }
 
@@ -50,7 +51,7 @@ export function Problem() {
     const [helpResponse, setHelpResponse] = useState("");
 
     function onCodeSubmit() {
-        onSubmission(problemData, userData, setUserData);
+        return onSubmission(problemData, userData, setUserData);
     }
 
     let normalizedId = id?.toLowerCase();
@@ -179,7 +180,7 @@ export function Problem() {
     errorText = DOMPurify.sanitize(errorText);
 
     let {helpButton, helpBox} =
-        HelpBoxAndButton(problemData, () => userData, onCodeSubmit, helpResponse, setHelpResponse);
+        HelpBoxAndButton(problemData, setUserData, onCodeSubmit, helpResponse, setHelpResponse);
 
     let nextProblem;
     if (problemData.nextProblemId !== "" && problemData.nextProblemId.toLowerCase() !== "nothing") {
@@ -198,8 +199,8 @@ export function Problem() {
     return (
         <div className="ml-5 flex-row">
             <div className="text-7xl font-bold pt-1 pb-5">{problemData.title}</div>
-            <div dangerouslySetInnerHTML={{__html: descParsed}}/>
-            <div className="flex flex-row justify-between h-auto">
+            <div className="w-1/2" dangerouslySetInnerHTML={{__html: descParsed}}/>
+            <div className="flex flex-row justify-between h-auto pt-2">
                 <div className="w-1/2 h-[calc(100vh*0.80)]">
                     {getEditor(problemData.codeLang, (value) => {
                         updateUserCode(value);
@@ -254,13 +255,15 @@ export class UserData {
     testResults: TestResults = new TestResults();
     lastUpdated: Date = new Date();
     currentCode: string = null as unknown as string;
+    aiRememberResponse: string[] = [];
 
-    constructor(history: string[] = [], requestHelpHistory: string[] = [], testResults: TestResults = new TestResults(), lastUpdated: Date = new Date(), currentCode: string = "") {
+    constructor(history: string[] = [], requestHelpHistory: string[] = [], testResults: TestResults = new TestResults(), lastUpdated: Date = new Date(), currentCode: string = "", aiRememberResponse: string[] = []) {
         this.history = history;
         this.testResults = testResults;
         this.requestHelpHistory = requestHelpHistory;
         this.lastUpdated = lastUpdated;
         this.currentCode = currentCode;
+        this.aiRememberResponse = aiRememberResponse;
     }
 }
 
@@ -324,9 +327,10 @@ function onSubmission(problemData: ProblemData, userData: UserData, setUserData:
         userData.requestHelpHistory,
         testResults,
         new Date(),
-        userData.currentCode
+        userData.currentCode,
+        userData.aiRememberResponse
     )
-
     setUserData(newUserData);
     saveUserData(problemData, newUserData);
+    return newUserData;
 }

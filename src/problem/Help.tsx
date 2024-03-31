@@ -1,21 +1,26 @@
 import React from "react";
-import {marked, UserData} from "./Problem";
+import {marked, saveUserData, UserData} from "./Problem";
 import DOMPurify from "dompurify";
 import {expireToken, getToken, isLoggedIn, logIn} from "../auth/AuthHelper";
 import {Button, ThemeProvider} from "@mui/material";
 import {buttonTheme} from "../App";
-import {ProblemData} from "./ProblemParse";
+import {ProblemData, removeNextHeading} from "./ProblemParse";
+import {Token, Tokens} from "marked";
 
 
 export const LOADING_MESSAGE = "Requesting help from the AI tutor...";
 
-export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => UserData, runTests: () => void, response: string, setResponse: (response: string) => void):
+export function HelpBoxAndButton(problemData: ProblemData,
+                                 setUserData: (userData: UserData) => void,
+                                 runTests: () => UserData,
+                                 response: string,
+                                 setResponse: (response: string) => void):
     { helpButton: React.JSX.Element, helpBox: React.JSX.Element } {
 
     function handleHelpRequest(event: React.MouseEvent<HTMLButtonElement>) {
         event.currentTarget.setAttribute("disabled", "true");
 
-        runTests();
+        let userData = runTests();
         if (!isLoggedIn()) {
             setResponse("You must be logged in to use the AI tutor. Please log in and try again.");
             return;
@@ -34,7 +39,7 @@ export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => Us
             },
             body: JSON.stringify({
                 problemData: problemData,
-                userData: getUserData(),
+                userData: userData,
             })
         })
             .then(response => response.json())
@@ -42,6 +47,8 @@ export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => Us
                 status: number,
                 prompt: string,
                 response: string,
+                rememberingPrompt: string,
+                rememberingResponse: string,
                 expire_logins: boolean,
             }) => {
                 if (json.expire_logins) {
@@ -62,8 +69,35 @@ export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => Us
                 }
 
                 console.log(json.response);
-                console.log(DOMPurify.sanitize(marked.parse(json.response) as string));
-                setResponse(DOMPurify.sanitize(marked.parse(json.response) as string));
+
+                let tokens = marked.lexer(json.response);
+                // There are two sections: # Thinking out loud and # My Response
+                // We want to display the My Response section
+
+                // Remove Thinking out loud
+                removeNextHeading(tokens, "Thinking out loud");
+                // Remove the My Response heading
+                removeNextHeading(tokens, "My Response");
+
+                // Collect everything under the My Response heading
+                let response = "";
+                while (tokens.length > 0 && (tokens[0].type !== "heading" || (tokens[0] as Tokens.Heading).depth > 1)) {
+                    response += ((tokens.shift() as Token).raw);
+                }
+
+                let newUserData = {
+                    ...userData,
+                    aiRememberResponse: userData.aiRememberResponse.concat([json.rememberingResponse]),
+                }
+
+                setUserData(
+                    newUserData
+                );
+
+                saveUserData(problemData, newUserData);
+                console.log(newUserData.aiRememberResponse);
+
+                setResponse(DOMPurify.sanitize(marked.parse(response) as string));
                 target.removeAttribute("disabled");
             })
             .catch((error) => {
