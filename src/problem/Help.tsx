@@ -79,7 +79,7 @@ export function HelpBoxAndButton(problemData: ProblemData, getUserData: () => Us
                     color="secondary"
                     onClick={handleHelpRequest}
                     className="helpButton"
-                    style={{marginTop: "0.25em"}}>
+            >
                 I'm stuck!
             </Button>
         </ThemeProvider>

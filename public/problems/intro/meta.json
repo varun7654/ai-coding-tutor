@@ -1,0 +1,9 @@
+{
+  "title": "A Beginner's Guide to Coding",
+  "description": "Is this you're first time coding? If so, start at the problem below. The problems begin with requiring no prior knowledge of coding and gradually increase in difficulty. If you have experience consider starting with the easy problems.",
+  "displayStyle": "whitelist",
+  "whitelist": [
+    "intro1"
+  ],
+  "weight": 10000
+}

@@ -114,8 +114,8 @@ export function Problem() {
 
     let testsDisplayJSX = <div>There are no visible test cases</div>;
     if (testsDisplay.length > 0) {
-        testsDisplayJSX = <ul>
-            {testsDisplay.map((test, i) => <li className="pt-2" key={i}>{test}</li>)}
+        testsDisplayJSX = <ul className="">
+            {testsDisplay.map((test, i) => <li key={i}>{test}</li>)}
         </ul>
     }
 
@@ -183,25 +183,28 @@ export function Problem() {
     }
 
     return (
-        <div className="Problem">
-            <h1 className="text-4xl font-bold pb-3 pt-2">{problemData.title}</h1>
-            <div className="pb-2" dangerouslySetInnerHTML={{__html: descParsed}}/>
-            <div className="Problem-Code">
-                {getEditor(problemData.codeLang, (value) => {
-                    updateUserCode(value);
-                }, userData.currentCode)}
-                <SubmitButton onClick={onCodeSubmit}/> {helpButton}
+        <div className="ml-5 flex-row">
+            <div className="text-7xl font-bold pt-1 pb-5">{problemData.title}</div>
+            <div dangerouslySetInnerHTML={{__html: descParsed}}/>
+            <div className="flex flex-row justify-between h-auto">
+                <div className="w-1/2 h-[calc(100vh*0.80)]">
+                    {getEditor(problemData.codeLang, (value) => {
+                        updateUserCode(value);
+                    }, userData.currentCode)}
+                    <div className="pt-2">
+                        <SubmitButton onClick={onCodeSubmit}/> {helpButton} {nextProblem}
+                    </div>
+                </div>
+                <div className="w-1/2 pl-4">
+                    <div className="text-3xl font-bold w-1/3"> Tests</div>
+                    {testsDisplayJSX}
+                    <p className="Problem-hidden-tests">
+                        {hiddenTestText}
+                    </p>
+                    <div className="text-error-red" dangerouslySetInnerHTML={{__html: errorText}}/>
+                    {helpBox}
+                </div>
             </div>
-            {helpBox}
-            <div className="text-error-red" dangerouslySetInnerHTML={{__html: errorText}}/>
-            <div className="Problem-test-results">
-                <div className="text-3xl font-bold"> Tests</div>
-                {testsDisplayJSX}
-                <p className="Problem-hidden-tests">
-                    {hiddenTestText}
-                </p>
-            </div>
-            {nextProblem}
         </div>
     );
 }
@@ -280,7 +283,7 @@ function SubmitButton({onClick}: { onClick: () => void }) {
                     color="primary"
                     onClick={onClick}
                     className={"submitButton"}
-                    style={{marginTop: "0.25em"}}>
+            >
                 Test Code
             </Button>
         </ThemeProvider>

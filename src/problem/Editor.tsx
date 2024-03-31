@@ -24,9 +24,9 @@ export function getEditor(lang: string, onChange: (value: string) => void, defau
         mode={lang}
         theme="github_dark"
         onChange={onChange}
-        width={"90%"}
         name="editor"
         fontSize="1.1em"
+        width="100%"
         setOptions={{
             useWorker: false,
             enableBasicAutocompletion: true,
@@ -39,8 +39,7 @@ export function getEditor(lang: string, onChange: (value: string) => void, defau
         style={{
             border: "0px solid #d3d3d3",
             borderRadius: "5px",
-            width: "95%",
-            maxWidth: "50em"
+            height: "90%",
         }}
     />
 }

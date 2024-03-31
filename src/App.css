@@ -2,6 +2,77 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+@layer base {
+    h1 {
+        @apply text-3xl;
+        @apply font-bold;
+        margin-bottom: 0.25em;
+        margin-top: 1em;
+    }
+
+    h2 {
+        @apply text-2xl;
+        @apply font-bold;
+        margin-bottom: 0.25em;
+        margin-top: 1em;
+    }
+
+    h3 {
+        @apply text-xl;
+        @apply font-bold;
+        margin-bottom: 0.25em;
+        margin-top: 1em;
+    }
+
+    h4 {
+        @apply text-lg;
+        @apply font-bold;
+        margin-bottom: 0.25em;
+        margin-top: 1em;
+    }
+
+    h5 {
+        @apply text-base;
+        @apply font-bold;
+        margin-bottom: 0.25em;
+        margin-top: 1em;
+    }
+
+    h6 {
+        @apply text-base;
+        @apply font-semibold;
+        margin-bottom: 0.25em;
+        margin-top: 1em;
+    }
+
+    ol,
+    ul {
+        list-style: circle;
+        margin-left: 1.5em;
+    }
+
+    li {
+        margin-bottom: -0.2em;
+    }
+
+    p {
+        @apply text-base;
+        margin-bottom: 1em;
+    }
+}
+
+@media (max-width: 900px) {
+    .flex-row {
+        flex-direction: column;
+    }
+
+    @media (max-width: 900px) {
+        .w-1\/2 {
+            width: 100%;
+        }
+    }
+}
+
 body {
     background-color: #1C1F23;
 }
@@ -87,6 +158,10 @@ body {
     height: 2em;
 }
 
+.nextProblemButton {
+    height: 2em;
+}
+
 code[class^="hljs-"] {
     background: #000;
 }
@@ -118,4 +193,8 @@ code {
     font-size: 1.5em;
     text-decoration: none;
     color: #f8e6f7;
+}
+
+.loginButton {
+    height: 2.75em;
 }

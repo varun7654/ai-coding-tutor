@@ -52,8 +52,12 @@ export default function LoginButton() {
     if (!loggedIn) {
         // return a rounded button with the github logo and "Sign in with GitHub"
         return <ThemeProvider theme={theme}>
-            <Button variant="contained" color="primary" onClick={logIn}>
-                <GithubLogo/> Sign in with GitHub
+            <Button variant="contained" color="primary" onClick={logIn} className="loginButton">
+                <GithubLogo style={{
+                    width: '2.5em',
+                    height: '2.5em',
+                    paddingRight: "1em",
+                }}/> Sign in with GitHub
             </Button>
         </ThemeProvider>
 
@@ -65,8 +69,13 @@ export default function LoginButton() {
                 <Button variant="outlined"
                         color="secondary"
                         onClick={logout}
-                        fullWidth={false}>
-                    <GithubLogo style={{width: '2em', height: '2em', paddingRight: "1em"}}/> {loggedInText}
+                        fullWidth={false}
+                        className="loginButton">
+                    <GithubLogo style={{
+                        width: '2.5em',
+                        height: '2.5em',
+                        paddingRight: "1em",
+                    }}/> {loggedInText}
                 </Button>
             </Tooltip>
         </ThemeProvider>
