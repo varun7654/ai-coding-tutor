@@ -37,6 +37,7 @@
     "react-ace": "^10.1.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
+    "react-scroll": "^1.9.0",
     "sort-by": "^1.2.0",
     "tailwindcss": "^3.4.3",
     "ts-node": "^10.9.2",
@@ -78,6 +79,7 @@
     "@types/escape-html": "^1.0.4",
     "@types/he": "^1.2.3",
     "@types/marked": "^6.0.0",
+    "@types/react-scroll": "^1.8.10",
     "gh-pages": "^6.1.1",
     "react-scripts": "^5.0.1",
     "shx": "^0.3.4"

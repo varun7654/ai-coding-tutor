@@ -1,5 +1,5 @@
 import React from 'react';
-import {BrowserRouter as Router, Link, Route, Routes} from 'react-router-dom';
+import {BrowserRouter as Router, Link, Route, Routes, useLocation} from 'react-router-dom';
 import './App.css';
 import 'highlight.js/styles/atom-one-dark.min.css';
 import {Problem} from "./problem/Problem";
@@ -53,11 +53,20 @@ export const mutedButtonTheme = createTheme({
 
 
 export function Header() {
-    return (
-        <span className="App-header">
-            <Link to="/" className="wecode-header">WeCode</Link> <LoginButton/>
-        </span>
-    )
+    const location = useLocation();
+
+    // Don't show on the home page
+    if (location.pathname !== "/") {
+        return (
+            <span className="App-header">
+                <Link to="/" className="wecode-header">WeCode</Link> <LoginButton/>
+            </span>
+        )
+    } else {
+        return (
+            <></>
+        )
+    }
 }
 
 function App() {
