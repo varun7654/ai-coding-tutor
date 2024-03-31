@@ -186,8 +186,8 @@ export function Problem() {
         <div className="ml-5 flex-row">
             <div className="text-7xl font-bold pt-1 pb-5">{problemData.title}</div>
             <div dangerouslySetInnerHTML={{__html: descParsed}}/>
-            <div className="flex justify-between h-[calc(100vh*0.80)]">
-                <div className="w-1/2 ">
+            <div className="flex flex-row justify-between h-auto">
+                <div className="w-1/2 h-[calc(100vh*0.80)]">
                     {getEditor(problemData.codeLang, (value) => {
                         updateUserCode(value);
                     }, userData.currentCode)}

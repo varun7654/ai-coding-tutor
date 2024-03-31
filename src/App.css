@@ -61,6 +61,18 @@
     }
 }
 
+@media (max-width: 900px) {
+    .flex-row {
+        flex-direction: column;
+    }
+
+    @media (max-width: 900px) {
+        .w-1\/2 {
+            width: 100%;
+        }
+    }
+}
+
 body {
     background-color: #1C1F23;
 }
@@ -181,4 +193,8 @@ code {
     font-size: 1.5em;
     text-decoration: none;
     color: #f8e6f7;
+}
+
+.loginButton {
+    height: 2.75em;
 }
