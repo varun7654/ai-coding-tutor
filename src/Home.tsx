@@ -16,9 +16,11 @@ function getCategoryFromFilePath(id: string): string {
     }
     return parts[parts.length - 2];
 }
+
 function capitalizeFirstLetter(string: string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
 function Home() {
     const [data, setData] = useState(null as ProblemData[] | null);
     const [groupedData, setGroupedData] = useState(new Map<string, ProblemData[]>());
@@ -70,7 +72,7 @@ function Home() {
                 <p>Each problem will give you enough backround information to get started as well as  input, output, and test cases.</p>
                 <p>Click on a problem to see the details and try to solve it.</p>
                 <p>After you solve a problem, you can see the solution and explanation.</p>
-                <p>Feel free to ask for help if you are stuck. Our help button will provide you with feedback
+                <p className="border-2 border-black p-2 m-2">Feel free to ask for help if you are stuck. Our help button will provide you with feedback
                     specific to your code without giving you the answer!</p>
                 <p>Good luck and have fun coding!</p>
             </div>
