@@ -2,8 +2,6 @@
 
 # Description
 
-Write a function that takes in a number `n` and returns the `n`th number in the Fibonacci sequence.
-
 The Fibonacci sequence is a series of numbers in which each number is the sum of the two preceding ones. So,
 
 $ f_n = f_{n-1} + f_{n-2} $
@@ -12,6 +10,8 @@ For reference, the 0th and 1st numbers in the Fibonacci sequence are `0` and `1`
 The sequence starts like the following:
 
 $0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, ...$
+
+Write a function that takes in a number `n` and returns the `n`th number in the Fibonacci sequence.
 
 # Problem
 

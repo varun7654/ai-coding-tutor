@@ -32,10 +32,11 @@ const options = {
 
 marked.use(markedKatex(options));
 
-function saveUserData(problemData: ProblemData, userData: UserData) {
+export function saveUserData(problemData: ProblemData, userData: UserData) {
     if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
         console.error("User data is being saved with no code");
     }
+
     localStorage.setItem(getStorageKey(problemData.id, getUserName()), JSON.stringify(userData));
 }
 
@@ -46,16 +47,26 @@ function getStorageKey(id: string, userName: string | undefined) {
 export function Problem() {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
     const {"*": id} = useParams();
-    const [userData, setUserData] = useState(getUserData(id, getUserName()));
+    const [userData, setUserData] = useState(null as unknown as UserData);
     const [helpResponse, setHelpResponse] = useState("");
 
     function onCodeSubmit() {
-        onSubmission(problemData, userData, setUserData);
+        return onSubmission(problemData, userData, setUserData);
+    }
+
+    let normalizedId = id?.toLowerCase();
+    normalizedId?.trim()
+    if (normalizedId?.startsWith("/")) {
+        normalizedId = normalizedId.substring(1)
+    }
+
+    if (normalizedId?.endsWith("/")) {
+        normalizedId = normalizedId.substring(0, normalizedId.length - 1)
     }
 
     useEffect(() => {
-        if (id !== undefined) {
-            fetch(process.env.PUBLIC_URL + "/problems/" + id + ".md")
+        if (normalizedId !== undefined) {
+            fetch(process.env.PUBLIC_URL + "/problems/" + normalizedId + ".md")
                 .then(async r => {
                     let text = await r.text()
                     if (!r.ok || !text.startsWith("#")) {
@@ -65,7 +76,9 @@ export function Problem() {
                     }
                 })
                 .then(async text => {
-                    let problemData = parseProblem(text, id);
+                    // @ts-ignore - we've check that the id isn't undefined
+                    let problemData = parseProblem(text, normalizedId);
+                    let userData = getUserData(normalizedId, getUserName());
 
                     // set the template data if the user has not saved any data
                     if (userData.currentCode === null || userData.currentCode === "" || userData.currentCode === undefined) {
@@ -83,19 +96,20 @@ export function Problem() {
                     }
 
                     setProblemData(problemData);
+                    setUserData(userData);
                 })
                 .catch(e => {
                     console.error(e);
                     let problemData = new ProblemData();
-                    problemData.title = "Failed to load problem " + id;
+                    problemData.title = "Failed to load problem " + normalizedId;
                     setProblemData(problemData);
                 })
         }
-    }, [id]);
+    }, [normalizedId]);
 
 
-    if (problemData === null) {
-        if (id !== undefined) {
+    if (problemData === null || userData === null) {
+        if (normalizedId !== undefined) {
             return <div>Loading...</div>;
         } else {
             return <div>A problem wasn't specified</div>;
@@ -166,7 +180,7 @@ export function Problem() {
     errorText = DOMPurify.sanitize(errorText);
 
     let {helpButton, helpBox} =
-        HelpBoxAndButton(problemData, () => userData, onCodeSubmit, helpResponse, setHelpResponse);
+        HelpBoxAndButton(problemData, setUserData, onCodeSubmit, helpResponse, setHelpResponse);
 
     let nextProblem;
     if (problemData.nextProblemId !== "" && problemData.nextProblemId.toLowerCase() !== "nothing") {
@@ -185,8 +199,8 @@ export function Problem() {
     return (
         <div className="ml-5 flex-row">
             <div className="text-7xl font-bold pt-1 pb-5">{problemData.title}</div>
-            <div dangerouslySetInnerHTML={{__html: descParsed}}/>
-            <div className="flex flex-row justify-between h-auto">
+            <div className="w-1/2" dangerouslySetInnerHTML={{__html: descParsed}}/>
+            <div className="flex flex-row justify-between h-auto pt-2">
                 <div className="w-1/2 h-[calc(100vh*0.80)]">
                     {getEditor(problemData.codeLang, (value) => {
                         updateUserCode(value);
@@ -241,13 +255,15 @@ export class UserData {
     testResults: TestResults = new TestResults();
     lastUpdated: Date = new Date();
     currentCode: string = null as unknown as string;
+    aiRememberResponse: string[] = [];
 
-    constructor(history: string[] = [], requestHelpHistory: string[] = [], testResults: TestResults = new TestResults(), lastUpdated: Date = new Date(), currentCode: string = "") {
+    constructor(history: string[] = [], requestHelpHistory: string[] = [], testResults: TestResults = new TestResults(), lastUpdated: Date = new Date(), currentCode: string = "", aiRememberResponse: string[] = []) {
         this.history = history;
         this.testResults = testResults;
         this.requestHelpHistory = requestHelpHistory;
         this.lastUpdated = lastUpdated;
         this.currentCode = currentCode;
+        this.aiRememberResponse = aiRememberResponse;
     }
 }
 
@@ -311,9 +327,10 @@ function onSubmission(problemData: ProblemData, userData: UserData, setUserData:
         userData.requestHelpHistory,
         testResults,
         new Date(),
-        userData.currentCode
+        userData.currentCode,
+        userData.aiRememberResponse
     )
-
     setUserData(newUserData);
     saveUserData(problemData, newUserData);
+    return newUserData;
 }

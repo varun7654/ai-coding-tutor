@@ -213,7 +213,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
                 testResults: [],
                 returnedResults: [],
                 expectedResults: getExpectedResults(problemData),
-                parseError: "No function found.",
+                parseError: "No function found. We expected to see at least one pair of '{}'.",
                 errorLine: lineNum,
                 runtimeError: "",
                 output: "",
