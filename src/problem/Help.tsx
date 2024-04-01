@@ -120,15 +120,8 @@ export function HelpBoxAndButton(problemData: ProblemData,
     );
 
     let helpBox = (
-        <div className="flex justify-between">
-            <div className="code-editor">
-                {/* Code editor goes here */}
-            </div>
-            <div className="flex justify-end">
-                <div className="AI-help-area border-2 border-black p-2 m-2">
-                    <p className="Code-tutor-response" dangerouslySetInnerHTML={{__html: response}}/>
-                </div>
-            </div>
+        <div className="AI-help-area border-2  p-2 m-2 border-white-pink w-full min-h-20">
+            <p className="Code-tutor-response" dangerouslySetInnerHTML={{__html: response}}/>
         </div>
     );
 

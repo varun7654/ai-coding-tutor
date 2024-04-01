@@ -209,7 +209,7 @@ export function Problem() {
                         <SubmitButton onClick={onCodeSubmit}/> {helpButton} {nextProblem}
                     </div>
                 </div>
-                <div className="w-1/2 pl-4">
+                <div className="w-1/2 pl-4 pr-4">
                     <div className="text-3xl font-bold w-1/3"> Tests</div>
                     {testsDisplayJSX}
                     <p className="Problem-hidden-tests">
