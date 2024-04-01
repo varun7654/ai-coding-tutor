@@ -12,8 +12,6 @@ module.exports = {
                 'bright-blue': '#2e92f0',
                 'bright-purple': '#a475f0',
                 'basically-black': '#171c2b',
-
-
             },
         },
     },
