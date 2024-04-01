@@ -108,8 +108,8 @@ function Home() {
                              alt="User going back to the problem to fix the issue"/>
                     </div>
                 </div>
-                <div className="text-5xl font-bold mt-8">Problems</div>
-                <div id="problems" className="w-2/3 pb-96">
+                <div id="problems" className="text-5xl font-bold mt-8">Problems</div>
+                <div className="w-2/3 pb-96">
                     {getProblemFolderAsJSX(data?.files || [])}
                 </div>
             </div>
