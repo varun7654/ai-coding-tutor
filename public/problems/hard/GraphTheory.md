@@ -1,4 +1,4 @@
-# Travelling Salesman Problem
+# Graph Theory
 
 ## Context
 

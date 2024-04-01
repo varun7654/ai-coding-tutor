@@ -1,4 +1,4 @@
-# Knapsack Problem
+# Combinatorial Optimization
 
 # Context
 
