@@ -15,7 +15,11 @@ weight that can be carried is `50`. The maximum value that can be obtained is `2
 
 Write a function that takes an array of objects (each object containing an item's weight and value) and a maximum
 weight, and returns the maximum value that can be obtained by selecting a combination of items such that the total
-weight is less than or equal to the maximum weight.
+weight is less than or equal to the maximum weight. In test cases, `items` is an array of objects,
+each with a `weight` and `value`. `maxWeight` is the maximum weight that can be carried. The function `knapsackProblem`
+is called with these arguments and returns the maximum value that can be obtained by selecting items such that the total
+weight is less than or equal to `maxWeight`. The hidden test cases work similarly with
+`hiddenItems1`, `hiddenItems2`, `hiddenMaxWeight1`, and `hiddenMaxWeight2`.
 
 # Problem
 
