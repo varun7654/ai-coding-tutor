@@ -6,7 +6,7 @@ The knapsack problem is a problem in combinatorial optimization. Given a set of 
 determine the number of each item to include in a collection so that the total weight is less than or equal to a given
 limit and the total value is as large as possible.
 
-# Example
+## Example
 
 Consider a set of items: `{A, B, C, D}` with weights `{10, 20, 30, 40}` and values `{60, 100, 120, 130}`. The maximum
 weight that can be carried is `50`. The maximum value that can be obtained is `220` by taking items `A` and `C`.
@@ -63,6 +63,8 @@ let maxWeight1 = 50;
 knapsackProblem(items1, maxWeight1); // Expected output: 220
 ```
 
+displayas = knapsackProblem(items1 maxWeight1);
+
 ```javascript
 // Test case 2
 let items2 = [
@@ -73,6 +75,8 @@ let items2 = [
 let maxWeight2 = 20;
 knapsackProblem(items2, maxWeight2); // Expected output: 100
 ```
+
+displayas = knapsackProblem(items2 maxWeight2);
 
 ```javascript
 // Test case 3
@@ -86,6 +90,8 @@ knapsackProblem(items3, maxWeight3); // Expected output: 3
 
 ```
 
+displayas = knapsackProblem(items3 maxWeight3);
+
 # Hidden Test Cases
 
 ```javascript
@@ -95,15 +101,26 @@ let hiddenItems1 = [
     {weight: 4, value: 5}
 ];
 let hiddenMaxWeight1 = 5;
-knapsackProblem(hiddenItems1, hiddenMaxWeight1); // Expected output: 7
+knapsackProblem(hiddenItems1,
+    hiddenMaxWeight1); // Expected output: 7
 ```
+
+displayas = knapsackProblem(hiddenItems1, hiddenMaxWeight1);
 
 ```javascript
 let hiddenItems2 = [
-    { weight: 1, value: 10 },
-    { weight: 2, value: 20 },
-    { weight: 3, value: 30 }
+    {weight: 1, value: 10},
+    {weight: 2, value: 20},
+    {weight: 3, value: 30}
 ];
 let hiddenMaxWeight2 = 4;
- knapsackProblem(hiddenItems2, hiddenMaxWeight2); // Expected output: 40
+knapsackProblem(hiddenItems2, hiddenMaxWeight2); // Expected output: 40
+```
 
+displayas = knapsackProblem(hiddenItems2, hiddenMaxWeight2);
+
+# Next
+
+# Tags
+
+Dynamic Programming, Knapsack Problem, Hard
