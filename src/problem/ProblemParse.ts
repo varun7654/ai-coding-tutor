@@ -19,12 +19,22 @@ export class ProblemData {
 export class TestCase {
     test: string;
     display: string;
-    magicLinks: Map<string, string>;
+    magicLinks: KeyValue[];
 
-    constructor(test: string, display: string, magicLinks: Map<string, string>) {
+    constructor(test: string, display: string, magicLinks: KeyValue[]) {
         this.test = test;
         this.display = display;
         this.magicLinks = magicLinks;
+    }
+}
+
+export class KeyValue {
+    key: string;
+    value: string;
+
+    constructor(key: string, value: string) {
+        this.key = key;
+        this.value = value;
     }
 }
 
@@ -167,7 +177,7 @@ function extractTestCases(tokens: Token[], tests: TestCase[]) {
             displayAs = displayAs.substring(0, displayAs.length - 1);
         }
 
-        let magicLinks = new Map<string, string>();
+        let magicLinks: KeyValue[] = [];
 
         // @ts-ignore - ts seems to not believe that type could be paragraph
         while (tokens.length > 0 && tokens[0].type === "paragraph") {
@@ -207,13 +217,16 @@ function extractTestCases(tokens: Token[], tests: TestCase[]) {
 
             } else if (params.includes(split[0])) { // We don't want to remove the casing
                 // This is a parameter
-                magicLinks.set(split[0], value.trim());
+                magicLinks.push({
+                    key: split[0],
+                    value: value.trim()
+                });
             } else {
                 console.error("Unknown metadata key: " + split[0]);
             }
             absorbWhitespace(tokens);
         }
-        
+
         for (let i = 0; i < repeatTimes; i++) {
             tests.push({
                 test: testString,

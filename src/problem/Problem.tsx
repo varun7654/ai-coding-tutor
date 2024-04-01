@@ -269,9 +269,10 @@ export function Problem() {
                 onClose={handlePopoverClose}
                 disableRestoreFocus
             >
-                <div className="p-2 bg-basically-black text-[#abb2bf]" dangerouslySetInnerHTML=
-                    {{__html: hoverHtml}
-                    }/>
+                <div className="p-2 bg-basically-black text-[#abb2bf]"
+                     style={{fontFamily: '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace'}}
+                     dangerouslySetInnerHTML={{__html: hoverHtml}
+                     }/>
             </Popover>
         </div>
     );
@@ -304,9 +305,10 @@ function getTestElement(test: TestCase, expectedResult: string, actualResult: st
 
     let testString = test.display;
 
-    for (const magicLink of test.magicLinks.entries()) {
-        let key = magicLink[0];
-        let value = magicLink[1];
+    for (const entries of test.magicLinks.values()) {
+        let key = entries.key;
+        let value = entries.value;
+        
         let index = testString.indexOf(key);
 
         if (index === -1) {
