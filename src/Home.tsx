@@ -67,7 +67,7 @@ function Home() {
                     <div className="-mt-16 w-2/3">
                         <div className="text-3xl text-black font-bold">Welcome to</div>
                         <div className="text-9xl font-extrabold text-bright-purple -mt-5">WeCode</div>
-                        <div className="text-xl text-black font-semibold mt-5 pl-4">The Smart Way to Learn to Code</div>
+                        <div className="text-xl text-black font-semibold mt-5 pl-4">Your Coding Ally</div>
                         <ScrollLink to="problems" smooth={true} duration={500}>
                             <div className="text-xl text-bright-blue underline font-semibold pl-4">Start Learning Now
                             </div>
