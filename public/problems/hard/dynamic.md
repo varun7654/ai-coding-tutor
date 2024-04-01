@@ -67,7 +67,7 @@ let maxWeight1 = 50;
 knapsackProblem(items1, maxWeight1); // Expected output: 220
 ```
 
-displayas = knapsackProblem(items1 maxWeight1);
+displayas = knapsackProblem(items1, maxWeight1);
 
 ```javascript
 // Test case 2
@@ -80,7 +80,7 @@ let maxWeight2 = 20;
 knapsackProblem(items2, maxWeight2); // Expected output: 100
 ```
 
-displayas = knapsackProblem(items2 maxWeight2);
+displayas = knapsackProblem(items2, maxWeight2);
 
 ```javascript
 // Test case 3
@@ -91,10 +91,9 @@ let items3 = [
 ];
 let maxWeight3 = 2;
 knapsackProblem(items3, maxWeight3); // Expected output: 3
-
 ```
 
-displayas = knapsackProblem(items3 maxWeight3);
+displayas = knapsackProblem(items3, maxWeight3);
 
 # Hidden Test Cases
 
@@ -105,8 +104,7 @@ let hiddenItems1 = [
     {weight: 4, value: 5}
 ];
 let hiddenMaxWeight1 = 5;
-knapsackProblem(hiddenItems1,
-    hiddenMaxWeight1); // Expected output: 7
+knapsackProblem(hiddenItems1, hiddenMaxWeight1); // Expected output: 7
 ```
 
 displayas = knapsackProblem(hiddenItems1, hiddenMaxWeight1);

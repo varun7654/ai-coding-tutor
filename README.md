@@ -18,6 +18,11 @@ You will also see any lint errors in the console.
 
 Deploys the app to GitHub Pages.
 
+# Server-Side
+
+- Hosted on Cloudflare Workers
+  https://github.com/varun7654/ai-code-tutor-cf-workers
+
 # Problem Format
 
 Each problem is a markdown file in the `public/problems` directory.
@@ -95,6 +100,8 @@ f(0);
 Test cases can also be longer than one line. This allows you to write extra code to set up parameters for the function
 call.
 
+**Ensure that the last line of the code block is the function call. Double check that there aren't any extra lines!**
+
 The last line of the code block must call the function that you're testing.
 The result of the function is captured and is used to determine if the user's solution is correct. (We do a string
 comparison of the result).
@@ -108,7 +115,7 @@ We do run the solution code before the user's code to ensure the user's code isn
 
 Modifiers should be placed after the test case code block that you want them to apply to.
 
-If you want to add modifiers to the test cases, you should separate them with commas.
+If you want to add multiple modifiers to one test case, you should separate them with new lines.
 
 - repeat=\<number\>: This modifier will repeat the test case the specified number of times.
   This is useful for testing functions where you're randomly generating input values.
