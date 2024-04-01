@@ -115,7 +115,7 @@ We do run the solution code before the user's code to ensure the user's code isn
 
 Modifiers should be placed after the test case code block that you want them to apply to.
 
-If you want to add multiple modifiers to one test case, you should separate them with new lines.
+If you want to add multiple modifiers to one test case, you should separate them with *two* new lines.
 
 - repeat=\<number\>: This modifier will repeat the test case the specified number of times.
   This is useful for testing functions where you're randomly generating input values.
@@ -129,6 +129,35 @@ If you want to add multiple modifiers to one test case, you should separate them
   repeat=100
 - displayas=\<string\>: This modifier will display the test case as the specified string.
   This is useful for hiding the actual test case from the user when there is complex setup code.
+- Magic Links
+    - For any parameter being passed to a function as a test case, you can define a magic link to show the user what
+      value the parameter holds.
+    - Say you have a test case like this:
+      ```
+      ```javascript
+      let items2 = [
+      {weight: 5, value: 30},
+      {weight: 10, value: 50},
+      {weight: 15, value: 70}
+      ];
+      let maxWeight2 = 20;
+      knapsackProblem(items2, maxWeight2);
+      .```
+      ```
+    - You can define a magic by adding a modifier with the name of the parameter and the value you want to show the
+      user.
+      ```text
+      items2 = [
+      {weight: 5, value: 30},
+      {weight: 10, value: 50},
+      {weight: 15, value: 70}
+      ];
+      
+      maxWeight2 = 20
+      ```
+    - The user will then see the magic link when they hover over the parameter in the test case.
+    - Remember that magic links are modifiers, so each new magic link should be separated by two new lines.
+    - You should place the magic links after the displayas modifier if you have one.
 
 ### Hidden Test Cases
 

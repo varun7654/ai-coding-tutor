@@ -9,10 +9,10 @@ import {useParams} from "react-router-dom";
 import 'katex/dist/katex.min.css';
 import {getUserName} from "../auth/AuthHelper";
 import {getExpectedResults, TestResult, TestResults, testUserCode} from "./CodeRunner";
-import {Button, ThemeProvider} from "@mui/material";
+import {Button, Popover, ThemeProvider, Typography} from "@mui/material";
 import {buttonTheme, mutedButtonTheme} from "../App";
 import markedKatex from "marked-katex-extension";
-import {parseProblem, ProblemData} from "./ProblemParse";
+import {parseProblem, ProblemData, TestCase} from "./ProblemParse";
 
 hljs.registerAliases([""], {languageName: "javascript"})
 export const marked = new Marked(
@@ -49,6 +49,10 @@ export function Problem() {
     const {"*": id} = useParams();
     const [userData, setUserData] = useState(null as unknown as UserData);
     const [helpResponse, setHelpResponse] = useState("");
+    const [magicLinksHover, setMagicLinks] = useState({
+        anchorEl: null as (HTMLElement | null),
+        magicLink: "",
+    })
 
     function onCodeSubmit() {
         return onSubmission(problemData, userData, setUserData);
@@ -116,14 +120,38 @@ export function Problem() {
         }
     }
 
+    let hljsLang = problemData.codeLang;
+    if (hljsLang === "") {
+        hljsLang = "plaintext";
+    }
+
     let descParsed = DOMPurify.sanitize(marked.parse(problemData.preProblemDescription + "\n\n" + problemData.description) as string);
 
+    const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>, magicLink: string) => {
+        setMagicLinks({
+            anchorEl: event.currentTarget as HTMLElement,
+            magicLink: magicLink
+        });
+    };
+
+    const handlePopoverClose = () => {
+        setMagicLinks({
+            anchorEl: null,
+            magicLink: ""
+        });
+    };
+
+    const open = Boolean(magicLinksHover.anchorEl);
+
+
     let testsDisplay = [];
+
     for (let i = 0; i < problemData.tests.length; i++) {
-        testsDisplay.push(getTestElement(problemData.testsDisplay[i],
+        testsDisplay.push(getTestElement(problemData.tests[i],
             userData.testResults.expectedResults[i],
             userData.testResults.returnedResults[i],
-            userData.testResults.testResults[i]));
+            userData.testResults.testResults[i],
+            handlePopoverOpen, handlePopoverClose));
     }
 
     let testsDisplayJSX = <div>There are no visible test cases</div>;
@@ -196,6 +224,10 @@ export function Problem() {
         nextProblem = <div/>
     }
 
+
+    let highlightHover = hljs.highlight(magicLinksHover.magicLink, {language: hljsLang});
+    let hoverHtml = DOMPurify.sanitize(highlightHover.value.replace(/\n/g, "<br>"));
+
     return (
         <div className="ml-5 flex-row">
             <div className="text-7xl font-bold pt-1 pb-5">{problemData.title}</div>
@@ -219,6 +251,28 @@ export function Problem() {
                     {helpBox}
                 </div>
             </div>
+            <Popover
+                id="mouse-over-popover"
+                sx={{
+                    pointerEvents: 'none',
+                }}
+                open={open}
+                anchorEl={magicLinksHover.anchorEl}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                onClose={handlePopoverClose}
+                disableRestoreFocus
+            >
+                <div className="p-2 bg-basically-black text-[#abb2bf]" dangerouslySetInnerHTML=
+                    {{__html: hoverHtml}
+                    }/>
+            </Popover>
         </div>
     );
 }
@@ -226,17 +280,68 @@ export function Problem() {
 /**
  * Returns a JSX element for a test case
  */
-function getTestElement(test: string, expectedResult: string, actualResult: string, result: TestResult | undefined) {
+function getTestElement(test: TestCase, expectedResult: string, actualResult: string, result: TestResult | undefined,
+                        handlePopoverOpen: (event: React.MouseEvent<HTMLElement>, magicLink: string) => void,
+                        handlePopoverClose: () => void) {
     let resultText = result === undefined ? "Not Run" : result.toString();
     if (result === TestResult.Failed) {
         resultText += " (Returned: " + actualResult + ")";
     }
 
     let bgColor = result === TestResult.Passed ? "bg-test-passed" : "bg-test-failed";
+
+    class MagicLink {
+        text: string;
+        link: string;
+
+        constructor(text: string, link: string) {
+            this.text = text;
+            this.link = link;
+        }
+    }
+
+    let testStringPart: (string | MagicLink)[] = [];
+
+    let testString = test.display;
+
+    for (const magicLink of test.magicLinks.entries()) {
+        let key = magicLink[0];
+        let value = magicLink[1];
+        let index = testString.indexOf(key);
+
+        if (index === -1) {
+            console.error("Failed to find magic link in test string: " + key);
+            continue;
+        }
+        if (index > 0) {
+            testStringPart.push(testString.substring(0, index));
+            testString = testString.substring(index);
+        }
+        testStringPart.push(new MagicLink(key, value));
+        testString = testString.substring(key.length);
+    }
+
+    testStringPart.push(testString);
+
+
+    let div = <div className={"mb-2 text-black font-bold " + bgColor}>
+        {testStringPart.map((part, i) => {
+            if (part instanceof MagicLink) {
+                return <span key={i} className={"text-purple-800 underline"}
+                             onMouseEnter={(e) => handlePopoverOpen(e, part.text + " = " + part.link)}
+                             onMouseLeave={handlePopoverClose}>{part.text}</span>
+            } else {
+                return <span key={i}>{part}</span>
+            }
+        })}
+        <span>
+            {" ➔"} {expectedResult} : {resultText}
+        </span>
+    </div>
+
+
     return (
-        <p className={"text-black font-bold " + bgColor}>
-            {test} {"➔"} {expectedResult} : {resultText}
-        </p>
+        div
     );
 }
 

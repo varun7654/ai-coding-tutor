@@ -313,7 +313,7 @@ let ${expectedResultsArrayName} = [] || [];
         //  - Once with the user's code
         // We'll then compare the results
         let testFull = combinedTests[i];
-        let testSplitByLines = testFull.split('\n');
+        let testSplitByLines = testFull.test.split('\n');
         let setupCode = testSplitByLines.slice(0, testSplitByLines.length - 1).join('\n');
         let getResult = testSplitByLines[testSplitByLines.length - 1];
 
@@ -461,7 +461,7 @@ ${solutionCode}
         // The result is the output of the last line
         // We'll then compare the results
         let testFull = combinedTests[i];
-        let testSplitByLines = testFull.split('\n');
+        let testSplitByLines = testFull.test.split('\n');
         let setupCode = testSplitByLines.slice(0, testSplitByLines.length - 1).join('\n');
         let getResult = testSplitByLines[testSplitByLines.length - 1];
 

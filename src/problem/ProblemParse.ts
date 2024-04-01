@@ -6,16 +6,26 @@ export class ProblemData {
     title: string = 'Loading...';
     preProblemDescription: string = "";
     description: string = "";
-    tests: string[] = [];
-    testsDisplay: string[] = [];
-    hiddenTests: string[] = []
-    hiddenTestsDisplay: string[] = [];
+    tests: TestCase[] = [];
+    hiddenTests: TestCase[] = [];
     displayAbove: string = "";
     displayBelow: string = "";
     solution: string = "";
     solutionCode: string = "";
     codeLang: string = "";
     nextProblemId: string = "";
+}
+
+export class TestCase {
+    test: string;
+    display: string;
+    magicLinks: Map<string, string>;
+
+    constructor(test: string, display: string, magicLinks: Map<string, string>) {
+        this.test = test;
+        this.display = display;
+        this.magicLinks = magicLinks;
+    }
 }
 
 export function parseProblem(text: string, id: string): ProblemData {
@@ -83,14 +93,12 @@ export function parseProblem(text: string, id: string): ProblemData {
     }
 
     removeNextHeading(tokens, "Test Cases"); // Remove the tests heading
-    let tests: string[] = [];
-    let testsDisplay: string[] = [];
-    extractTestCases(tokens, tests, testsDisplay);
+    let tests: TestCase[] = [];
+    extractTestCases(tokens, tests);
 
     removeNextHeading(tokens, "Hidden Test Cases"); // Remove the hidden tests heading
-    let hiddenTests: string[] = [];
-    let hiddenTestsDisplay: string[] = [];
-    extractTestCases(tokens, hiddenTests, hiddenTestsDisplay);
+    let hiddenTests: TestCase[] = [];
+    extractTestCases(tokens, hiddenTests);
 
     removeNextHeading(tokens, "Next");
     let nextProblemId;
@@ -117,9 +125,7 @@ export function parseProblem(text: string, id: string): ProblemData {
         preProblemDescription,
         description,
         tests,
-        testsDisplay,
         hiddenTests,
-        hiddenTestsDisplay,
         displayAbove,
         displayBelow,
         solution,
@@ -129,54 +135,91 @@ export function parseProblem(text: string, id: string): ProblemData {
     };
 }
 
-function extractTestCases(tokens: Token[], tests: string[], testsDisplay: string[]) {
+function extractTestCases(tokens: Token[], tests: TestCase[]) {
     // Tests are formatted as a list of functions in a code block with the expected result below it
     while (tokens.length > 0) {
         absorbWhitespace(tokens);
         if (tokens.length === 0 || tokens[0].type !== "code") break;
         let test = tokens.shift() as Tokens.Code;
 
+        let testString = test.text.trim();
+        let split = testString.split("\n").flatMap((s) => s.trim());
+        let functionCall = split[split.length - 1];
+        let indexBeginParen = functionCall.indexOf("(");
+        let indexEndParen = -1;
+        for (let i = functionCall.length - 1; i >= 0; i--) {
+            if (functionCall[i] === ")") {
+                indexEndParen = i;
+                break;
+            }
+        }
+        if (indexBeginParen === -1 || indexEndParen === -1) {
+            console.error("Failed to parse function call (Magic Links will not work!): " + functionCall);
+            continue;
+        }
+        let params = functionCall.substring(indexBeginParen + 1, indexEndParen).split(",").map(s => s.trim());
+
         absorbWhitespace(tokens);
         let repeatTimes = 1;
-        let displayAs = "";
+        let displayAs = testString;
+        // Remove the last ; if it exists
+        if (displayAs.endsWith(";")) {
+            displayAs = displayAs.substring(0, displayAs.length - 1);
+        }
+
+        let magicLinks = new Map<string, string>();
 
         // @ts-ignore - ts seems to not believe that type could be paragraph
-        if (tokens.length === 0 || tokens[0].type === "paragraph") {
-            let str = (tokens.shift() as Tokens.Paragraph).text.trim();
-            let metaData = str.split("\n").map(s => s.trim());
+        while (tokens.length > 0 && tokens[0].type === "paragraph") {
+            let metaData = (tokens.shift() as Tokens.Paragraph).text.trim();
 
-            for (let str of metaData) {
-                let split = str.split("=").map(s => s.trim());
-                if (split.length !== 2) {
-                    console.error("Failed to parse metadata: " + str);
+            let split = metaData.split("=").map(s => s.trim());
+            if (split.length !== 2) {
+                console.error("Failed to parse metadata: " + metaData);
+                continue;
+            }
+            let key = split[0].toLowerCase();
+            let value = split[1];
+
+            if (key === "repeat") {
+                let num = parseInt(value);
+                if (isNaN(num)) {
+                    console.error("Failed to parse repeat value: " + value);
+                } else {
+                    repeatTimes = num;
+                }
+            } else if (key === "displayas") {
+                displayAs = value;
+
+                let indexBeginParen = functionCall.indexOf("(");
+                let indexEndParen = -1;
+                for (let i = displayAs.length - 1; i >= 0; i--) {
+                    if (displayAs[i] === ")") {
+                        indexEndParen = i;
+                        break;
+                    }
+                }
+                if (indexBeginParen === -1 || indexEndParen === -1) {
+                    console.error("Failed to parse function for displayAs meta call (Magic Links will not work!): " + displayAs);
                     continue;
                 }
-                let key = split[0].toLowerCase();
-                let value = split[1];
+                params = displayAs.substring(indexBeginParen + 1, indexEndParen).split(",").map(s => s.trim());
 
-                if (key === "repeat") {
-                    let num = parseInt(value);
-                    if (isNaN(num)) {
-                        console.error("Failed to parse repeat value: " + value);
-                    } else {
-                        repeatTimes = num;
-                    }
-                } else if (key === "displayas") {
-                    displayAs = value;
-                }
-
+            } else if (params.includes(split[0])) { // We don't want to remove the casing
+                // This is a parameter
+                magicLinks.set(split[0], value.trim());
+            } else {
+                console.error("Unknown metadata key: " + split[0]);
             }
+            absorbWhitespace(tokens);
         }
-        if (displayAs === "") {
-            displayAs = test.text.trim();
-            // Remove the last ; if it exists
-            if (displayAs.endsWith(";")) {
-                displayAs = displayAs.substring(0, displayAs.length - 1);
-            }
-        }
+        
         for (let i = 0; i < repeatTimes; i++) {
-            tests.push(test.text);
-            testsDisplay.push(displayAs);
+            tests.push({
+                test: testString,
+                display: displayAs,
+                magicLinks
+            });
         }
     }
 }
