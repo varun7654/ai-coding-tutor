@@ -158,6 +158,10 @@ If you want to add multiple modifiers to one test case, you should separate them
     - The user will then see the magic link when they hover over the parameter in the test case.
     - Remember that magic links are modifiers, so each new magic link should be separated by two new lines.
     - You should place the magic links after the displayas modifier if you have one.
+    - After your equal sign, you can optionally use a code block to write out the value of the parameter.
+    - Magic links are also automatically generated, so you don't need to write them out manually unless you want to
+      override the default value.
+        - This requires that you define your parameter variable with `let` and end with a semicolon.
 
 ### Hidden Test Cases
 

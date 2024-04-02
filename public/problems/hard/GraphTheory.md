@@ -79,20 +79,6 @@ let distances1 = [
 travellingSalesmanProblem(distances1); // Expected output: 80
 ```
 
-displayas = travellingSalesmanProblem(distances1);
-
-distances1 =
-
-```javascript
-[
-    //A   B   C   D
-    [0, 10, 15, 20], // A
-    [10, 0, 35, 25], // B
-    [15, 35, 0, 30], // C
-    [20, 25, 30, 0]  // D
-];
-```
-
 ```javascript
 // Test case 2
 let distances2 = [
@@ -104,20 +90,6 @@ let distances2 = [
 travellingSalesmanProblem(distances2); // Expected output: 27
 ```
 
-displayas = travellingSalesmanProblem(distances2);
-
-distances2 =
-
-```javascript
-[
-    //A   B   C   D
-    [0, 5, 11, 9], // A
-    [5, 0, 7, 6], // B
-    [11, 7, 0, 10], // C
-    [9, 6, 10, 0]  // D
-];
-```
-
 ```javascript
 // Test case 3
 let distances3 = [
@@ -127,21 +99,6 @@ let distances3 = [
     [10, 4, 8, 0]
 ];
 travellingSalesmanProblem(distances3); // Expected output: 21
-```
-
-displayas = travellingSalesmanProblem(distances3);
-
-distances3 =
-
-```javascript
-[
-    //A   B   C   D
-    [0, 1, 15, 6], // A
-    [2, 0, 7, 3], // B
-    [9, 6, 0, 12], // C
-    [10, 4, 8, 0]  // D
-];
-
 ```
 
 ## Hidden Test Cases
@@ -157,20 +114,6 @@ let distances4 = [
 travellingSalesmanProblem(distances4); // Expected output: 21
 ```
 
-displayas = travellingSalesmanProblem(distances4);
-
-distances4 =
-
-```javascript
-[
-    //A   B   C   D
-    [0, 2, 9, 10], // A
-    [1, 0, 6, 4], // B
-    [15, 7, 0, 8], // C
-    [6, 3, 12, 0]  // D
-];
-```
-
 ```javascript
 // Hidden test case 2
 let distances5 = [
@@ -182,20 +125,6 @@ let distances5 = [
 travellingSalesmanProblem(distances5); // Expected output: 27
 ```
 
-displayas = travellingSalesmanProblem(distances5);
-
-distances5 =
-
-```javascript
-[
-    //A   B   C   D
-    [0, 5, 2, 3], // A
-    [10, 0, 15, 5], // B
-    [13, 4, 0, 20], // C
-    [7, 14, 8, 0]  // D
-];
-```
-
 ```javascript
 // Hidden test case 3
 let distances6 = [
@@ -205,20 +134,6 @@ let distances6 = [
     [10, 11, 12, 0]
 ];
 travellingSalesmanProblem(distances6); // Expected output: 18
-```
-
-displayas = travellingSalesmanProblem(distances6);
-
-distances6 =
-
-```javascript
-[
-    //A   B   C   D
-    [0, 1, 3, 4], // A
-    [2, 0, 5, 6], // B
-    [7, 8, 0, 9], // C
-    [10, 11, 12, 0]  // D
-];
 ```
 
 # Next

@@ -171,13 +171,53 @@ function extractTestCases(tokens: Token[], tests: TestCase[]) {
 
         absorbWhitespace(tokens);
         let repeatTimes = 1;
-        let displayAs = testString;
+        let displayAs = functionCall;
         // Remove the last ; if it exists
         if (displayAs.endsWith(";")) {
             displayAs = displayAs.substring(0, displayAs.length - 1);
         }
 
         let magicLinks: KeyValue[] = [];
+
+        for (let param of params) {
+            // See if we can find where the parameter is defined in the code block
+            // We want to match let param = value;
+            let match = testString.match(new RegExp(`let\\s+${param}\\s*=\\s*`));
+            if (match !== null && match.index !== undefined) {
+                let value = testString.substring(match.index + match[0].length).trim();
+                let bracketCount = 0;
+                let curlyCount = 0;
+                let doubleQuoteCount = 0;
+                let singleQuoteCount = 0;
+                let backtickCount = 0;
+                for (let i = 0; i < value.length; i++) {
+                    let c = value[i];
+                    if (c === "(") {
+                        bracketCount++;
+                    } else if (c === ")") {
+                        bracketCount--;
+                    } else if (c === "{") {
+                        curlyCount++;
+                    } else if (c === "}") {
+                        curlyCount--;
+                    } else if (c === "\"") {
+                        doubleQuoteCount++;
+                    } else if (c === "'") {
+                        singleQuoteCount++;
+                    } else if (c === "`") {
+                        backtickCount++;
+                    }
+                    if (bracketCount === 0 && curlyCount === 0 && doubleQuoteCount % 2 === 0 && singleQuoteCount % 2 === 0 && backtickCount % 2 === 0 && c === ";" && i !== value.length - 1) {
+                        value = value.substring(0, i);
+                        break;
+                    }
+                }
+
+                setKeyValue(magicLinks, param, value);
+            }
+        }
+
+        console.log(magicLinks);
 
         // @ts-ignore - ts seems to not believe that type could be paragraph
         while (tokens.length > 0 && tokens[0].type === "paragraph") {
@@ -225,14 +265,10 @@ function extractTestCases(tokens: Token[], tests: TestCase[]) {
                         console.error("Found magic link with nothing after the equals sign & no code block following: " + split[0]);
                     } else {
                         value = (tokens.shift() as Tokens.Code).text;
-                        console.log("Found magic link with code block: " + value);
                     }
                 }
                 // This is a parameter
-                magicLinks.push({
-                    key,
-                    value
-                });
+                setKeyValue(magicLinks, key, value);
             } else {
                 console.error("Unknown metadata key: " + split[0]);
             }
@@ -247,6 +283,17 @@ function extractTestCases(tokens: Token[], tests: TestCase[]) {
             });
         }
     }
+}
+
+
+function setKeyValue(kvList: KeyValue[], key: string, value: string) {
+    for (let kv of kvList) {
+        if (kv.key === key) {
+            kv.value = value;
+            return;
+        }
+    }
+    kvList.push(new KeyValue(key, value));
 }
 
 
