@@ -216,10 +216,22 @@ function extractTestCases(tokens: Token[], tests: TestCase[]) {
                 params = displayAs.substring(indexBeginParen + 1, indexEndParen).split(",").map(s => s.trim());
 
             } else if (params.includes(split[0])) { // We don't want to remove the casing
+                let key = split[0];
+                let value = split[1];
+                if (split[1].length === 0) {
+                    // We should look for a code block
+                    absorbWhitespace(tokens);
+                    if (tokens.length === 0 || tokens[0].type !== "code") {
+                        console.error("Found magic link with nothing after the equals sign & no code block following: " + split[0]);
+                    } else {
+                        value = (tokens.shift() as Tokens.Code).text;
+                        console.log("Found magic link with code block: " + value);
+                    }
+                }
                 // This is a parameter
                 magicLinks.push({
-                    key: split[0],
-                    value: value.trim()
+                    key,
+                    value
                 });
             } else {
                 console.error("Unknown metadata key: " + split[0]);

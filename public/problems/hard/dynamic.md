@@ -67,11 +67,15 @@ knapsackProblem(items1, maxWeight1);
 
 displayas = knapsackProblem(items1, maxWeight1)
 
-items1 = [
-{weight: 10, value: 60},
-{weight: 20, value: 100},
-{weight: 30, value: 120}
+items1 =
+
+```javascript
+[
+    {weight: 10, value: 60},
+    {weight: 20, value: 100},
+    {weight: 30, value: 120}
 ];
+```
 
 maxWeight1 = 50
 
@@ -87,11 +91,15 @@ knapsackProblem(items2, maxWeight2);
 
 displayas = knapsackProblem(items2, maxWeight2)
 
-items2 = [
-{weight: 5, value: 30},
-{weight: 10, value: 50},
-{weight: 15, value: 70}
+items2 =
+
+```javascript
+[
+    {weight: 5, value: 30},
+    {weight: 10, value: 50},
+    {weight: 15, value: 70}
 ];
+```
 
 maxWeight2 = 20
 
@@ -107,11 +115,15 @@ knapsackProblem(items3, maxWeight3);
 
 displayas = knapsackProblem(items3, maxWeight3);
 
-items3 = [
-{weight: 1, value: 1},
-{weight: 2, value: 2},
-{weight: 3, value: 3}
+items3 =
+
+```javascript
+[
+    {weight: 1, value: 1},
+    {weight: 2, value: 2},
+    {weight: 3, value: 3}
 ]
+```
 
 maxWeight3 = 2
 
@@ -129,11 +141,15 @@ knapsackProblem(hiddenItems1, hiddenMaxWeight1);
 
 displayas = knapsackProblem(hiddenItems1, hiddenMaxWeight1);
 
-hiddenItems1 = [
-{weight: 2, value: 3},
-{weight: 3, value: 4},
-{weight: 4, value: 5}
+hiddenItems1 =
+
+```javascript
+[
+    {weight: 2, value: 3},
+    {weight: 3, value: 4},
+    {weight: 4, value: 5}
 ];
+```
 
 hiddenMaxWeight1 = 5;
 
@@ -149,11 +165,16 @@ knapsackProblem(hiddenItems2, hiddenMaxWeight2);
 
 displayas = knapsackProblem(hiddenItems2, hiddenMaxWeight2);
 
-hiddenItems2 = [
-{weight: 1, value: 10},
-{weight: 2, value: 20},
-{weight: 3, value: 30}
+hiddenItems2 =
+
+```javascript
+[
+    {weight: 1, value: 10},
+    {weight: 2, value: 20},
+    {weight: 3, value: 30}
 ];
+```
+
 hiddenMaxWeight2 = 4;
 
 # Next
