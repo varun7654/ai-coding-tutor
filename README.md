@@ -144,7 +144,7 @@ If you want to add multiple modifiers to one test case, you should separate them
       knapsackProblem(items2, maxWeight2);
       .```
       ```
-    - You can define a magic by adding a modifier with the name of the parameter and the value you want to show the
+    - You can define a magic link by adding a modifier with the name of the parameter and the value you want to show the
       user.
       ```text
       items2 = [
