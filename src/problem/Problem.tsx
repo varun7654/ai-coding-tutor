@@ -9,7 +9,7 @@ import {useParams} from "react-router-dom";
 import 'katex/dist/katex.min.css';
 import {getUserName} from "../auth/AuthHelper";
 import {getExpectedResults, TestResult, TestResults, testUserCode} from "./CodeRunner";
-import {Button, Popover, ThemeProvider, Typography} from "@mui/material";
+import {Button, Popover, ThemeProvider} from "@mui/material";
 import {buttonTheme, mutedButtonTheme} from "../App";
 import markedKatex from "marked-katex-extension";
 import {parseProblem, ProblemData, TestCase} from "./ProblemParse";
@@ -48,7 +48,7 @@ export function Problem() {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
     const {"*": id} = useParams();
     const [userData, setUserData] = useState(null as unknown as UserData);
-    const [helpResponse, setHelpResponse] = useState("");
+    const [helpResponse, setHelpResponse] = useState("When you press \"I'm stuck\", the AI tutor will respond here.");
     const [magicLinksHover, setMagicLinks] = useState({
         anchorEl: null as (HTMLElement | null),
         magicLink: "",
@@ -107,12 +107,15 @@ export function Problem() {
                     let problemData = new ProblemData();
                     problemData.title = "Failed to load problem " + normalizedId;
                     setProblemData(problemData);
-                })
+                });
         }
     }, [normalizedId]);
 
 
     if (problemData === null || userData === null) {
+        if (problemData != null && problemData.title !== undefined && problemData.title.startsWith("Failed to load problem") && normalizedId !== undefined) {
+            return <div>Failed to load problem {normalizedId}</div>;
+        }
         if (normalizedId !== undefined) {
             return <div>Loading...</div>;
         } else {
@@ -137,7 +140,7 @@ export function Problem() {
     const handlePopoverClose = () => {
         setMagicLinks({
             anchorEl: null,
-            magicLink: ""
+            magicLink: magicLinksHover.magicLink
         });
     };
 
@@ -238,7 +241,7 @@ export function Problem() {
                         updateUserCode(value);
                     }, userData.currentCode)}
                     <div className="pt-2">
-                        <SubmitButton onClick={onCodeSubmit}/> {helpButton} {nextProblem}
+                        {nextProblem}
                     </div>
                 </div>
                 <div className="w-1/2 pl-4 pr-4">
@@ -247,6 +250,7 @@ export function Problem() {
                     <p className="Problem-hidden-tests">
                         {hiddenTestText}
                     </p>
+                    <SubmitButton onClick={onCodeSubmit}/> {helpButton}
                     <div className="text-error-red" dangerouslySetInnerHTML={{__html: errorText}}/>
                     {helpBox}
                 </div>

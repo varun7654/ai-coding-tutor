@@ -120,7 +120,7 @@ export function HelpBoxAndButton(problemData: ProblemData,
     );
 
     let helpBox = (
-        <div className="AI-help-area border-2  p-2 m-2 border-white-pink w-full min-h-20">
+        <div className="AI-help-area border-2  p-2 mt-2 mr-2 border-white-pink w-full min-h-20">
             <p className="Code-tutor-response" dangerouslySetInnerHTML={{__html: response}}/>
         </div>
     );
