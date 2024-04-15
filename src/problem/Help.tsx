@@ -47,8 +47,6 @@ export function HelpBoxAndButton(problemData: ProblemData,
                 status: number,
                 prompt: string,
                 response: string,
-                rememberingPrompt: string,
-                rememberingResponse: string,
                 expire_logins: boolean,
             }) => {
                 if (json.expire_logins) {
@@ -81,13 +79,19 @@ export function HelpBoxAndButton(problemData: ProblemData,
 
                 // Collect everything under the My Response heading
                 let response = "";
-                while (tokens.length > 0 && (tokens[0].type !== "heading" || (tokens[0] as Tokens.Heading).depth > 1)) {
+                while (tokens.length > 0 && (tokens[0].type !== "heading" || (tokens[0] as Tokens.Heading).depth > 1 || (tokens[0] as Tokens.Heading).text.trim() !== "Remembering")) {
                     response += ((tokens.shift() as Token).raw);
+                }
+
+                removeNextHeading(tokens, "Remembering"); // Remove the Remembering heading
+                let rememberingResponse = "";
+                while (tokens.length > 0) {
+                    rememberingResponse += ((tokens.shift() as Token).raw);
                 }
 
                 let newUserData = {
                     ...userData,
-                    aiRememberResponse: userData.aiRememberResponse.concat([json.rememberingResponse]),
+                    aiRememberResponse: userData.aiRememberResponse.concat(rememberingResponse),
                 }
 
                 setUserData(
