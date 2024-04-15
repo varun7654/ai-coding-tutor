@@ -66,8 +66,6 @@ export function HelpBoxAndButton(problemData: ProblemData,
                     return;
                 }
 
-                console.log(json.response);
-
                 let tokens = marked.lexer(json.response);
                 // There are two sections: # Thinking out loud and # My Response
                 // We want to display the My Response section
@@ -99,8 +97,6 @@ export function HelpBoxAndButton(problemData: ProblemData,
                 );
 
                 saveUserData(problemData, newUserData);
-                console.log(newUserData.aiRememberResponse);
-
                 setResponse(DOMPurify.sanitize(marked.parse(response) as string));
                 target.removeAttribute("disabled");
             })
