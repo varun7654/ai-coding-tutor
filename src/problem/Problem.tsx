@@ -333,7 +333,7 @@ function getTestElement(test: TestCase, expectedResult: string, actualResult: st
     testStringPart.push(testString);
 
 
-    let div = <div className={"mb-2 text-black font-bold " + bgColor}>
+    let div = <div className={"mb-2 text-black font-bold pl-1 " + bgColor}>
         {testStringPart.map((part, i) => {
             if (part instanceof MagicLink) {
                 return <span key={i} className={"text-purple-800 underline"}
