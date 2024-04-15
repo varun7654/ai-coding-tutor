@@ -71,7 +71,7 @@ function tokenizeFunctionSignature(signature: string): StringLineNum[] {
  * @param userCodeLineNumbersBegin The line numbers of the user's code
  * @param userCodeLineNumbersEnd The line numbers of the user's code
  */
-function reformatStackTrace(result: Error, userCodeLineNumbersBegin: number[], userCodeLineNumbersEnd: number[]) {
+function reformatStackTrace(result: Error, userCodeLineNumbersBegin: number[], userCodeLineNumbersEnd: number[], addedLines: number[]): number {
     let stackTrace = result.stack;
     if (stackTrace === undefined) {
         stackTrace = "";
@@ -81,7 +81,6 @@ function reformatStackTrace(result: Error, userCodeLineNumbersBegin: number[], u
     for (let j = 0; j < stackTraceLines.length; j++) {
         let thisLine = stackTraceLines[j].trim();
         if (thisLine.startsWith("at testUserCode") || thisLine.startsWith("at Function") || thisLine.startsWith("at eval")) {
-            console.log("Discarding: " + thisLine);
             stackTraceLines = stackTraceLines.slice(0, j);
             break;
         }
@@ -95,7 +94,6 @@ function reformatStackTrace(result: Error, userCodeLineNumbersBegin: number[], u
     }
 
     let errorLine = -1
-
     // Find the line number of the error & adjust line numbers to match the user's code
     for (let j = 0; j < stackTraceLines.length; j++) {
         let thisLine = stackTraceLines[j].trim();
@@ -117,6 +115,16 @@ function reformatStackTrace(result: Error, userCodeLineNumbersBegin: number[], u
 
             if (userCodeLineNumberBegin !== -1 && userCodeLineNumberEnd !== -1) {
                 let newLineNumber = lineNumber - userCodeLineNumberBegin + 1;
+
+                let lineNumberOffset = 0;
+                for (let i = 0; i < addedLines.length; i++) {
+                    if (newLineNumber > addedLines[i]) {
+                        lineNumberOffset++;
+                    }
+                }
+
+                newLineNumber -= lineNumberOffset;
+
                 let columnNumber = parseInt(matches[2]); // Retrieve the column number
                 let newLine = `${newLineNumber}:${columnNumber}`; // Construct the new line with adjusted line number
                 stackTraceLines[j] = thisLine.replace(matches[0], newLine); // Replace the entire matched portion with the new line
@@ -290,6 +298,76 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
         }
     }
 
+    // We need to look for all the loops (for, while, do-while) and insert code to count the number of iterations.
+    // If the number of iterations exceeds 10000, we'll stop the code and return an error.
+    // This is to prevent infinite loops.
+
+    function findLoops(code: string) {
+        const loopRegex = /\b(for|while|do\s*while)\s*\((?:[^)(]|\((?:[^)(]+|\([^)(]*\))*\))*\)\s*\{/g;
+        const loops = [];
+        let match;
+
+        while ((match = loopRegex.exec(code)) !== null) {
+            loops.push({
+                type: match[1],
+                start: match.index,
+                end: findLoopEndIndex(code, match.index + match[0].length)
+            });
+        }
+
+        return loops;
+    }
+
+    function findLoopEndIndex(code: string, startIndex: number) {
+        let level = 1;
+        for (let i = startIndex; i < code.length; i++) {
+            if (code[i] === '{') {
+                level++;
+            } else if (code[i] === '}') {
+                level--;
+                if (level === 0) {
+                    return i + 1;
+                }
+            }
+        }
+        return -1; // If loop end is not found
+    }
+
+
+    let loopCounterExtraLines: number[] = []
+
+    let loops = findLoops(userCode);
+    for (let i = 0; i < loops.length; i++) {
+        let loop = loops[i];
+        let loopHeaderStart = loop.start;
+        let loopHeaderEnd = userCode.indexOf('{', loopHeaderStart) + 1;
+
+        let loopHeader = userCode.substring(loopHeaderStart, loopHeaderEnd);
+        let preLoopCode = userCode.substring(0, loopHeaderStart);
+        let postLoopHeader = userCode.substring(loopHeaderEnd);
+
+        let lineOfCounter = preLoopCode.split('\n').length;
+        let linePastLoopHeader = preLoopCode.split('\n').length + loopHeader.split('\n').length;
+
+        let loopCounterVar = "loopCounter" + crypto.randomUUID().replace(/-/g, '');
+        let userCodeAddPreLoop = `let ${loopCounterVar} = 0;\n`;
+        let userCodeAddPostLoop = `if (${loopCounterVar}++ > 10000) { throw new Error("Infinite loop detected. Execution stopped."); }\n`;
+        userCode = preLoopCode + userCodeAddPreLoop + loopHeader + userCodeAddPostLoop + postLoopHeader;
+
+        loopCounterExtraLines.push(lineOfCounter);
+        loopCounterExtraLines.push(linePastLoopHeader);
+
+        let addedChars = userCodeAddPreLoop.length + userCodeAddPostLoop.length;
+        //Adjust the line numbers of the loops
+        for (let j = i + 1; j < loops.length; j++) {
+            loops[j].start += addedChars;
+            loops[j].end += addedChars;
+        }
+    }
+
+    console.log("User code with loop counters: " + userCode);
+
+
     let solutionCode = problemData.solutionCode;
     let resultsArrayName = "results" + crypto.randomUUID().replace(/-/g, '');
     let expectedResultsArrayName = "expectedResults" + crypto.randomUUID().replace(/-/g, '');
@@ -375,7 +453,7 @@ ${solutionCode}
         console.error("Failed to run the solution: " + e);
         testResults.expectedResults = getExpectedResults(problemData);
         if (e instanceof Error) {
-            testResults.errorLine = reformatStackTrace(e, userCodeLineNumbersBegin, userCodeLineNumbersEnd);
+            testResults.errorLine = reformatStackTrace(e, userCodeLineNumbersBegin, userCodeLineNumbersEnd, loopCounterExtraLines);
             console.log(e.stack);
             testResults.runtimeError = e.stack as string;
         } else {
@@ -423,7 +501,7 @@ ${solutionCode}
             testResults.returnedResults.push("Error");
             testResults.testResults.push(TestResult.Exception);
             // End the stack trace at the user's code
-            testResults.errorLine = reformatStackTrace(result, userCodeLineNumbersBegin, userCodeLineNumbersEnd);
+            testResults.errorLine = reformatStackTrace(result, userCodeLineNumbersBegin, userCodeLineNumbersEnd, loopCounterExtraLines);
 
             testResults.runtimeError = result.stack as string;
             testResults.ranSuccessfully = false;
