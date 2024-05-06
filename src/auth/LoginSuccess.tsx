@@ -39,7 +39,7 @@ export default function LoginSuccess() {
                     console.error(error);
                 });
         }
-    }, []);
+    });
 
 
     return (

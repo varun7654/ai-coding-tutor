@@ -41,7 +41,7 @@ export default function LoginButton() {
                     console.error(error);
                 });
         }
-
+        // eslint-disable-next-line
     }, [loggedIn, token]);
 
     function logIn() {
@@ -85,5 +85,5 @@ export default function LoginButton() {
 export function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("userName");
-    window.location.href = window.location.href;
+    window.location.reload()
 }

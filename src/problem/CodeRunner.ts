@@ -439,6 +439,7 @@ ${solutionCode}
     let testResults = new TestResults();
 
     try {
+        // eslint-disable-next-line
         let func = Function(codeToRun);
         let out = func();
 
@@ -564,6 +565,7 @@ ${solutionCode}
     let expectedResultsArray: any[] = [];
 
     try {
+        // eslint-disable-next-line
         let func = Function(codeToRun);
         expectedResultsArray = func();
     } catch (e: any) {
