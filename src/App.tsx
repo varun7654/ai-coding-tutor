@@ -1,11 +1,8 @@
-import React from 'react';
+import React, {lazy} from 'react';
 import {BrowserRouter as Router, Link, Route, Routes, useLocation} from 'react-router-dom';
 import './App.css';
 import 'highlight.js/styles/atom-one-dark.min.css';
-import {Problem} from "./problem/Problem";
-import Home from './Home';
 import LoginButton from "./auth/LoginButton";
-import LoginSuccess from "./auth/LoginSuccess";
 import {createTheme, Shadows} from "@mui/material";
 
 export const API_URL = "https://codehelp.api.dacubeking.com/";
@@ -68,6 +65,11 @@ export function Header() {
         )
     }
 }
+
+const Home = lazy(() => import("./Home"));
+const Problem = lazy(() => import("./problem/Problem"));
+const LoginSuccess = lazy(() => import("./auth/LoginSuccess"));
+
 
 function App() {
     return (

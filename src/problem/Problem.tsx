@@ -44,7 +44,7 @@ function getStorageKey(id: string, userName: string | undefined) {
     return "problem " + id;
 }
 
-export function Problem() {
+export default function Problem() {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
     const {"*": id} = useParams();
     const [userData, setUserData] = useState(null as unknown as UserData);
