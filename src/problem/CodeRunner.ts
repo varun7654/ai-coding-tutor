@@ -365,9 +365,6 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
         }
     }
 
-    console.log("User code with loop counters: " + userCode);
-
-
     let solutionCode = problemData.solutionCode;
     let resultsArrayName = "results" + crypto.randomUUID().replace(/-/g, '');
     let expectedResultsArrayName = "expectedResults" + crypto.randomUUID().replace(/-/g, '');
