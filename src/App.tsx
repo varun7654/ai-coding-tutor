@@ -1,4 +1,4 @@
-import React, {lazy} from 'react';
+import React, {lazy, Suspense} from 'react';
 import {BrowserRouter as Router, Link, Route, Routes, useLocation} from 'react-router-dom';
 import './App.css';
 import 'highlight.js/styles/atom-one-dark.min.css';
@@ -77,11 +77,13 @@ function App() {
             <div className="App">
                 <meta name="viewport" content="initial-scale=1, width=device-width"/>
                 <Header/>
-                <Routes>
-                    <Route path="/" Component={Home}/>
-                    <Route path="/problem/*" Component={() => <Problem/>}/>
-                    <Route path="/auth/login_success" Component={() => <LoginSuccess/>}/>
-                </Routes>
+                <Suspense fallback={<div>Loading...</div>}>
+                    <Routes>
+                        <Route path="/" Component={Home}/>
+                        <Route path="/problem/*" Component={() => <Problem/>}/>
+                        <Route path="/auth/login_success" Component={() => <LoginSuccess/>}/>
+                    </Routes>
+                </Suspense>
             </div>
         </Router>
     );
