@@ -5,8 +5,13 @@ import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/theme-github_dark";
 import "ace-builds/src-noconflict/ext-language_tools";
 
-
-export function getEditor(lang: string, onChange: (value: string) => void, defaultValue: string = "") {
+// lang: string, onChange: (value: string) => void, defaultValue: string = ""
+export default function Editor(
+    {lang, onChange, defaultValue = ""}: {
+        lang: string,
+        onChange: (value: string) => void,
+        defaultValue: string
+    }) {
 
     try {
         require(`ace-builds/src-noconflict/mode-${lang}`);

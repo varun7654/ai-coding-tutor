@@ -1,9 +1,8 @@
 import {Marked} from "marked";
 import {markedHighlight} from "marked-highlight";
 import hljs from "highlight.js/lib/common";
-import React, {useEffect, useState} from "react";
+import React, {lazy, Suspense, useEffect, useState} from "react";
 import DOMPurify from "dompurify";
-import {getEditor} from "./Editor";
 import {HelpBoxAndButton} from "./Help";
 import {useParams} from "react-router-dom";
 import 'katex/dist/katex.min.css';
@@ -15,6 +14,8 @@ import markedKatex from "marked-katex-extension";
 import {parseProblem, ProblemData, TestCase} from "./ProblemParse";
 
 hljs.registerAliases([""], {languageName: "javascript"})
+
+const Editor = lazy(() => import("./Editor"));
 export const marked = new Marked(
     markedHighlight({
         langPrefix: 'hljs language-',
@@ -236,9 +237,14 @@ export default function Problem() {
             <div className="w-1/2" dangerouslySetInnerHTML={{__html: descParsed}}/>
             <div className="flex flex-row justify-between h-auto pt-2">
                 <div className="w-1/2 h-[calc(100vh*0.80)]">
-                    {getEditor(problemData.codeLang, (value) => {
-                        updateUserCode(value);
-                    }, userData.currentCode)}
+                    <Suspense fallback={<div className={"italic text-gray-300"}>The Editor is loading...</div>}>
+                        <Editor
+                            lang={problemData.codeLang}
+                            onChange={(value) => updateUserCode(value)}
+                            defaultValue={userData.currentCode}
+                        />
+                    </Suspense>
+
                     <div className="pt-2">
                         {nextProblem}
                     </div>
