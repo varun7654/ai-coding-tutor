@@ -202,7 +202,6 @@ export function Problem() {
             }
             errorText += indentText(userData.testResults.runtimeError, 1);
         } else {
-            console.log(userData.testResults);
             errorText += "No error message was provided."
         }
     }

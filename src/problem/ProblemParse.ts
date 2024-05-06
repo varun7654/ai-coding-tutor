@@ -217,8 +217,6 @@ function extractTestCases(tokens: Token[], tests: TestCase[]) {
             }
         }
 
-        console.log(magicLinks);
-
         // @ts-ignore - ts seems to not believe that type could be paragraph
         while (tokens.length > 0 && tokens[0].type === "paragraph") {
             let metaData = (tokens.shift() as Tokens.Paragraph).text.trim();

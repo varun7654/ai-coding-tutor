@@ -20,7 +20,6 @@ export default function LoginSuccess() {
                 .then(response => response.json())
                 .then(result => {
                     if (result.token) {
-                        console.log("Finished logging in. Token: " + result.token);
                         localStorage.setItem("token", result.token);
                         let loginRedirect = localStorage.getItem("loginRedirect");
 
