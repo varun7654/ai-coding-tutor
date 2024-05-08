@@ -1,5 +1,7 @@
 import {UserData} from "./Problem";
 import {ProblemData} from "./ProblemParse";
+import {Log} from "capture-console-logs/dist/logs";
+import * as util from "util";
 
 const functionHeaderOffset = 2;
 
@@ -17,7 +19,7 @@ export class TestResults {
     public parseError: string = "";
     public errorLine: number = -1;
     public runtimeError: string = "";
-    public output: string = "";
+    public outputs: string[][] = [];
     public ranSuccessfully: boolean = true; // Prevents the user from seeing an error message on first load
 }
 
@@ -30,6 +32,9 @@ class StringLineNum {
         this.lineNum = lineNum;
     }
 }
+
+const CaptureConsole = require("capture-console-logs").default
+
 
 // Function to tokenize a JavaScript function signature
 function tokenizeFunctionSignature(signature: string): StringLineNum[] {
@@ -174,7 +179,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
                         parseError: "You began a new function after closing your first one. You cannot do that. If you want to define a new function, do it inside the first function.",
                         errorLine: lineNum,
                         runtimeError: "",
-                        output: "",
+                        outputs: [],
                         ranSuccessfully: false
                     };
                 }
@@ -197,7 +202,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
                     parseError: "Unbalanced brackets. Extra '}' found.",
                     errorLine: lineNum,
                     runtimeError: "",
-                    output: "",
+                    outputs: [],
                     ranSuccessfully: false
                 };
             }
@@ -211,7 +216,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
                 parseError: "Unbalanced brackets. Missing '}'.",
                 errorLine: lineNum,
                 runtimeError: "",
-                output: "",
+                outputs: [],
                 ranSuccessfully: false
             };
         }
@@ -224,7 +229,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
                 parseError: "No function found. We expected to see at least one pair of '{}'.",
                 errorLine: lineNum,
                 runtimeError: "",
-                output: "",
+                outputs: [],
                 ranSuccessfully: false
             };
         }
@@ -237,7 +242,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
                 parseError: "You have stray character(s) after the last '}'.",
                 errorLine: characterAfterLastBracket.lineNum,
                 runtimeError: "",
-                output: "",
+                outputs: [],
                 ranSuccessfully: false
             };
         }
@@ -277,7 +282,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
                     parseError,
                     errorLine: tokens[i].lineNum,
                     runtimeError: "",
-                    output: "",
+                    outputs: [],
                     ranSuccessfully: false
                 };
             }
@@ -292,7 +297,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
                     "Expected: " + expectedFunctionSignature + " but got: " + functionSignature,
                 errorLine: tokens[tokens.length - 1].lineNum,
                 runtimeError: "",
-                output: "",
+                outputs: [],
                 ranSuccessfully: false
             };
         }
@@ -368,17 +373,19 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
     let solutionCode = problemData.solutionCode;
     let resultsArrayName = "results" + crypto.randomUUID().replace(/-/g, '');
     let expectedResultsArrayName = "expectedResults" + crypto.randomUUID().replace(/-/g, '');
+    let consoleLogArrayName = "consoleLog" + crypto.randomUUID().replace(/-/g, '');
 
     let codeToRun = `
 let ${resultsArrayName} = [] || [];
 let ${expectedResultsArrayName} = [] || [];
+let ${consoleLogArrayName} = [] || [];
     `;
 
     let userCodeLineNumbersBegin: number[] = [];
 
     let userCodeLineNumbersEnd: number[] = [];
 
-    let combinedTests = problemData.tests.concat(problemData.hiddenTests);
+    let combinedTests = problemData.tests.concat(problemData.hiddenTests)
 
     for (let i = 0; i < combinedTests.length; i++) {
         // Split out everything except the last line of the test case
@@ -407,6 +414,8 @@ ${solutionCode}
                     }
                 }
                 {
+                const cc = new CaptureConsole();
+                cc.start();
                 `;
         userCodeLineNumbersBegin.push(codeToRun.split('\n').length);
         codeToRun += userCode;
@@ -418,6 +427,8 @@ ${solutionCode}
                     } catch (e) {
                         result = e;
                     }
+                    cc.stop();
+                    ${consoleLogArrayName}.push(cc.getCaptures());
                 }
             }
             ${resultsArrayName}.push(result);
@@ -427,24 +438,27 @@ ${solutionCode}
     }
 
     codeToRun += `
-    return [${resultsArrayName}, ${expectedResultsArrayName}];
+    return [${resultsArrayName}, ${expectedResultsArrayName}, ${consoleLogArrayName}];
     `;
 
     // eslint-disable-next-line
     let resultsArray: any[] = [];
     // eslint-disable-next-line
     let expectedResultsArray: any[] = [];
+    let consoleLogArray: Log[][] = [];
 
 
     let testResults = new TestResults();
 
     try {
         // eslint-disable-next-line
-        let func = Function(codeToRun);
-        let out = func();
+        let func = Function("CaptureConsole", codeToRun);
+        console.log(func.toString());
+        let out = func(CaptureConsole);
 
         resultsArray = out[0];
         expectedResultsArray = out[1];
+        consoleLogArray = out[2];
         testResults.ranSuccessfully = true;
     } catch (e) {
         testResults.ranSuccessfully = false;
@@ -465,6 +479,7 @@ ${solutionCode}
             testResults.testResults.push(TestResult.NotRun);
             testResults.expectedResults.push("Unknown");
             testResults.returnedResults.push("Unknown");
+            testResults.outputs.push([]);
             testResults.ranSuccessfully = false;
             continue;
         }
@@ -473,12 +488,20 @@ ${solutionCode}
             testResults.testResults.push(TestResult.NotRun);
             testResults.expectedResults.push(expectedResultsArray[i].toString());
             testResults.returnedResults.push("Unknown");
+            testResults.outputs.push([]);
             testResults.ranSuccessfully = false;
             continue;
         }
 
         let result = resultsArray[i];
         let expectedResult = expectedResultsArray[i];
+        let log: Log[];
+        if (i > problemData.tests.length) {
+            log = []; //Don't save console logs for hidden tests
+        } else {
+            log = consoleLogArray[i];
+
+        }
 
         if (expectedResult instanceof Error) {
             testResults.expectedResults.push("Error");
@@ -494,6 +517,30 @@ ${solutionCode}
         } else {
             testResults.expectedResults.push(safeToString(expectedResult));
         }
+
+        let outputArray: string[] = [];
+        for (let entry of log) {
+            let out = "";
+            if (entry.function !== "log") {
+                out = entry.function + ": ";
+            }
+
+            for (let arg of entry.args) {
+                if (arg instanceof Error) {
+                    reformatStackTrace(arg, userCodeLineNumbersBegin, userCodeLineNumbersEnd, loopCounterExtraLines);
+                }
+            }
+
+            if (entry.args.length > 0) {
+                out += util.format(entry.args[0], ...entry.args.slice(1));
+            } else {
+                out += "";
+            }
+
+            outputArray.push(out);
+        }
+
+        testResults.outputs.push(outputArray);
 
         if (result instanceof Error) {
             testResults.returnedResults.push("Error");
@@ -514,6 +561,8 @@ ${solutionCode}
             testResults.testResults.push(TestResult.Passed);
         }
     }
+
+    console.log(testResults.outputs);
 
     return testResults;
 }

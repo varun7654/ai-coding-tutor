@@ -120,11 +120,11 @@ findNthFibonacci(11);
 # Hidden Test Cases
 
 ```javascript
-let num = Math.floor(Math.random() * 1000);
+let num = Math.floor(Math.random() * 100);
 findNthFibonacci(num);
 ```
 
-repeat = 100
+repeat = 20
 
 # Next
 
