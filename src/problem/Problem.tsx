@@ -151,10 +151,7 @@ export default function Problem() {
     let testsDisplay = [];
 
     for (let i = 0; i < problemData.tests.length; i++) {
-        testsDisplay.push(getTestElement(problemData.tests[i],
-            userData.testResults.expectedResults[i],
-            userData.testResults.returnedResults[i],
-            userData.testResults.testResults[i],
+        testsDisplay.push(getTestElement(problemData.tests, userData.testResults, i,
             handlePopoverOpen, handlePopoverClose));
     }
 
@@ -293,12 +290,13 @@ export default function Problem() {
 /**
  * Returns a JSX element for a test case
  */
-function getTestElement(test: TestCase, expectedResult: string, actualResult: string, result: TestResult | undefined,
+function getTestElement(testCases: TestCase[], testResults: TestResults, index: number,
                         handlePopoverOpen: (event: React.MouseEvent<HTMLElement>, magicLink: string) => void,
                         handlePopoverClose: () => void) {
+    let result = testResults.testResults[index];
     let resultText = result === undefined ? "Not Run" : result.toString();
     if (result === TestResult.Failed) {
-        resultText += " (Returned: " + actualResult + ")";
+        resultText += " (Returned: " + testResults.returnedResults[index] + ")";
     }
 
     let bgColor = result === TestResult.Passed ? "bg-test-passed" : "bg-test-failed";
@@ -315,9 +313,9 @@ function getTestElement(test: TestCase, expectedResult: string, actualResult: st
 
     let testStringPart: (string | MagicLink)[] = [];
 
-    let testString = test.display;
+    let testString = testCases[index].display;
 
-    for (const entries of test.magicLinks.values()) {
+    for (const entries of testCases[index].magicLinks.values()) {
         let key = entries.key;
         let value = entries.value;
 
@@ -336,6 +334,22 @@ function getTestElement(test: TestCase, expectedResult: string, actualResult: st
     }
 
     testStringPart.push(testString);
+    let shouldDisplayConsole = testResults.outputs[index] !== undefined && testResults.outputs[index].length > 0;
+
+
+    let resultSpan;
+    if (shouldDisplayConsole) {
+        let consoleOutput = shouldDisplayConsole ? "Console Output: \n" + testResults.outputs[index].join("\n") : "";
+
+        resultSpan =
+            <span className={"underline decoration-gray-600 underline-offset-2"}
+                  onMouseEnter={(e) => handlePopoverOpen(e, consoleOutput)}
+                  onMouseLeave={handlePopoverClose}>
+            {testResults.expectedResults[index]} : {resultText}
+        </span>
+    } else {
+        resultSpan = <span>{testResults.expectedResults[index]} : {resultText}</span>
+    }
 
 
     let div = <div className={"mb-2 text-black font-bold pl-1 " + bgColor}>
@@ -349,8 +363,9 @@ function getTestElement(test: TestCase, expectedResult: string, actualResult: st
             }
         })}
         <span>
-            {" ➔"} {expectedResult} : {resultText}
+            {" ➔ "}
         </span>
+        {resultSpan}
     </div>
 
 
