@@ -38,7 +38,8 @@ export default function LoginSuccess() {
                     console.error(error);
                 });
         }
-    });
+        // eslint-disable-next-line
+    }, []);
 
 
     return (
