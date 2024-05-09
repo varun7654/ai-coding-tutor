@@ -161,11 +161,27 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
     // Check that we have balanced brackets
     {
         let brackets = 0;
+        let doubleQuotes = false;
+        let singleQuotes = false;
+        let backticks = false;
         let lineNum = 1;
         let foundFirstBracket = false;
         let whitespaceRegex = /^\s*$/;
         let characterAfterLastBracket = {value: false, lineNum: -1};
         for (let i = 0; i < userCode.length; i++) {
+
+            if (userCode[i] === '"' && !singleQuotes && !backticks) {
+                doubleQuotes = !doubleQuotes;
+            }
+            if (userCode[i] === "'" && !doubleQuotes && !backticks) {
+                singleQuotes = !singleQuotes;
+            }
+            if (userCode[i] === "`" && !doubleQuotes && !singleQuotes) {
+                backticks = !backticks;
+            }
+            if (doubleQuotes || singleQuotes || backticks) {
+                continue;
+            }
             if (brackets === 0 && foundFirstBracket && !userCode[i].match(whitespaceRegex) && !characterAfterLastBracket.value) {
                 characterAfterLastBracket = {value: true, lineNum: lineNum};
             }
@@ -206,6 +222,20 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
                     ranSuccessfully: false
                 };
             }
+        }
+
+        if (doubleQuotes || singleQuotes || backticks) {
+            let type = doubleQuotes ? "double quotes" : singleQuotes ? "single quotes" : "backticks";
+            return {
+                testResults: [],
+                returnedResults: [],
+                expectedResults: getExpectedResults(problemData),
+                parseError: "Unbalanced " + type + ". Missing closing " + type + ".",
+                errorLine: lineNum,
+                runtimeError: "",
+                outputs: [],
+                ranSuccessfully: false
+            };
         }
 
         if (brackets !== 0) {
@@ -301,6 +331,31 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
                 ranSuccessfully: false
             };
         }
+    }
+
+    // Try putting the user's code in a function and running it to catch syntax errors
+    //eslint-disable-next-line
+    let testUserCode = `
+        ${userCode}
+    `;
+    try {
+        // eslint-disable-next-line
+        let func = Function(testUserCode);
+        func();
+    } catch (e) {
+        console.error("Failed to run the user's code: " + e);
+        let error = e as Error;
+        console.log(error.stack);
+        return {
+            testResults: [],
+            returnedResults: [],
+            expectedResults: getExpectedResults(problemData),
+            parseError: error.toString(),
+            errorLine: -1,
+            runtimeError: "",
+            outputs: [],
+            ranSuccessfully: false
+        };
     }
 
     // We need to look for all the loops (for, while, do-while) and insert code to count the number of iterations.
@@ -453,7 +508,6 @@ ${solutionCode}
     try {
         // eslint-disable-next-line
         let func = Function("CaptureConsole", codeToRun);
-        console.log(func.toString());
         let out = func(CaptureConsole);
 
         resultsArray = out[0];
@@ -561,8 +615,6 @@ ${solutionCode}
             testResults.testResults.push(TestResult.Passed);
         }
     }
-
-    console.log(testResults.outputs);
 
     return testResults;
 }
