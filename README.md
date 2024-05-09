@@ -80,6 +80,8 @@ The solution is given to the AI assistant to help it provide hints to the user, 
 
 It is additionally used to determine the correct answers to the test cases.
 
+*The function name that should be called must be the first method in the code block. (if there are multiple methods)*
+
 ### Test Cases (required)
 
 If you don't want to provide any visible test cases, you can leave this section empty, but it must be present.

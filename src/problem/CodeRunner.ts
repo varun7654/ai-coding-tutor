@@ -2,6 +2,9 @@ import {UserData} from "./Problem";
 import {ProblemData} from "./ProblemParse";
 import {Log} from "capture-console-logs/dist/logs";
 import * as util from "util";
+import * as acorn from "acorn";
+
+const acornLoose = require("acorn-loose");
 
 const functionHeaderOffset = 2;
 
@@ -158,204 +161,127 @@ function safeToString(expectedResult: any) {
 export function testUserCode(userData: UserData, problemData: ProblemData): TestResults {
     let userCode = userData.currentCode;
 
-    // Check that we have balanced brackets
-    {
-        let brackets = 0;
-        let doubleQuotes = false;
-        let singleQuotes = false;
-        let backticks = false;
-        let lineNum = 1;
-        let foundFirstBracket = false;
-        let whitespaceRegex = /^\s*$/;
-        let characterAfterLastBracket = {value: false, lineNum: -1};
-        for (let i = 0; i < userCode.length; i++) {
+    let ast;
+    try {
+        ast = acorn.parse(userCode, {ecmaVersion: "latest", locations: true});
+    } catch (e) {
+        if (e instanceof SyntaxError) {
+            return {
+                testResults: [],
+                returnedResults: [],
+                expectedResults: getExpectedResults(problemData),
+                parseError: e.message,
+                // @ts-ignore
+                errorLine: e.loc.line,
+                runtimeError: "",
+                outputs: [],
+                ranSuccessfully: false
+            };
+        } else {
+            throw e;
+        }
+    }
 
-            if (userCode[i] === '"' && !singleQuotes && !backticks) {
-                doubleQuotes = !doubleQuotes;
+
+    {
+        let missingFunctionError = {
+            returnableError: {
+                testResults: [],
+                returnedResults: [],
+                expectedResults: getExpectedResults(problemData),
+                parseError: "You need to define a function with the following signature:" + problemData.solutionCode.split('{')[0],
+                errorLine: 1,
+                runtimeError: "",
+                outputs: [],
+                ranSuccessfully: false
+            },
+            matchedTokens: 0,
+            // The levenshteinDistance between the missed token
+            levenshteinDistance: 100000
+        };
+
+        let foundFunction = false;
+
+        fnLoop: for (let func of ast.body) {
+            let functionSignature = userCode.substring(func.start, func.end).split('{')[0];
+            let tokens = tokenizeFunctionSignature(functionSignature);
+
+            let expectedFunctionSignature = problemData.solutionCode.split('{')[0];
+            let expectedTokens = tokenizeFunctionSignature(expectedFunctionSignature);
+
+            for (let i = 0; i < tokens.length; i++) {
+                if (tokens[i].str !== expectedTokens[i].str) {
+
+                    let parseError = "Function signature does not match the expected signature. ";
+                    if (i === 0) {
+                        parseError += "\nThe function signature should begin with `" + expectedTokens[i].str + "` but you have ";
+                        if (tokens[i] === undefined || tokens[i].str === "") {
+                            parseError += "nothing.";
+                        } else {
+                            parseError += "`" + tokens[i].str + "`.";
+                        }
+                    } else {
+                        if (tokens[i] === undefined || tokens[i].str === "") {
+                            parseError += "Expected: `" + expectedTokens[i].str + "` but got nothing.";
+                        } else {
+                            parseError += "Expected: `" + expectedTokens[i].str + "` after `" + tokens.slice(0, i)
+                                .map(t => t.str).join(" ") + "` but got: `" + tokens[i].str + "`.";
+                        }
+                    }
+
+                    let distance = levenshteinDistance(tokens[i].str, expectedTokens[i].str);
+
+                    // We also check the levenshtein distance
+                    // to see if the user has a typo and put the error on the closest match
+                    if (i > missingFunctionError.matchedTokens ||
+                        (distance < missingFunctionError.levenshteinDistance && i >= missingFunctionError.matchedTokens)) {
+                        missingFunctionError = {
+                            returnableError: {
+                                testResults: [],
+                                returnedResults: [],
+                                expectedResults: getExpectedResults(problemData),
+                                parseError,
+                                errorLine: tokens[i].lineNum,
+                                runtimeError: "",
+                                outputs: [],
+                                ranSuccessfully: false
+                            },
+                            matchedTokens: i,
+                            levenshteinDistance: distance
+                        }
+                    }
+                    continue fnLoop;
+                }
             }
-            if (userCode[i] === "'" && !doubleQuotes && !backticks) {
-                singleQuotes = !singleQuotes;
-            }
-            if (userCode[i] === "`" && !doubleQuotes && !singleQuotes) {
-                backticks = !backticks;
-            }
-            if (doubleQuotes || singleQuotes || backticks) {
+
+            if (tokens.length !== expectedTokens.length) {
+                if (tokens.length > missingFunctionError.matchedTokens) {
+                    missingFunctionError = {
+                        returnableError: {
+                            testResults: [],
+                            returnedResults: [],
+                            expectedResults: getExpectedResults(problemData),
+                            parseError: "Function signature does not match the expected signature. " +
+                                "Expected: " + expectedFunctionSignature + " but got: " + functionSignature,
+                            errorLine: tokens[tokens.length - 1].lineNum,
+                            runtimeError: "",
+                            outputs: [],
+                            ranSuccessfully: false
+                        },
+                        matchedTokens: tokens.length,
+                        levenshteinDistance: 100000
+                    }
+                }
                 continue;
             }
-            if (brackets === 0 && foundFirstBracket && !userCode[i].match(whitespaceRegex) && !characterAfterLastBracket.value) {
-                characterAfterLastBracket = {value: true, lineNum: lineNum};
-            }
 
-            if (userCode[i] === '{') {
-                if (foundFirstBracket && brackets === 0) {
-                    return {
-                        testResults: [],
-                        expectedResults: getExpectedResults(problemData),
-                        returnedResults: [],
-                        parseError: "You began a new function after closing your first one. You cannot do that. If you want to define a new function, do it inside the first function.",
-                        errorLine: lineNum,
-                        runtimeError: "",
-                        outputs: [],
-                        ranSuccessfully: false
-                    };
-                }
-
-                brackets++;
-                foundFirstBracket = true;
-            } else if (userCode[i] === '}') {
-                brackets--;
-            }
-
-            if (userCode[i] === '\n') {
-                lineNum++;
-            }
-
-            if (brackets < 0) {
-                return {
-                    testResults: [],
-                    returnedResults: [],
-                    expectedResults: getExpectedResults(problemData),
-                    parseError: "Unbalanced brackets. Extra '}' found.",
-                    errorLine: lineNum,
-                    runtimeError: "",
-                    outputs: [],
-                    ranSuccessfully: false
-                };
-            }
+            foundFunction = true;
+            break;
         }
 
-        if (doubleQuotes || singleQuotes || backticks) {
-            let type = doubleQuotes ? "double quotes" : singleQuotes ? "single quotes" : "backticks";
-            return {
-                testResults: [],
-                returnedResults: [],
-                expectedResults: getExpectedResults(problemData),
-                parseError: "Unbalanced " + type + ". Missing closing " + type + ".",
-                errorLine: lineNum,
-                runtimeError: "",
-                outputs: [],
-                ranSuccessfully: false
-            };
+        if (!foundFunction) {
+            return missingFunctionError.returnableError;
         }
-
-        if (brackets !== 0) {
-            return {
-                testResults: [],
-                returnedResults: [],
-                expectedResults: getExpectedResults(problemData),
-                parseError: "Unbalanced brackets. Missing '}'.",
-                errorLine: lineNum,
-                runtimeError: "",
-                outputs: [],
-                ranSuccessfully: false
-            };
-        }
-
-        if (!foundFirstBracket) {
-            return {
-                testResults: [],
-                returnedResults: [],
-                expectedResults: getExpectedResults(problemData),
-                parseError: "No function found. We expected to see at least one pair of '{}'.",
-                errorLine: lineNum,
-                runtimeError: "",
-                outputs: [],
-                ranSuccessfully: false
-            };
-        }
-
-        if (characterAfterLastBracket.value) {
-            return {
-                testResults: [],
-                returnedResults: [],
-                expectedResults: getExpectedResults(problemData),
-                parseError: "You have stray character(s) after the last '}'.",
-                errorLine: characterAfterLastBracket.lineNum,
-                runtimeError: "",
-                outputs: [],
-                ranSuccessfully: false
-            };
-        }
-    }
-
-    // Check that the function signature is correct
-    {
-        let functionSignature = userCode.split('{')[0];
-        let tokens = tokenizeFunctionSignature(functionSignature);
-
-        let expectedFunctionSignature = problemData.solutionCode.split('{')[0];
-        let expectedTokens = tokenizeFunctionSignature(expectedFunctionSignature);
-
-        for (let i = 0; i < tokens.length; i++) {
-            if (tokens[i].str !== expectedTokens[i].str) {
-
-                let parseError = "Function signature does not match the expected signature. ";
-                if (i === 0) {
-                    parseError += "\nThe function signature should begin with `" + expectedTokens[i].str + "` but you have ";
-                    if (tokens[i] === undefined || tokens[i].str === "") {
-                        parseError += "nothing.";
-                    } else {
-                        parseError += "`" + tokens[i].str + "`.";
-                    }
-                } else {
-                    if (tokens[i] === undefined || tokens[i].str === "") {
-                        parseError += "Expected: `" + expectedTokens[i].str + "` but got nothing.";
-                    } else {
-                        parseError += "Expected: `" + expectedTokens[i].str + "` after `" + tokens.slice(0, i)
-                            .map(t => t.str).join(" ") + "` but got: `" + tokens[i].str + "`.";
-                    }
-                }
-                return {
-                    testResults: [],
-                    returnedResults: [],
-                    expectedResults: getExpectedResults(problemData),
-                    parseError,
-                    errorLine: tokens[i].lineNum,
-                    runtimeError: "",
-                    outputs: [],
-                    ranSuccessfully: false
-                };
-            }
-        }
-
-        if (tokens.length !== expectedTokens.length) {
-            return {
-                testResults: [],
-                returnedResults: [],
-                expectedResults: getExpectedResults(problemData),
-                parseError: "Function signature does not match the expected signature. " +
-                    "Expected: " + expectedFunctionSignature + " but got: " + functionSignature,
-                errorLine: tokens[tokens.length - 1].lineNum,
-                runtimeError: "",
-                outputs: [],
-                ranSuccessfully: false
-            };
-        }
-    }
-
-    // Try putting the user's code in a function and running it to catch syntax errors
-    //eslint-disable-next-line
-    let testUserCode = `
-        ${userCode}
-    `;
-    try {
-        // eslint-disable-next-line
-        let func = Function(testUserCode);
-        func();
-    } catch (e) {
-        console.error("Failed to run the user's code: " + e);
-        let error = e as Error;
-        console.log(error.stack);
-        return {
-            testResults: [],
-            returnedResults: [],
-            expectedResults: getExpectedResults(problemData),
-            parseError: error.toString(),
-            errorLine: -1,
-            runtimeError: "",
-            outputs: [],
-            ranSuccessfully: false
-        };
     }
 
     // We need to look for all the loops (for, while, do-while) and insert code to count the number of iterations.
@@ -677,3 +603,23 @@ ${solutionCode}
 
     return expectedResultsArray.map(result => safeToString(result));
 }
+
+const levenshteinDistance = (s: string, t: string) => {
+    if (!s.length) return t.length;
+    if (!t.length) return s.length;
+    const arr = [];
+    for (let i = 0; i <= t.length; i++) {
+        arr[i] = [i];
+        for (let j = 1; j <= s.length; j++) {
+            arr[i][j] =
+                i === 0
+                    ? j
+                    : Math.min(
+                        arr[i - 1][j] + 1,
+                        arr[i][j - 1] + 1,
+                        arr[i - 1][j - 1] + (s[j - 1] === t[i - 1] ? 0 : 1)
+                    );
+        }
+    }
+    return arr[t.length][s.length];
+};
