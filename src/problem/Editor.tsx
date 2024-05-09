@@ -6,7 +6,6 @@ import "ace-builds/src-noconflict/theme-github_dark";
 import "ace-builds/src-noconflict/ext-language_tools";
 
 
-// lang: string, onChange: (value: string) => void, defaultValue: string = ""
 export default function Editor(
     {lang, onChange, defaultValue = ""}: {
         lang: string,

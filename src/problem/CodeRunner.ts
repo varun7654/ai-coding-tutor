@@ -4,8 +4,6 @@ import {Log} from "capture-console-logs/dist/logs";
 import * as util from "util";
 import * as acorn from "acorn";
 
-const acornLoose = require("acorn-loose");
-
 const functionHeaderOffset = 2;
 
 export enum TestResult {
@@ -166,11 +164,19 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
         ast = acorn.parse(userCode, {ecmaVersion: "latest", locations: true});
     } catch (e) {
         if (e instanceof SyntaxError) {
+            let message = e.message;
+
+            // @ts-ignore
+            if (e.pos === userCode.length) {
+                message += "\nUnexpected end of input. Check that you have closed all brackets and parentheses.";
+            }
+
+
             return {
                 testResults: [],
                 returnedResults: [],
                 expectedResults: getExpectedResults(problemData),
-                parseError: e.message,
+                parseError: message,
                 // @ts-ignore
                 errorLine: e.loc.line,
                 runtimeError: "",
