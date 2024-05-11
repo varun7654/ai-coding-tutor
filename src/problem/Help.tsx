@@ -48,6 +48,7 @@ export function HelpBoxAndButton(problemData: ProblemData,
                 prompt: string,
                 response: string,
                 expire_logins: boolean,
+                wait_time: number,
             }) => {
                 if (json.expire_logins) {
                     expireToken();
@@ -61,10 +62,22 @@ export function HelpBoxAndButton(problemData: ProblemData,
                     return;
                 }
 
-                if (json.status !== 200) {
-                    setResponse("An error occurred while using the AI tutor. Please try again later.");
+
+                if (json.status === 429) {
+                    setResponse("You have made too many requests to the AI tutor. Please try again later.");
+                    // Use the waitTime (seconds) to determine how long to wait before trying again
+                    new Promise((resolve) => setTimeout(resolve, json.wait_time * 1000)).then(() => {
+                        target.removeAttribute("disabled");
+                    });
                     return;
                 }
+
+                if (json.status !== 200) {
+                    setResponse("An error occurred while using the AI tutor. Please try again later.");
+                    target.removeAttribute("disabled");
+                    return;
+                }
+
 
                 let tokens = marked.lexer(json.response);
                 // There are two sections: # Thinking out loud and # My Response
@@ -98,7 +111,9 @@ export function HelpBoxAndButton(problemData: ProblemData,
 
                 saveUserData(problemData, newUserData);
                 setResponse(DOMPurify.sanitize(marked.parse(response) as string));
-                target.removeAttribute("disabled");
+                new Promise((resolve) => setTimeout(resolve, json.wait_time * 1000)).then(() => {
+                    target.removeAttribute("disabled");
+                });
             })
             .catch((error) => {
                 console.error(error);
