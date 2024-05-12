@@ -111,4 +111,4 @@ let arr = Array.from({length: len}, () => Math.floor(Math.random() * 1000));
 mergeSort(arr);
 ```
 
-repeat = 1
+repeat = 100
