@@ -1,4 +1,4 @@
-import React from "react";
+import React, {ReactElement} from "react";
 import {marked, saveUserData, UserData} from "./Problem";
 import DOMPurify from "dompurify";
 import {expireToken, getToken, isLoggedIn, logIn} from "../auth/AuthHelper";
@@ -10,12 +10,15 @@ import {Token, Tokens} from "marked";
 
 export const LOADING_MESSAGE = "Requesting help from the AI tutor...";
 
+export const NEXT_HELP_TIME = "NEXT_HELP_TIME"
+
+
 export function HelpBoxAndButton(problemData: ProblemData,
                                  setUserData: (userData: UserData) => void,
                                  runTests: () => UserData,
                                  response: string,
                                  setResponse: (response: string) => void):
-    { helpButton: React.JSX.Element, helpBox: React.JSX.Element } {
+    { helpButton: ReactElement, helpBox: ReactElement } {
 
     function handleHelpRequest(event: React.MouseEvent<HTMLButtonElement>) {
         event.currentTarget.setAttribute("disabled", "true");
@@ -62,6 +65,7 @@ export function HelpBoxAndButton(problemData: ProblemData,
                     return;
                 }
 
+                localStorage.setItem(NEXT_HELP_TIME, (Date.now() + json.wait_time * 1000).toString());
 
                 if (json.status === 429) {
                     setResponse("You have made too many requests to the AI tutor. Please try again later.");

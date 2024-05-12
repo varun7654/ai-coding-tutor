@@ -540,8 +540,8 @@ ${solutionCode}
         } else {
             testResults.returnedResults.push(safeToString(result));
         }
-
-        if (result !== expectedResult) {
+        
+        if (result.type === expectedResult.type && result.toString() !== expectedResult.toString()) {
             testResults.testResults.push(TestResult.Failed);
         } else {
             testResults.testResults.push(TestResult.Passed);

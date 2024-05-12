@@ -3,7 +3,7 @@ import {markedHighlight} from "marked-highlight";
 import hljs from "highlight.js/lib/common";
 import React, {lazy, Suspense, useEffect, useState} from "react";
 import DOMPurify from "dompurify";
-import {HelpBoxAndButton} from "./Help";
+import {HelpBoxAndButton, NEXT_HELP_TIME} from "./Help";
 import {useParams} from "react-router-dom";
 import 'katex/dist/katex.min.css';
 import {getUserName} from "../auth/AuthHelper";
@@ -51,8 +51,9 @@ export default function Problem() {
     const [userData, setUserData] = useState(null as unknown as UserData);
     const [helpResponse, setHelpResponse] = useState("When you press \"I'm stuck\", the AI tutor will respond here.");
     const [magicLinksHover, setMagicLinks] = useState({
-        anchorEl: null as (HTMLElement | null),
+        anchorEl: null as (React.JSX.Element | null),
         magicLink: "",
+        highlight: true
     })
 
     function onCodeSubmit() {
@@ -131,17 +132,19 @@ export default function Problem() {
 
     let descParsed = DOMPurify.sanitize(marked.parse(problemData.preProblemDescription + "\n\n" + problemData.description) as string);
 
-    const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>, magicLink: string) => {
+    const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>, magicLink: string, highlight = true) => {
         setMagicLinks({
-            anchorEl: event.currentTarget as HTMLElement,
-            magicLink: magicLink
+            anchorEl: event.currentTarget as unknown as React.JSX.Element,
+            magicLink: magicLink,
+            highlight: highlight
         });
     };
 
     const handlePopoverClose = () => {
         setMagicLinks({
             anchorEl: null,
-            magicLink: magicLinksHover.magicLink
+            magicLink: magicLinksHover.magicLink,
+            highlight: magicLinksHover.highlight
         });
     };
 
@@ -225,8 +228,31 @@ export default function Problem() {
     }
 
 
-    let highlightHover = hljs.highlight(magicLinksHover.magicLink, {language: hljsLang});
-    let hoverHtml = DOMPurify.sanitize(highlightHover.value.replace(/\n/g, "<br>"));
+    let highlightHover;
+    if (magicLinksHover.highlight) {
+        highlightHover = hljs.highlight(magicLinksHover.magicLink, {language: hljsLang}).value;
+    } else {
+        highlightHover = magicLinksHover.magicLink;
+    }
+    let hoverHtml = DOMPurify.sanitize(highlightHover.replace(/\n/g, "<br>"));
+
+    let helpButtonHtml;
+    if (localStorage.getItem(NEXT_HELP_TIME) !== null) {
+        helpButtonHtml = <span className="ml-1"
+                               onMouseEnter={(e) => {
+                                   let timeToNextHelp = parseInt(localStorage.getItem(NEXT_HELP_TIME) as string);
+                                   let timeToNextHelpSeconds = Math.ceil((timeToNextHelp - Date.now()) / 1000);
+                                   if (timeToNextHelpSeconds > 0) {
+                                       handlePopoverOpen(e, "You can request help again in " + timeToNextHelpSeconds + " seconds", false)
+                                   }
+                               }}
+                               onMouseLeave={handlePopoverClose}>
+                        {helpButton}
+                    </span>
+    } else {
+        helpButtonHtml = <span className="ml-1">{helpButton}</span>
+    }
+
 
     return (
         <div className="ml-5 flex-row">
@@ -252,7 +278,8 @@ export default function Problem() {
                     <p className="Problem-hidden-tests">
                         {hiddenTestText}
                     </p>
-                    <SubmitButton onClick={onCodeSubmit}/> {helpButton}
+                    <SubmitButton onClick={onCodeSubmit}/>
+                    {helpButtonHtml}
                     <div className="text-error-red" dangerouslySetInnerHTML={{__html: errorText}}/>
                     {helpBox}
                 </div>
@@ -263,7 +290,7 @@ export default function Problem() {
                     pointerEvents: 'none',
                 }}
                 open={open}
-                anchorEl={magicLinksHover.anchorEl}
+                anchorEl={magicLinksHover.anchorEl as Element | null}
                 anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left',
