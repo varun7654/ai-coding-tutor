@@ -14,8 +14,7 @@ sorting the two halves, and then merging them back together.
     - If the array has only one element, return the array. (Base case)
     - Otherwise, divide the array into two halves and recursively sort each half
 3. Merge the two halves back together in sorted order.
-    - Note you'll probablt want to write a helper function to merge the two halves together.
-      You will need to define this function inside the `mergeSort` function.
+    - Note you'll probably want to write a helper function to merge the two halves together.
     - The `merge` function should take two arrays as arguments and return a single sorted array.
     - How can you use the fact that the two halves are already sorted to merge them together efficiently?
 4. Return the sorted array.
