@@ -4,6 +4,19 @@ import './App.css';
 import 'highlight.js/styles/atom-one-dark.min.css';
 import LoginButton from "./auth/LoginButton";
 import {createTheme, Shadows} from "@mui/material";
+import loadable, {DefaultComponent} from "@loadable/component";
+import {PrerenderedComponent} from "react-prerendered-component";
+
+const prerenderedLoadable = (dynamicImport: (props: unknown) => Promise<DefaultComponent<unknown>>) => {
+    const LoadableComponent = loadable(dynamicImport);
+    return React.memo(props => (
+        // you can use the `.preload()` method from react-loadable or react-imported-component`
+        // @ts-ignore
+        <PrerenderedComponent live={LoadableComponent.load()}>
+            <LoadableComponent {...props} />
+        </PrerenderedComponent>
+    ));
+};
 
 export const API_URL = "https://codehelp.api.dacubeking.com/";
 export const AUTH_API_URL = `${API_URL}auth`;
@@ -66,9 +79,10 @@ export function Header() {
     }
 }
 
-const Home = lazy(() => import("./Home"));
-const Problem = lazy(() => import("./problem/Problem"));
-const LoginSuccess = lazy(() => import("./auth/LoginSuccess"));
+const Home = prerenderedLoadable(() => import("./Home"));
+const LoginSuccess = prerenderedLoadable(() => import("./auth/LoginSuccess"));
+
+const LoadableProblem = loadable(() => import("./problem/Problem"));
 
 
 function App() {
@@ -77,13 +91,15 @@ function App() {
             <div className="App">
                 <meta name="viewport" content="initial-scale=1, width=device-width"/>
                 <Header/>
-                <Suspense fallback={<div>Loading...</div>}>
-                    <Routes>
-                        <Route path="/" Component={Home}/>
-                        <Route path="/problem/*" Component={() => <Problem/>}/>
-                        <Route path="/auth/login_success" Component={() => <LoginSuccess/>}/>
-                    </Routes>
-                </Suspense>
+                <Routes>
+                    <Route path="/" Component={Home}/>
+                    <Route path="/problem/*" Component={() =>
+                        //@ts-ignore
+                        <PrerenderedComponent live={LoadableProblem.load()}>
+                            <LoadableProblem/>
+                        </PrerenderedComponent>}/>
+                    <Route path="/auth/login_success" Component={() => <LoginSuccess/>}/>
+                </Routes>
             </div>
         </Router>
     );

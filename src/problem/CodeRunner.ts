@@ -156,6 +156,10 @@ function safeToString(expectedResult: any) {
     return expectedResult.toString();
 }
 
+function randomString() {
+    return Math.random().toString(36).substring(7);
+}
+
 export function testUserCode(userData: UserData, problemData: ProblemData): TestResults {
     let userCode = userData.currentCode;
 
@@ -341,7 +345,7 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
         let lineOfCounter = preLoopCode.split('\n').length;
         let linePastLoopHeader = preLoopCode.split('\n').length + loopHeader.split('\n').length;
 
-        let loopCounterVar = "loopCounter" + crypto.randomUUID().replace(/-/g, '');
+        let loopCounterVar = "loopCounter" + randomString()
         let userCodeAddPreLoop = `let ${loopCounterVar} = 0;\n`;
         let userCodeAddPostLoop = `if (${loopCounterVar}++ > 10000) { throw new Error("Infinite loop detected. Execution stopped."); }\n`;
         userCode = preLoopCode + userCodeAddPreLoop + loopHeader + userCodeAddPostLoop + postLoopHeader;
@@ -358,9 +362,9 @@ export function testUserCode(userData: UserData, problemData: ProblemData): Test
     }
 
     let solutionCode = problemData.solutionCode;
-    let resultsArrayName = "results" + crypto.randomUUID().replace(/-/g, '');
-    let expectedResultsArrayName = "expectedResults" + crypto.randomUUID().replace(/-/g, '');
-    let consoleLogArrayName = "consoleLog" + crypto.randomUUID().replace(/-/g, '');
+    let resultsArrayName = "results" + randomString();
+    let expectedResultsArrayName = "expectedResults" + randomString();
+    let consoleLogArrayName = "consoleLog" + randomString();
 
     let codeToRun = `
 let ${resultsArrayName} = [] || [];
@@ -556,7 +560,7 @@ ${solutionCode}
 export function getExpectedResults(problemData: ProblemData): string[] {
     // Parse the solution code and replace the function name with a random name
     let solutionCode = problemData.solutionCode;
-    let expectedResultsArrayName = "expectedResults" + crypto.randomUUID().replace(/-/g, '');
+    let expectedResultsArrayName = "expectedResults" + randomString();
 
     let codeToRun = `
 let ${expectedResultsArrayName} = [] || [];

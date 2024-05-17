@@ -11,6 +11,7 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
+    "@loadable/component": "^5.16.4",
     "@mui/material": "^5.15.14",
     "@nyariv/sandboxjs": "^0.8.23",
     "@react-buddy/ide-toolbox": "^2.4.0",
@@ -41,10 +42,12 @@
     "react": "^18.2.0",
     "react-ace": "^10.1.0",
     "react-dom": "^18.3.1",
+    "react-prerendered-component": "^1.2.5",
     "react-router-dom": "^6.22.3",
     "react-scroll": "^1.9.0",
     "sort-by": "^1.2.0",
     "source-map-explorer": "^2.5.3",
+    "stream-browserify": "^3.0.0",
     "tailwindcss": "^3.4.3",
     "ts-node": "^10.9.2",
     "typescript": "^4.9.5",
@@ -53,13 +56,14 @@
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "predeploy": "npm run build && shx cp build/index.html build/404.html",
+    "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "prestart": "node generateProblemLocations.js",
-    "start": "react-scripts start",
+    "start": "react-app-rewired start",
     "prebuild": "node generateProblemLocations.js",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "build": "react-app-rewired build",
+    "postbuild": "react-snap",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -85,10 +89,16 @@
     "@types/dompurify": "^3.0.5",
     "@types/escape-html": "^1.0.4",
     "@types/he": "^1.2.3",
+    "@types/loadable__component": "^5.13.9",
     "@types/marked": "^6.0.0",
     "@types/react-scroll": "^1.8.10",
     "gh-pages": "^6.1.1",
+    "react-app-rewired": "^2.2.1",
     "react-scripts": "^5.0.1",
+    "react-snap": "^1.23.0",
     "shx": "^0.3.4"
+  },
+  "reactSnap": {
+    "inlineCss": true
   }
 }
