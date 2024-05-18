@@ -10,5 +10,5 @@ jobs:
           node-version-file: 'package.json'
           cache: 'npm'
       - run: npm ci
-      - run: npm run build
+      - run: npm run ci-build
 #      - run: npm test --passWithNoTests

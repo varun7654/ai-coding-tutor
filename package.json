@@ -63,6 +63,7 @@
     "prebuild": "node generateProblemLocations.js",
     "build": "react-app-rewired build",
     "postbuild": "react-snap",
+    "ci-build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
