@@ -1,4 +1,3 @@
-import React, {lazy, Suspense} from 'react';
 import {BrowserRouter as Router, Link, Route, Routes, useLocation} from 'react-router-dom';
 import './App.css';
 import 'highlight.js/styles/atom-one-dark.min.css';
@@ -6,6 +5,7 @@ import LoginButton from "./auth/LoginButton";
 import {createTheme, Shadows} from "@mui/material";
 import loadable, {DefaultComponent} from "@loadable/component";
 import {PrerenderedComponent} from "react-prerendered-component";
+import React from "react";
 
 const prerenderedLoadable = (dynamicImport: (props: unknown) => Promise<DefaultComponent<unknown>>) => {
     const LoadableComponent = loadable(dynamicImport);

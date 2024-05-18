@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM, {createRoot} from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -18,6 +17,7 @@ if (rootElement == null) {
 if (rootElement.hasChildNodes()) {
     hydrate(<App/>, rootElement);
 } else {
+    // eslint-disable-next-line
     render(<React.StrictMode>
         <DevSupport ComponentPreviews={ComponentPreviews}
                     useInitialHook={useInitial}
