@@ -6,6 +6,7 @@ import {createTheme, Shadows} from "@mui/material";
 import loadable, {DefaultComponent} from "@loadable/component";
 import {PrerenderedComponent} from "react-prerendered-component";
 import React from "react";
+import Terms from "./footer/Terms";
 
 const prerenderedLoadable = (dynamicImport: (props: unknown) => Promise<DefaultComponent<unknown>>) => {
     const LoadableComponent = loadable(dynamicImport);
@@ -79,8 +80,20 @@ export function Header() {
     }
 }
 
+export function Footer() {
+    return (
+        <footer className="App-footer ml-5">
+            <div className="flex">
+                <Link to="/privacy" className="mx-2">Privacy</Link>
+                <Link to="/terms" className="mx-2">Terms</Link>
+            </div>
+        </footer>
+    )
+}
+
 const Home = prerenderedLoadable(() => import("./Home"));
 const LoginSuccess = prerenderedLoadable(() => import("./auth/LoginSuccess"));
+const Privacy = prerenderedLoadable(() => import("./footer/Privacy"));
 
 const LoadableProblem = loadable(() => import("./problem/Problem"));
 
@@ -92,14 +105,17 @@ function App() {
                 <meta name="viewport" content="initial-scale=1, width=device-width"/>
                 <Header/>
                 <Routes>
-                    <Route path="/" Component={Home}/>
+                    <Route path="/" Component={() => <Home/>}/>
+                    <Route path="/auth/login_success" Component={() => <LoginSuccess/>}/>
+                    <Route path="/privacy" Component={() => <Privacy/>}/>
+                    <Route path="/terms" Component={() => <Terms/>}/>
                     <Route path="/problem/*" Component={() =>
                         //@ts-ignore
                         <PrerenderedComponent live={LoadableProblem.load()}>
                             <LoadableProblem/>
                         </PrerenderedComponent>}/>
-                    <Route path="/auth/login_success" Component={() => <LoginSuccess/>}/>
                 </Routes>
+                <Footer/>
             </div>
         </Router>
     );
