@@ -304,7 +304,7 @@ export default function Problem() {
             >
                 <div className="p-2 bg-basically-black text-[#abb2bf]"
                      style={{
-                         fontFamily: '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace',
+                         fontFamily: '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier,' + (magicLinksHover.highlight ? "monospace" : ""),
                          whiteSpace: "pre-wrap",
                      }}
                      dangerouslySetInnerHTML={{__html: hoverHtml}
