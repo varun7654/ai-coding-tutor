@@ -173,9 +173,9 @@ export default function Problem() {
 
     let testsDisplayJSX = <div>There are no visible test cases</div>;
     if (testsDisplay.length > 0) {
-        testsDisplayJSX = <ul className="">
-            {testsDisplay.map((test, i) => <li key={i}>{test}</li>)}
-        </ul>
+        testsDisplayJSX = <div>
+            {testsDisplay.map((test, i) => <div key={i} className={"-mb-0.5"}>{test}</div>)}
+        </div>
     }
 
 
@@ -402,7 +402,7 @@ function getTestElement(testCases: TestCase[], testResults: TestResults, index: 
     }
 
 
-    let div = <div className={"mb-2 text-black font-bold pl-1 " + bgColor}>
+    let div = <div className={"mb-2 rounded text-black font-bold pl-1 " + bgColor}>
         {testStringPart.map((part, i) => {
             if (part instanceof MagicLink) {
                 return <span key={i} className={"text-purple-800 underline"}
