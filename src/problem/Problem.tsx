@@ -8,7 +8,7 @@ import {useParams} from "react-router-dom";
 import 'katex/dist/katex.min.css';
 import {getUserName} from "../auth/AuthHelper";
 import {getExpectedResults, TestResult, TestResults, testUserCode} from "./CodeRunner";
-import {Button, Popover, ThemeProvider} from "@mui/material";
+import {Button, Popover, Popper, ThemeProvider} from "@mui/material";
 import {buttonTheme, mutedButtonTheme} from "../App";
 import markedKatex from "marked-katex-extension";
 import {parseProblem, ProblemData, TestCase} from "./ProblemParse";
@@ -45,6 +45,10 @@ function getStorageKey(id: string, userName: string | undefined) {
     return "problem " + id;
 }
 
+enum HoverState {
+    OVER_HIGHLIGHT, OVER_POPUP, NONE
+}
+
 export default function Problem() {
     const [problemData, setProblemData] = useState(null as unknown as ProblemData);
     const {"*": id} = useParams();
@@ -53,7 +57,8 @@ export default function Problem() {
     const [magicLinksHover, setMagicLinks] = useState({
         anchorEl: null as (React.JSX.Element | null),
         magicLink: "",
-        highlight: true
+        highlight: true,
+        isHovering: HoverState.NONE
     })
 
     function onCodeSubmit() {
@@ -136,19 +141,27 @@ export default function Problem() {
         setMagicLinks({
             anchorEl: event.currentTarget as unknown as React.JSX.Element,
             magicLink: magicLink,
-            highlight: highlight
+            highlight: highlight,
+            isHovering: HoverState.OVER_HIGHLIGHT
         });
     };
 
     const handlePopoverClose = () => {
-        setMagicLinks({
-            anchorEl: null,
-            magicLink: magicLinksHover.magicLink,
-            highlight: magicLinksHover.highlight
-        });
+        if (magicLinksHover.isHovering === HoverState.NONE || magicLinksHover.isHovering === HoverState.OVER_HIGHLIGHT) {
+            setMagicLinks({
+                anchorEl: magicLinksHover.anchorEl,
+                magicLink: magicLinksHover.magicLink,
+                highlight: magicLinksHover.highlight,
+                isHovering: HoverState.NONE
+            });
+        }
     };
 
-    const open = Boolean(magicLinksHover.anchorEl);
+    const open = !(magicLinksHover.isHovering === HoverState.NONE) && magicLinksHover.anchorEl !== null;
+    let hoverAnchor = magicLinksHover.anchorEl as Element | null;
+    if (!open) {
+        hoverAnchor = null;
+    }
 
 
     let testsDisplay = [];
@@ -284,32 +297,42 @@ export default function Problem() {
                     {helpBox}
                 </div>
             </div>
-            <Popover
+            <Popper
                 id="mouse-over-popover"
                 sx={{
-                    pointerEvents: 'none',
+                    pointerEvents: 'all',
+                    zIndex: 2000,
                 }}
                 open={open}
-                anchorEl={magicLinksHover.anchorEl as Element | null}
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                }}
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                }}
-                onClose={handlePopoverClose}
-                disableRestoreFocus
+                anchorEl={hoverAnchor}
             >
                 <div className="p-2 bg-basically-black text-[#abb2bf]"
+                     onMouseEnter={(e) => {
+                         setMagicLinks({
+                             anchorEl: magicLinksHover.anchorEl,
+                             magicLink: magicLinksHover.magicLink,
+                             highlight: magicLinksHover.highlight,
+                             isHovering: HoverState.OVER_POPUP
+                         });
+                     }}
+                     onMouseLeave={(e) => {
+                         if (magicLinksHover.isHovering === HoverState.OVER_POPUP) {
+                             setMagicLinks({
+                                 anchorEl: magicLinksHover.anchorEl,
+                                 magicLink: magicLinksHover.magicLink,
+                                 highlight: magicLinksHover.highlight,
+                                 isHovering: HoverState.NONE
+                             });
+                         }
+                     }}
                      style={{
                          fontFamily: '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier,' + (magicLinksHover.highlight ? "monospace" : ""),
                          whiteSpace: "pre-wrap",
+                         borderRadius: 3,
                      }}
                      dangerouslySetInnerHTML={{__html: hoverHtml}
                      }/>
-            </Popover>
+            </Popper>
         </div>
     );
 }
