@@ -28,7 +28,7 @@
     "acorn-loose": "^8.4.0",
     "capture-console-logs": "^2.0.1-rc.1",
     "dompurify": "^3.0.9",
-    "eslint": "^8.57.0",
+    "eslint": "^9.5.0",
     "he": "^1.2.0",
     "highlight.js": "^11.9.0",
     "install": "^0.13.0",
